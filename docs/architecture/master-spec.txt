@@ -1,0 +1,300 @@
+TIKTOK LIVE AUTOMATION APP — REACTSTREAM
+DOCUMENTO MAESTRO FINAL V2 — ESPECIFICACIÓN DEFINITIVA PARA INICIAR CODIFICACIÓN
+Fecha original: 2026-09-03
+Nombre de producto confirmado: ReactStream
+Estado: APROBADO — ARQUITECTURA CERRADA — EN IMPLEMENTACIÓN (Etapa 0)
+
+
+============================================================
+0. OBJETIVO DEL PROYECTO
+============================================================
+
+Construir una aplicación de escritorio para Windows que permita conectar una cuenta de TikTok LIVE, recibir eventos en tiempo real, normalizarlos, ejecutar automatizaciones visuales y disparar acciones sobre el PC y overlays compatibles con OBS.
+
+Flujo principal:
+
+TikTok LIVE
+    ↓
+TikTok LIVE Connector
+    ↓
+TikTok Bridge
+    ↓
+Event Normalizer
+    ↓
+Event Bus
+    ├── Live Session Manager
+    ├── Automation Engine
+    ├── Action Engine
+    ├── Timer Engine
+    ├── Ranking Engine
+    ├── Overlay Engine
+    └── Logging
+
+
+PRINCIPIO CENTRAL:
+
+Rust Core es el cerebro y autoridad de la aplicación.
+React es únicamente interfaz.
+Node.js Bridge únicamente conoce TikTok.
+Los overlays únicamente visualizan datos.
+SQLite almacena configuración, historial y persistencia.
+El estado activo de un LIVE permanece en RAM.
+
+
+============================================================
+1. STACK TECNOLÓGICO DEFINITIVO
+============================================================
+
+Desktop:
+- Tauri 2
+- React
+- TypeScript
+- Zustand
+- Tailwind CSS
+
+Core:
+- Rust
+
+TikTok Bridge:
+- Node.js
+- TypeScript
+- tiktok-live-connector
+
+Database:
+- SQLite
+
+Overlays:
+- HTML
+- CSS
+- JavaScript/TypeScript
+- WebSocket local
+- Browser Sources de OBS
+
+Comunicación:
+
+React
+  ↕
+Tauri Commands/Events
+  ↕
+Rust Core
+
+TikTok
+  ↕
+Node Bridge
+  ↕
+WebSocket local
+  ↕
+Rust Core
+
+Rust Core
+  ↕
+WebSocket
+  ↕
+Overlays
+
+
+Bridge/Core:
+- localhost únicamente
+- 127.0.0.1
+- puerto inicial de referencia: 47821
+
+
+============================================================
+2. ESTRUCTURA DEL REPOSITORIO
+============================================================
+
+ReactStream/
+apps/desktop/src/{components,pages,stores,hooks,services,types}, apps/desktop/src-tauri/
+apps/tiktok-bridge/src/{connector,normalizer,websocket,types}
+apps/overlays/{jar,likes,donors,taps,best-gift,timer}
+packages/{events,types,automation,gift-catalog,shared}
+core/rust/src/{event_bus,automation,actions,session,timer,rankings,overlays,database,license,keystroke,audio,simulation,logging,state}, core/rust/tests/
+database/{migrations,schema}
+config/
+assets/{sounds,gifts,overlays}
+tests/{integration,e2e,fixtures/{events,gifts,automations,simulations,licenses,database}}
+docs/{architecture,protocols,events,database,licensing}
+
+(Ver el árbol real del repositorio con `find . -maxdepth 3 -type d` — esta
+estructura ya está creada y coincide exactamente con la especificación.)
+
+
+============================================================
+3. ALCANCE MVP DEFINITIVO
+============================================================
+
+INCLUIDO:
+1. Conexión a TikTok LIVE.
+2. Eventos: gift, likes/tap tap, follow, comment, share, member/join,
+   live started, live ended, viewer count.
+3. Editor visual de automatizaciones.
+4. Acciones: PlaySound, KeyStroke, ShowOverlay, HideOverlay, Wait, AddTimer.
+5. KeyStroke: tecla individual, combinaciones, secuencias, repetición,
+   duración, intervalo.
+6. Biblioteca de sonidos: importar MP3, volumen.
+7. Timer general: tiempo inicial, conversión monedas → segundos, nunca
+   termina TikTok LIVE, al llegar a 00:00 emite TIMER_ZERO.
+8. Gift Jar: fondo transparente, regalos dentro del frasco, tamaño
+   proporcional al valor en monedas, caída/acumulación sencilla.
+9. Likes/Tap Tap: corazones, avatar del usuario, mismo avatar máximo una
+   vez cada 10 segundos, varios usuarios simultáneamente.
+10. Top Donors: default 10, configurable (2/3/5/10/20), métrica = coins,
+    reset al terminar LIVE.
+11. Top Tap Tap: configurable, métrica = likes, reset al terminar LIVE.
+12. Best Gift: regalo unitario de mayor valor, imagen, nombre, monedas,
+    remitente, reset por LIVE.
+13. Overlays: /overlay/jar, /overlay/likes, /overlay/donors, /overlay/taps,
+    /overlay/best-gift, /overlay/timer.
+14. Live Session Manager.
+15. Logs.
+16. SQLite.
+17. Gift Catalog inicial para Colombia.
+18. Arquitectura de licencia.
+19. Modo simulación.
+20. Instalador Windows.
+
+NO INCLUIR EN MVP:
+chatbot avanzado, multi-TikTok, Twitch, YouTube, integración OBS avanzada,
+marketplace, plugins, IA, analítica avanzada, dashboard web, aplicación
+móvil, sistema multiusuario/equipos, editor avanzado de animaciones,
+física avanzada del jar, catálogo enorme de overlays, automatizaciones
+distribuidas en cloud.
+
+NO AGREGAR FUNCIONES FUERA DE ESTE ALCANCE SIN UNA DECISIÓN DE ARQUITECTURA NUEVA.
+
+
+============================================================
+4. REGLAS INMUTABLES
+============================================================
+
+1. Rust Core es la autoridad.
+2. React nunca ejecuta acciones del sistema.
+3. React nunca conecta directamente con TikTok.
+4. TikTok solamente es conocido por TikTok Bridge.
+5. Bridge no contiene lógica de negocio.
+6. Bridge no ejecuta KeyStroke.
+7. Bridge no reproduce sonidos.
+8. Bridge no modifica rankings.
+9. Bridge no controla timer.
+10. Bridge no controla OBS.
+11. Bridge no escribe estadísticas de sesión.
+12. Bridge no valida licencias.
+13. TikTok no define los contratos internos.
+14. Los eventos normalizados son contratos estables.
+15. Cada evento tiene ID único.
+16. Los duplicados se ignoran.
+17. sessionId separa completamente cada LIVE.
+18. Evento de sesión antigua no modifica la sesión activa.
+19. Desconexión de TikTok no significa LIVE terminado.
+20. Cierre de OBS no significa LIVE terminado.
+21. Expiración de licencia no interrumpe un LIVE activo.
+22. Fallo de SQLite durante LIVE no detiene LIVE.
+23. Event Bus distribuye; no ejecuta lógica de negocio.
+24. Timer es propiedad del Core.
+25. Timer nunca termina TikTok LIVE.
+26. TIMER_ZERO se emite una vez por transición a cero.
+27. Timer utiliza timestamps/Clock, no acumulación ingenua de ticks.
+28. gift.coins representa el valor de UNA unidad.
+29. totalCoins = gift.coins × quantity.
+30. Rankings usan totalCoins.
+31. Best Gift compara gift.coins.
+32. User.id identifica al usuario.
+33. Gift.id identifica al regalo.
+34. Las automatizaciones son datos, no código ejecutable.
+35. Wait es no bloqueante globalmente.
+36. No existe una cola global única de acciones.
+37. KeyStroke es estrictamente secuencial.
+38. Una secuencia KeyStroke no puede intercalarse con otra.
+39. La prioridad no interrumpe una secuencia activa.
+40. Las teclas siempre deben liberarse.
+41. Audio es independiente de KeyStroke.
+42. Máximo 5 sonidos simultáneos.
+43. Máximo 100 ejecuciones simultáneas.
+44. Máximo 500 KeyStrokes pendientes.
+45. Máximo 100 eventos overlay pendientes.
+46. Máximo 1000 eventos pendientes en Event Bus.
+47. LIVE_END cancela acciones pendientes del LIVE.
+48. No puede quedar KeyStroke pendiente después de LIVE_END.
+49. Ejecución WAITING pasa a CANCELLED en LIVE_END.
+50. Un error de una acción no detiene las acciones siguientes.
+51. Un error de un módulo no debe tumbar toda la aplicación.
+52. Los overlays solo visualizan.
+53. Los overlays no contienen lógica de negocio.
+54. Overlay reconecta y solicita resync.
+55. Comunicación Bridge/Core solamente por localhost.
+56. Core no se expone a Internet.
+57. Entradas externas son no confiables hasta validarse.
+58. Tauri debe usar mínimo privilegio.
+59. No usar eval ni ejecutar código desde configuraciones.
+60. No permitir rutas arbitrarias para sonidos.
+61. SQLite usa prepared statements.
+62. Base de datos está en AppData.
+63. MP3 no se almacena como BLOB.
+64. Llave privada de licencia jamás está en el cliente.
+65. Licencias usan payload firmado.
+66. Feature flags centralizados.
+67. Simulación usa exactamente el mismo pipeline.
+68. Simulación nunca envía nada a TikTok.
+69. Safe Action Mode es el modo predeterminado de simulación.
+70. Configuración persistente es diferente del estado LIVE.
+71. Configuración que compromete consistencia de sesión se congela durante LIVE.
+72. Top N puede cambiar durante LIVE sin perder datos.
+73. Catálogo se mantiene estable durante LIVE.
+74. Catálogo local no depende de un sitio externo durante ejecución.
+75. Cambios de contratos deben hacerse formalmente y acompañarse de pruebas.
+76. Cada bug crítico debe convertirse en prueba de regresión.
+77. Instalación/actualización nunca debe borrar AppData.
+78. Desinstalación conserva AppData por defecto.
+79. Crash/reinicio MVP no recupera LIVE.
+80. Después de reiniciar la aplicación, estado de sesión = NO_SESSION.
+81. No hacer optimización prematura.
+82. Preferir comportamiento determinista.
+83. UI refleja el estado confirmado por Core.
+84. No implementar éxito optimista cuando Core no confirmó.
+85. Integración debe probarse sin depender de TikTok real mediante Simulation.
+86. Las pruebas de integración deben mockear solamente fronteras externas.
+87. El instalador no contiene lógica de negocio.
+88. Todo componente debe registrar errores relevantes.
+89. Los límites técnicos deben estar implementados en Core.
+90. Simplicidad tiene prioridad sobre complejidad innecesaria.
+
+
+============================================================
+DECISIONES ADICIONALES POST-DOCUMENTO ORIGINAL
+============================================================
+
+- Nombre de producto: ReactStream (verificado sin choques de marca/nombre
+  relevantes al momento de decidirlo).
+- Empaquetado del Bridge: Node.js SEA (no pkg — deprecado, con CVE sin
+  parche; no nexe — mantenimiento intermitente de terceros). SEA es la vía
+  oficialmente respaldada por el proyecto Node.js para ejecutables sin
+  requerir que el usuario instale Node.
+- License Server: se construye completo (API + Admin Panel + License DB)
+  desde este ciclo de trabajo, no como stub/mock.
+- Timer tras TIMER_ZERO: configurable en Settings vía el nuevo campo
+  `timer_reactivate_on_zero` (boolean, default true). `TimerEngine::add_coins`
+  debe consultar este flag antes de decidir si pone `running = true` tras
+  una transición a cero.
+- Configuración congelada durante LIVE (lista explícita): timer_initial,
+  timer_coins_per_second, timer_reactivate_on_zero.
+  Configuración editable durante LIVE: donor_top_count, tap_top_count,
+  volumen, visibilidad de overlays.
+- Fase actual del proyecto: pruebas privadas en streams propios. Sin
+  dominio, sin code signing, sin auto-update activo todavía. Bundle ID
+  Tauri placeholder: com.reactstream.dev — pendiente de definir dominio
+  real antes de cualquier distribución pública.
+
+(Las secciones 5 a 41 del documento original — contratos TypeScript
+completos, Gift Catalog, Live Session Manager, Event Bus, Automation
+Engine, Action Engine, KeyStroke Engine, Audio Engine, Timer Engine,
+Ranking Engine, Best Gift, Overlay Engine, especificación de cada overlay,
+configuración global, esquema SQLite completo con CREATE TABLE de las 12
+tablas, protocolo Bridge↔Core, responsabilidades del Bridge, Simulation
+Engine, Licenciamiento, Seguridad, Estados del sistema, Manejo de errores,
+Build/Instalador Windows, Orden exacto de desarrollo con las 46 etapas,
+Critical path, Trabajo paralelizable, Testing, No-Go conditions y
+Definition of Done — se mantienen vigentes tal como fueron aprobados en la
+conversación de diseño original y gobiernan la implementación de cada
+etapa. Al implementar un módulo específico, consultar primero este
+resumen y, ante cualquier duda de detalle fino, la conversación de diseño
+completa es la referencia autoritativa.)

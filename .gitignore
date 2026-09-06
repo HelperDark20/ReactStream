@@ -1,0 +1,49 @@
+# Node
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+.npm/
+
+# Rust
+target/
+core/rust/target/
+apps/desktop/src-tauri/target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# Tauri
+apps/desktop/src-tauri/gen/
+
+# TypeScript
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+config/*.local.json
+**/license/private_key*
+
+# Database local (nunca versionar app.db real)
+database/*.db
+database/*.db-wal
+database/*.db-shm
+**/*.sqlite
+**/*.sqlite3
+
+# Audio importado en pruebas locales
+assets/sounds/*
+!assets/sounds/.gitkeep
+
+# OS / editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Test artifacts
+coverage/
+tests/fixtures/**/*.local.json

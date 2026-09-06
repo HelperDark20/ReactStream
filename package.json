@@ -1,0 +1,38 @@
+{
+  "name": "reactstream",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ReactStream — Automatización de TikTok LIVE (Rust Core + Tauri + React + Node Bridge)",
+  "workspaces": [
+    "apps/desktop",
+    "apps/tiktok-bridge",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "dev:desktop": "npm run dev --workspace=apps/desktop",
+    "dev:bridge": "npm run dev --workspace=apps/tiktok-bridge",
+    "build:bridge": "npm run build --workspace=apps/tiktok-bridge"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

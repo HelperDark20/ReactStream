@@ -1,0 +1,8 @@
+/* Fondo transparente obligatorio para captura como Browser Source de OBS */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}

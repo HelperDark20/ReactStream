@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./apps/desktop" },
+    { "path": "./apps/tiktok-bridge" },
+    { "path": "./packages/events" },
+    { "path": "./packages/types" },
+    { "path": "./packages/automation" },
+    { "path": "./packages/gift-catalog" },
+    { "path": "./packages/shared" }
+  ]
+}

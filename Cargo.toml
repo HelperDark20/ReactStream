@@ -1,0 +1,17 @@
+[workspace]
+resolver = "2"
+members = [
+    "core/rust",
+    "apps/desktop/src-tauri"
+]
+
+# NOTA: la implementación real de comandos/eventos Tauri llega en la
+# Etapa 26 (Tauri API). Por ahora src-tauri es un shell mínimo que
+# ya referencia reactstream-core para validar que el workspace compila.
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "unwind"
+strip = true
