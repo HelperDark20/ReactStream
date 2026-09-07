@@ -1,0 +1,23 @@
+{
+  "id": "evt_gift_0001",
+  "type": "gift",
+  "timestamp": 1788300000000,
+  "sessionId": "live_test_session_001",
+  "source": "tiktok",
+  "user": {
+    "id": "123456789",
+    "username": "carlos",
+    "displayName": "Carlos",
+    "avatarUrl": "https://example.com/avatar.png"
+  },
+  "gift": {
+    "id": "5655",
+    "name": "Rose",
+    "coins": 1,
+    "imageUrl": "https://example.com/rose.png",
+    "region": "CO"
+  },
+  "quantity": 10,
+  "totalCoins": 10,
+  "repeatEnd": true
+}

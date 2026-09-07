@@ -1,0 +1,7 @@
+{
+  "id": "evt_live_started_0001",
+  "type": "live_started",
+  "timestamp": 1788299999000,
+  "sessionId": "live_test_session_001",
+  "source": "tiktok"
+}

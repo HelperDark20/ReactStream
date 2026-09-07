@@ -1,0 +1,42 @@
+{
+  "id": "auto_001",
+  "name": "Combo especial al recibir Rose",
+  "enabled": true,
+  "trigger": { "type": "gift" },
+  "conditions": [
+    {
+      "id": "grp_001",
+      "logic": "AND",
+      "conditions": [
+        { "id": "cond_001", "field": "gift.id", "operator": "equals", "value": "5655" },
+        { "id": "cond_002", "field": "totalCoins", "operator": "greater_or_equal", "value": 10 }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "play_sound",
+      "id": "act_001",
+      "sortOrder": 0,
+      "repeatCount": 1,
+      "repeatIntervalMs": 0,
+      "config": { "soundId": "snd_rose", "volume": 90 }
+    },
+    {
+      "type": "keystroke",
+      "id": "act_002",
+      "sortOrder": 1,
+      "repeatCount": 1,
+      "repeatIntervalMs": 0,
+      "config": {
+        "sequence": [
+          { "keys": ["space"], "durationMs": 100, "intervalMs": 50 }
+        ]
+      }
+    }
+  ],
+  "cooldown": { "globalMs": 5000, "perUserMs": 0 },
+  "priority": 10,
+  "createdAt": 1788300000000,
+  "updatedAt": 1788300000000
+}

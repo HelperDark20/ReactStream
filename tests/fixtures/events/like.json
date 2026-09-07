@@ -1,0 +1,13 @@
+{
+  "id": "evt_like_0001",
+  "type": "like",
+  "timestamp": 1788300001000,
+  "sessionId": "live_test_session_001",
+  "source": "tiktok",
+  "user": {
+    "id": "987654321",
+    "username": "maria",
+    "displayName": "Maria"
+  },
+  "count": 25
+}

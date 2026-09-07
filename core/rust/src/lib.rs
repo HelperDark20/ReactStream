@@ -7,6 +7,7 @@
 pub mod actions;
 pub mod audio;
 pub mod automation;
+pub mod contracts;
 pub mod database;
 pub mod event_bus;
 pub mod keystroke;
