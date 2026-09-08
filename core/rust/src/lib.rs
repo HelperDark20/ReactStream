@@ -7,8 +7,10 @@
 pub mod actions;
 pub mod audio;
 pub mod automation;
+pub mod clock;
 pub mod contracts;
 pub mod database;
+pub mod error;
 pub mod event_bus;
 pub mod keystroke;
 pub mod license;
