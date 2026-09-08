@@ -45,6 +45,23 @@ pub enum EventSource {
     System,
 }
 
+/// Discriminador liviano de tipo de evento — el Event Bus lo usa para
+/// indexar suscripciones sin necesitar el AppEvent completo (Sección 9).
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "snake_case")]
+pub enum EventType {
+    LiveStarted,
+    LiveEnded,
+    Gift,
+    Like,
+    Follow,
+    Comment,
+    Share,
+    Member,
+    ViewerCount,
+    TimerZero,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct GiftEvent {
@@ -197,6 +214,23 @@ pub enum AppEvent {
 }
 
 impl AppEvent {
+    /// Discriminador liviano de tipo — usado por el Event Bus para indexar
+    /// suscripciones (Sección 9) sin necesitar un match completo del enum.
+    pub fn event_type(&self) -> EventType {
+        match self {
+            AppEvent::Gift(_) => EventType::Gift,
+            AppEvent::Like(_) => EventType::Like,
+            AppEvent::Comment(_) => EventType::Comment,
+            AppEvent::Follow(_) => EventType::Follow,
+            AppEvent::Share(_) => EventType::Share,
+            AppEvent::Member(_) => EventType::Member,
+            AppEvent::LiveStarted(_) => EventType::LiveStarted,
+            AppEvent::LiveEnded(_) => EventType::LiveEnded,
+            AppEvent::TimerZero(_) => EventType::TimerZero,
+            AppEvent::ViewerCount(_) => EventType::ViewerCount,
+        }
+    }
+
     /// Campos comunes del envelope, accesibles sin hacer match manual
     /// (Event Bus los necesita para validación/deduplicación, Sección 9).
     pub fn id(&self) -> &str {
@@ -299,5 +333,20 @@ mod tests {
         assert!(value.get("totalCoins").is_some());
         assert!(value.get("repeatEnd").is_some());
         assert_eq!(value.get("type").and_then(|v| v.as_str()), Some("gift"));
+    }
+
+    #[test]
+    fn event_type_discrimina_correctamente_cada_variante() {
+        let gift = load_fixture("gift.json");
+        let gift_event: AppEvent = serde_json::from_str(&gift).unwrap();
+        assert_eq!(gift_event.event_type(), EventType::Gift);
+
+        let like = load_fixture("like.json");
+        let like_event: AppEvent = serde_json::from_str(&like).unwrap();
+        assert_eq!(like_event.event_type(), EventType::Like);
+
+        let live_started = load_fixture("live_started.json");
+        let live_started_event: AppEvent = serde_json::from_str(&live_started).unwrap();
+        assert_eq!(live_started_event.event_type(), EventType::LiveStarted);
     }
 }
