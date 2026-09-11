@@ -166,7 +166,6 @@ mod tests {
     use super::*;
     use crate::database::{seeds, Database};
     use crate::logging::InMemoryLogger;
-    use std::sync::Arc;
 
     fn setup() -> Database {
         let db = Database::open_in_memory().unwrap();
