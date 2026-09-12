@@ -2,17 +2,12 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>ReactStream — Overlay: timer</title>
+    <title>ReactStream — Timer</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <!--
-      Timer general — cuenta regresiva alimentada por coins (Sección 14)
-      Regla #52-53: este overlay SOLO visualiza, no contiene lógica de negocio.
-      Regla #54: debe reconectar y solicitar resync ante desconexión.
-      TODO(Etapa correspondiente): implementar render real.
-    -->
-    <div id="root"></div>
+    <div id="status" class="status">Conectando...</div>
+    <div id="timer-display" class="timer-display">00:00</div>
     <script type="module" src="./main.js"></script>
   </body>
 </html>

@@ -2,17 +2,12 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>ReactStream — Overlay: likes</title>
+    <title>ReactStream — Likes</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <!--
-      Likes/Tap Tap — corazones + avatar, máx 1 vez cada 10s por usuario (Sección 19)
-      Regla #52-53: este overlay SOLO visualiza, no contiene lógica de negocio.
-      Regla #54: debe reconectar y solicitar resync ante desconexión.
-      TODO(Etapa correspondiente): implementar render real.
-    -->
-    <div id="root"></div>
+    <div id="status" class="status">Conectando...</div>
+    <div id="hearts-container" class="hearts-container"></div>
     <script type="module" src="./main.js"></script>
   </body>
 </html>

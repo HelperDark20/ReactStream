@@ -1,8 +1,10 @@
-/* Fondo transparente obligatorio para captura como Browser Source de OBS */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  overflow: hidden;
+html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; width: 100vw; height: 100vh; }
+.status { position: absolute; top: 4px; right: 4px; font-size: 10px; color: rgba(255,255,255,0.4); }
+.hearts-container { position: relative; width: 100%; height: 100%; pointer-events: none; }
+.heart-wrap { position: absolute; bottom: 10%; animation: floatUp 2.5s ease-out forwards; }
+.avatar-heart { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #f472b6; object-fit: cover; }
+.heart { font-size: 28px; }
+@keyframes floatUp {
+  0%   { transform: translateY(0) scale(1);   opacity: 1; }
+  100% { transform: translateY(-80px) scale(0.6); opacity: 0; }
 }

@@ -1,8 +1,8 @@
-/* Fondo transparente obligatorio para captura como Browser Source de OBS */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  overflow: hidden;
-}
+html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; font-family: "Segoe UI", sans-serif; }
+.status { position: absolute; top: 4px; right: 4px; font-size: 10px; color: rgba(255,255,255,0.4); }
+.best-gift { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.6); border-radius: 12px; padding: 8px 14px; border: 1px solid rgba(251,191,36,0.4); }
+.gift-img { width: 48px; height: 48px; object-fit: contain; }
+.gift-info { display: flex; flex-direction: column; gap: 2px; }
+.gift-name { font-size: 15px; font-weight: 700; color: #fff; }
+.gift-coins { font-size: 13px; color: #fbbf24; font-weight: 700; }
+.gift-sender { font-size: 11px; color: rgba(255,255,255,0.6); }

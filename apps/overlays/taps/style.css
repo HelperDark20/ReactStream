@@ -1,8 +1,8 @@
-/* Fondo transparente obligatorio para captura como Browser Source de OBS */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  overflow: hidden;
-}
+html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; font-family: "Segoe UI", sans-serif; }
+.status { position: absolute; top: 4px; right: 4px; font-size: 10px; color: rgba(255,255,255,0.4); }
+.tapper-list { display: flex; flex-direction: column; gap: 6px; padding: 8px; }
+.tapper-entry { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.55); border-radius: 8px; padding: 6px 10px; }
+.rank { font-size: 14px; font-weight: 700; color: #f472b6; min-width: 24px; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+.name { flex: 1; font-size: 14px; color: #fff; font-weight: 600; }
+.likes { font-size: 13px; color: #f472b6; font-weight: 700; }

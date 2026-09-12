@@ -1,8 +1,11 @@
-/* Fondo transparente obligatorio para captura como Browser Source de OBS */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  overflow: hidden;
+html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; font-family: "Segoe UI", sans-serif; }
+.status { position: absolute; top: 4px; right: 4px; font-size: 10px; color: rgba(255,255,255,0.4); }
+.jar-wrapper { display: flex; justify-content: center; align-items: flex-end; height: 100vh; padding-bottom: 10px; }
+.jar-outer { position: relative; width: 140px; height: 200px; border: 3px solid rgba(255,255,255,0.6); border-radius: 0 0 40px 40px; border-top: none; overflow: hidden; background: rgba(0,0,0,0.25); }
+.jar-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(99,102,241,0.4), rgba(167,139,250,0.2)); height: 0%; transition: height 0.6s ease; }
+.gift-area { position: absolute; inset: 0; }
+.gift-ball { position: absolute; border-radius: 50%; bottom: 0; animation: fallIn 0.5s ease-out forwards; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+@keyframes fallIn {
+  from { transform: translateY(-200px) scale(0.5); opacity: 0; }
+  to   { transform: translateY(0) scale(1);        opacity: 1; }
 }

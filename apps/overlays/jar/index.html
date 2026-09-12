@@ -2,17 +2,17 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>ReactStream — Overlay: jar</title>
+    <title>ReactStream — Gift Jar</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <!--
-      Gift Jar — regalos cayendo en el frasco, tamaño proporcional a coins (Sección 18)
-      Regla #52-53: este overlay SOLO visualiza, no contiene lógica de negocio.
-      Regla #54: debe reconectar y solicitar resync ante desconexión.
-      TODO(Etapa correspondiente): implementar render real.
-    -->
-    <div id="root"></div>
+    <div id="status" class="status">Conectando...</div>
+    <div class="jar-wrapper">
+      <div class="jar-outer">
+        <div id="jar-fill" class="jar-fill"></div>
+        <div id="gift-area" class="gift-area"></div>
+      </div>
+    </div>
     <script type="module" src="./main.js"></script>
   </body>
 </html>
