@@ -1,4 +1,5 @@
 import { useState } from "react";
+import GiftPickerModal, { type GiftItem } from "../components/GiftPickerModal";
 
 const TRIGGERS = [
   { id: "none", icon: "—", label: "Sin trigger" },
@@ -32,6 +33,7 @@ export default function SoundsPage() {
   const [sounds, setSounds] = useState<Sound[]>(MOCK);
   const [selected, setSelected] = useState<string | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
+  const [showGiftPicker, setShowGiftPicker] = useState(false);
 
   const cfg = sounds.find((s) => s.id === selected);
 
@@ -180,16 +182,38 @@ export default function SoundsPage() {
               ))}
             </div>
             {cfg.trigger === "gift" && (
-              <div>
+              <div style={{ marginTop: 10 }}>
                 <div style={{ fontSize: 12, color: "var(--rs-text-secondary)", marginBottom: 6 }}>
-                  Filtro de regalo (nombre o ID — vacío = cualquier regalo)
+                  Filtro de regalo
                 </div>
-                <input
-                  value={cfg.giftFilter}
-                  onChange={(e) => update({ giftFilter: e.target.value })}
-                  placeholder="Ej: Rosa, León, 5655"
-                  style={{ width: "100%" }}
-                />
+                <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                  <div
+                    onClick={() => setShowGiftPicker(true)}
+                    style={{ flex:1, padding:"8px 12px", background:"rgba(5,7,6,0.9)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, fontSize:13, color: cfg.giftFilter ? "#fff" : "rgba(255,255,255,0.3)", cursor:"pointer" }}
+                  >
+                    {cfg.giftFilter || "Seleccionar regalo..."}
+                  </div>
+                  {cfg.giftFilter && (
+                    <button className="btn-ghost" style={{ fontSize:12, padding:"6px 10px", color:"#ef4444", borderColor:"rgba(239,68,68,0.3)" }}
+                      onClick={() => update({ giftFilter: "" })}>
+                      ✕
+                    </button>
+                  )}
+                  <button className="btn-green" style={{ fontSize:12, padding:"7px 14px" }}
+                    onClick={() => setShowGiftPicker(true)}>
+                    🎁 Elegir
+                  </button>
+                </div>
+                <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)", marginTop:5 }}>
+                  Vacío = suena con cualquier regalo
+                </div>
+                {showGiftPicker && (
+                  <GiftPickerModal
+                    selectedId={cfg.giftFilter}
+                    onSelect={(gift: GiftItem) => { update({ giftFilter: gift.id }); setShowGiftPicker(false); }}
+                    onClose={() => setShowGiftPicker(false)}
+                  />
+                )}
               </div>
             )}
             {cfg.trigger === "none" && (

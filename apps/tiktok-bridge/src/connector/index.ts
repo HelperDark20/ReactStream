@@ -69,9 +69,31 @@ export class TikTokConnector {
       this.sessionId = randomUUID();
       this.wireEvents();
 
-      
-      await this.tiktokClient.connect();
+      const state = await this.tiktokClient.connect();
       this.status = "connected";
+
+      // Capturar catálogo de regalos disponibles al conectarse
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gifts: any[] = state?.availableGifts ?? this.tiktokClient.availableGifts ?? [];
+      if (gifts.length > 0) {
+        console.log(`[bridge:connector] ${gifts.length} regalos disponibles — sincronizando catálogo...`);
+        this.client.send({
+          id: randomUUID(),
+          type: "gift_catalog_sync",
+          timestamp: Date.now(),
+          sessionId: this.sessionId,
+          source: "tiktok",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          gifts: gifts.map((g: any) => ({
+            id: String(g.id),
+            name: g.name ?? g.describe ?? "Regalo",
+            coins: g.diamond_count ?? g.diamondCount ?? 0,
+            imageUrl: g.image?.url_list?.[0] ?? g.image?.uri ?? null,
+            region: "CO",
+          })),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any);
+      }
 
       this.client.send(normalizeLiveStarted(this.sessionId));
       console.log(`[bridge:connector] conectado al LIVE de @${this.config.tiktokUsername}`);

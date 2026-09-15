@@ -1,4 +1,10 @@
 import { useState } from "react";
+import TimerPreview from "../components/overlays/TimerPreview";
+import DonorsPreview from "../components/overlays/DonorsPreview";
+import TappersPreview from "../components/overlays/TappersPreview";
+import BestGiftPreview from "../components/overlays/BestGiftPreview";
+import LikesPreview from "../components/overlays/LikesPreview";
+import JarPreview from "../components/overlays/JarPreview";
 
 type OverlayId = "timer" | "donors" | "tappers" | "best-gift" | "likes" | "jar";
 
@@ -72,27 +78,17 @@ export default function OverlaysPage() {
         <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
           {/* Vista previa */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", borderRight: "1px solid var(--rs-border)" }}>
-            <div style={{ padding: "8px 14px", borderBottom: "1px solid var(--rs-border)" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-muted)", letterSpacing: "0.08em" }}>VISTA PREVIA</span>
+            <div style={{ padding: "8px 14px", borderBottom: "1px solid var(--rs-border)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-muted)", letterSpacing: "0.08em" }}>VISTA PREVIA (datos de ejemplo)</span>
+              <span style={{ fontSize:10, color:"var(--rs-text-muted)" }}>Animación real en OBS durante el LIVE</span>
             </div>
             <div style={{ flex: 1, background: "#000", position: "relative", overflow: "hidden" }}>
-              <iframe
-                src={`http://127.0.0.1:47821/overlay/${ov.id}`}
-                style={{ width: "100%", height: "100%", border: "none", background: "transparent" }}
-                title={`Preview ${ov.name}`}
-              />
-              {/* Overlay de "conectando" cuando no hay LIVE */}
-              <div style={{
-                position: "absolute", inset: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                flexDirection: "column", gap: 8,
-                background: "rgba(0,0,0,0.7)",
-                pointerEvents: "none",
-              }}>
-                <span style={{ fontSize: 28 }}>{ov.icon}</span>
-                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Vista previa disponible durante el LIVE</span>
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", fontFamily: "monospace" }}>{ov.url}</span>
-              </div>
+              {ov.id === "timer"     && <TimerPreview />}
+              {ov.id === "donors"    && <DonorsPreview />}
+              {ov.id === "tappers"   && <TappersPreview />}
+              {ov.id === "best-gift" && <BestGiftPreview />}
+              {ov.id === "likes"     && <LikesPreview />}
+              {ov.id === "jar"       && <JarPreview />}
             </div>
           </div>
 

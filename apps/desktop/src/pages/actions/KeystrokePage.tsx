@@ -1,4 +1,5 @@
 import { useState } from "react";
+import GiftPickerModal, { type GiftItem } from "../../components/GiftPickerModal";
 
 const TRIGGERS = [
   { id: "gift", icon: "🎁", label: "Regalo específico" },
@@ -34,6 +35,7 @@ export default function KeystrokePage() {
   const [simLog, setSimLog] = useState<string[]>([]);
   const [simRunning, setSimRunning] = useState(false);
   const [autoitInstalled] = useState(false);
+  const [showGiftPicker, setShowGiftPicker] = useState(false);
 
   const cfg = configs.find((c) => c.id === selected);
 
@@ -172,8 +174,33 @@ export default function KeystrokePage() {
           </Section>
 
           {cfg.trigger === "gift" && (
-            <Section title="Filtro de regalo (nombre o ID)">
-              <input value={cfg.giftFilter} onChange={(e) => updateCfg({ giftFilter: e.target.value })} placeholder="Ej: Rosa, León, 5655 — vacío = cualquier regalo" style={{ width: "100%" }} />
+            <Section title="Filtro de regalo">
+              <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                <div style={{ flex:1, padding:"8px 12px", background:"rgba(5,7,6,0.9)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, fontSize:13, color: cfg.giftFilter ? "#fff" : "rgba(255,255,255,0.3)", cursor:"pointer" }}
+                  onClick={() => setShowGiftPicker(true)}>
+                  {cfg.giftFilter || "Seleccionar regalo..."}
+                </div>
+                {cfg.giftFilter && (
+                  <button className="btn-ghost" style={{ fontSize:12, padding:"6px 10px", color:"#ef4444", borderColor:"rgba(239,68,68,0.3)" }}
+                    onClick={() => updateCfg({ giftFilter: "" })}>
+                    ✕
+                  </button>
+                )}
+                <button className="btn-green" style={{ fontSize:12, padding:"7px 14px" }}
+                  onClick={() => setShowGiftPicker(true)}>
+                  🎁 Elegir
+                </button>
+              </div>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)", marginTop:5 }}>
+                Vacío = cualquier regalo dispara la acción
+              </div>
+              {showGiftPicker && (
+                <GiftPickerModal
+                  selectedId={cfg.giftFilter}
+                  onSelect={(gift: GiftItem) => updateCfg({ giftFilter: gift.id, name: cfg.name || gift.name })}
+                  onClose={() => setShowGiftPicker(false)}
+                />
+              )}
             </Section>
           )}
 

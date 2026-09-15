@@ -28,6 +28,8 @@ export class CoreWebSocketClient {
     this.ws.on("open", () => {
       console.log(`[bridge:ws] conectado a Core en ${this.url}`);
       this.reconnectAttempts = 0;
+      // Identificarse ante el Core (protocolo interno ReactStream)
+      this.ws?.send(JSON.stringify({ clientType: "bridge" }));
       this.startPing();
       // Drenar cola acumulada durante la reconexión
       while (this.queue.length > 0) {

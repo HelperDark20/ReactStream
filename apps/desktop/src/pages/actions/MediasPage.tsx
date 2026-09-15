@@ -1,4 +1,5 @@
 import { useState } from "react";
+import GiftPickerModal, { type GiftItem } from "../../components/GiftPickerModal";
 
 const TRIGGERS = [
   { id: "gift", icon: "🎁", label: "Regalo" },
@@ -46,6 +47,7 @@ const MEDIA_LABELS: Record<MediaType, string> = {
 export default function MediasPage() {
   const [medias, setMedias] = useState<MediaAction[]>(MOCK);
   const [selected, setSelected] = useState<string | null>(MOCK[0]?.id ?? null);
+  const [showGiftPicker, setShowGiftPicker] = useState(false);
 
   const cfg = medias.find((m) => m.id === selected);
 
@@ -123,7 +125,32 @@ export default function MediasPage() {
 
           {cfg.trigger === "gift" && (
             <Section title="Filtro de regalo">
-              <input value={cfg.giftFilter} onChange={(e) => updateCfg({ giftFilter: e.target.value })} placeholder="Nombre o ID del regalo — vacío = cualquier regalo" style={{ width: "100%" }} />
+              <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                <div
+                  onClick={() => setShowGiftPicker(true)}
+                  style={{ flex:1, padding:"8px 12px", background:"rgba(5,7,6,0.9)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, fontSize:13, color: cfg.giftFilter ? "#fff" : "rgba(255,255,255,0.3)", cursor:"pointer" }}
+                >
+                  {cfg.giftFilter || "Seleccionar regalo..."}
+                </div>
+                {cfg.giftFilter && (
+                  <button className="btn-ghost" style={{ fontSize:12, padding:"6px 10px", color:"#ef4444", borderColor:"rgba(239,68,68,0.3)" }}
+                    onClick={() => updateCfg({ giftFilter: "" })}>✕</button>
+                )}
+                <button className="btn-green" style={{ fontSize:12, padding:"7px 14px" }}
+                  onClick={() => setShowGiftPicker(true)}>
+                  🎁 Elegir
+                </button>
+              </div>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)", marginTop:5 }}>
+                Vacío = se activa con cualquier regalo
+              </div>
+              {showGiftPicker && (
+                <GiftPickerModal
+                  selectedId={cfg.giftFilter}
+                  onSelect={(gift: GiftItem) => { updateCfg({ giftFilter: gift.id }); setShowGiftPicker(false); }}
+                  onClose={() => setShowGiftPicker(false)}
+                />
+              )}
             </Section>
           )}
 

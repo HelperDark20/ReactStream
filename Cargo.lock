@@ -2533,6 +2533,7 @@ name = "reactstream-core"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "futures-util",
  "rusqlite",
  "serde",
  "serde_json",

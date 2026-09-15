@@ -21,3 +21,4 @@ pub mod session;
 pub mod simulation;
 pub mod state;
 pub mod timer;
+pub mod ws_server;

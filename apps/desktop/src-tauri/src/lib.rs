@@ -7,10 +7,12 @@ use reactstream_core::{
     clock::ProductionClock,
     event_bus::EventBus,
     logging::{InMemoryLogger, LogEntry, LogLevel, Logger},
+    overlays::OverlayEngine,
     rankings::{best_gift::BestGiftEngine, RankingEngine},
     session::SessionManager,
     state::{settings::SettingsManager, StateManager},
     timer::TimerEngine,
+    ws_server::WsServer,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
@@ -22,26 +24,34 @@ use uuid::Uuid;
 // ============================================================
 
 pub struct CoreState {
-    pub logger:       Arc<InMemoryLogger>,
-    pub event_bus:    Arc<EventBus>,
-    pub session_mgr:  Arc<SessionManager>,
-    pub ranking_mgr:  Arc<RankingEngine>,
-    pub best_gift_mgr:Arc<BestGiftEngine>,
-    pub timer_engine: Mutex<Option<Arc<TimerEngine>>>,
-    pub settings_mgr: Arc<SettingsManager>,
-    pub state_mgr:    Arc<StateManager>,
+    pub logger:        Arc<InMemoryLogger>,
+    pub event_bus:     Arc<EventBus>,
+    pub session_mgr:   Arc<SessionManager>,
+    pub ranking_mgr:   Arc<RankingEngine>,
+    pub best_gift_mgr: Arc<BestGiftEngine>,
+    pub timer_engine:  Mutex<Option<Arc<TimerEngine>>>,
+    pub settings_mgr:  Arc<SettingsManager>,
+    pub state_mgr:     Arc<StateManager>,
+    pub overlay_engine:Arc<OverlayEngine>,
+    pub ws_server:     Arc<WsServer>,
     pub tiktok_username: Mutex<String>,
 }
 
 impl CoreState {
     fn new() -> Self {
-        let logger      = Arc::new(InMemoryLogger::new());
-        let event_bus   = Arc::new(EventBus::new(logger.clone()));
-        let session_mgr = Arc::new(SessionManager::new());
-        let ranking_mgr = Arc::new(RankingEngine::new(10, 10));
-        let best_gift_mgr = Arc::new(BestGiftEngine::new());
-        let settings_mgr  = Arc::new(SettingsManager::default());
-        let state_mgr     = Arc::new(StateManager::new());
+        let logger       = Arc::new(InMemoryLogger::new());
+        let event_bus    = Arc::new(EventBus::new(logger.clone()));
+        let session_mgr  = Arc::new(SessionManager::new());
+        let ranking_mgr  = Arc::new(RankingEngine::new(10, 10));
+        let best_gift_mgr  = Arc::new(BestGiftEngine::new());
+        let settings_mgr   = Arc::new(SettingsManager::default());
+        let state_mgr      = Arc::new(StateManager::new());
+        let overlay_engine = Arc::new(OverlayEngine::new(logger.clone()));
+        let ws_server      = Arc::new(WsServer::new(
+            event_bus.clone(),
+            overlay_engine.clone(),
+            logger.clone(),
+        ));
 
         // Conectar motores al Event Bus
         reactstream_core::session::wire_to_event_bus(session_mgr.clone(), &event_bus);
@@ -57,6 +67,8 @@ impl CoreState {
             timer_engine: Mutex::new(None),
             settings_mgr,
             state_mgr,
+            overlay_engine,
+            ws_server,
             tiktok_username: Mutex::new(String::new()),
         }
     }
@@ -65,6 +77,15 @@ impl CoreState {
 // ============================================================
 // DTOs para React (camelCase, serializable)
 // ============================================================
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct GiftCatalogItemDto {
+    pub id: String,
+    pub name: String,
+    pub coins: u64,
+    pub image_url: Option<String>,
+}
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -277,6 +298,21 @@ async fn get_top_tappers(state: State<'_, CoreState>) -> Result<Vec<TapperDto>, 
 }
 
 #[tauri::command]
+async fn get_gift_catalog(_state: State<'_, CoreState>) -> Result<Vec<GiftCatalogItemDto>, String> {
+    use reactstream_core::database::repository::gift_catalog_sync::GiftCatalogSyncRepository;
+    let db = reactstream_core::database::Database::open_in_memory()
+        .map_err(|e| e.to_string())?;
+    let repo = GiftCatalogSyncRepository::new(&db);
+    let items = repo.list_all().map_err(|e| e.to_string())?;
+    Ok(items.into_iter().map(|(id, name, coins, image_url)| GiftCatalogItemDto {
+        id,
+        name,
+        coins: coins as u64,
+        image_url,
+    }).collect())
+}
+
+#[tauri::command]
 async fn get_settings(
     state: State<'_, CoreState>,
 ) -> Result<reactstream_core::state::settings::AppSettings, String> {
@@ -325,12 +361,21 @@ pub fn run() {
             get_timer_state,
             get_top_donors,
             get_top_tappers,
+            get_gift_catalog,
             get_settings,
             update_setting,
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
             window.set_title("ReactStream").unwrap();
+
+            // Arrancar el WebSocket server en background
+            let state = app.state::<CoreState>();
+            let ws = state.ws_server.clone();
+            tokio::spawn(async move {
+                ws.run().await;
+            });
+
             Ok(())
         })
         .run(tauri::generate_context!())
