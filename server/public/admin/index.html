@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReactStream — Admin</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0a0a;--panel:#141414;--card:#1a1a1a;
+      --green:#39ff14;--green-dim:#2bcc10;--green-glow:rgba(57,255,20,0.15);
+      --text:#fff;--muted:#888;--border:rgba(255,255,255,0.08);
+      --red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;
+    }
+    body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    input,select,textarea{background:#111;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:13px;outline:none;width:100%}
+    input:focus,select:focus{border-color:rgba(57,255,20,0.5);box-shadow:0 0 0 2px var(--green-glow)}
+    .btn{padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+    .btn-green{background:var(--green);color:#000}.btn-green:hover{background:var(--green-dim)}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{border-color:rgba(57,255,20,0.4);color:var(--green)}
+    .btn-red{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,0.3)}.btn-red:hover{background:rgba(239,68,68,0.08)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+    .badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+    .badge-active{background:rgba(57,255,20,0.12);color:var(--green)}
+    .badge-revoked{background:rgba(239,68,68,0.12);color:var(--red)}
+    .badge-expired{background:rgba(245,158,11,0.12);color:var(--yellow)}
+    .badge-pro{background:rgba(59,130,246,0.12);color:var(--blue)}
+    .badge-studio{background:rgba(168,85,247,0.12);color:#a855f7}
+    .badge-free{background:rgba(255,255,255,0.08);color:var(--muted)}
+    table{width:100%;border-collapse:collapse}
+    th{font-size:11px;color:var(--muted);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);letter-spacing:.05em;text-transform:uppercase}
+    td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+    tr:hover td{background:rgba(255,255,255,0.02)}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+    .stat-value{font-size:28px;font-weight:700;color:var(--green)}
+    .stat-label{font-size:12px;color:var(--muted);margin-top:4px}
+    .topbar{height:52px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px}
+    .logo{font-size:15px;font-weight:700}
+    .logo span{color:var(--green)}
+    .sidebar{width:200px;background:var(--panel);border-right:1px solid var(--border);min-height:calc(100vh - 52px);padding:12px 8px}
+    .nav-btn{width:100%;padding:10px 14px;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--muted);cursor:pointer;text-align:left;font-size:13px;display:flex;align-items:center;gap:8px;transition:all .15s}
+    .nav-btn:hover{background:rgba(255,255,255,0.04)}
+    .nav-btn.active{background:rgba(57,255,20,0.08);border-color:rgba(57,255,20,0.3);color:var(--green);font-weight:600}
+    .main{flex:1;padding:24px;overflow-y:auto}
+    .grid-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+    .flex{display:flex}.flex-col{flex-direction:column}
+    .gap-4{gap:16px}.gap-2{gap:8px}.gap-1{gap:4px}
+    .items-center{align-items:center}.justify-between{justify-content:space-between}
+    .mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}
+    .mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}
+    .text-muted{color:var(--muted);font-size:12px}
+    .text-green{color:var(--green)}
+    .hidden{display:none}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100}
+    .modal{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;width:460px;max-width:90vw}
+    .form-group{margin-bottom:14px}
+    .form-label{font-size:12px;color:var(--muted);margin-bottom:5px;display:block}
+    .alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px}
+    .alert-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--red)}
+    .alert-success{background:rgba(57,255,20,0.08);border:1px solid rgba(57,255,20,0.3);color:var(--green)}
+    #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200}
+    .login-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:32px;width:360px}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="mb-4" style="text-align:center">
+      <div class="logo" style="font-size:20px;margin-bottom:4px">React<span>Stream</span></div>
+      <div class="text-muted">Panel de Administración</div>
+    </div>
+    <div id="login-alert"></div>
+    <div class="form-group"><label class="form-label">Usuario</label><input id="login-user" type="text" placeholder="admin" /></div>
+    <div class="form-group"><label class="form-label">Contraseña</label><input id="login-pass" type="password" /></div>
+    <button class="btn btn-green" style="width:100%" onclick="doLogin()">Iniciar sesión</button>
+    <div class="mt-3 text-muted" style="text-align:center;font-size:11px">
+      ¿Primer arranque? La cuenta se crea en <code style="color:var(--green)">/admin/api/setup</code>
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL (oculto hasta login) -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="logo">React<span>Stream</span> Admin</div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <span id="admin-user" class="text-muted"></span>
+      <button class="btn btn-ghost" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+  <div class="flex" style="height:calc(100vh - 52px)">
+    <div class="sidebar">
+      <button class="nav-btn active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+      <button class="nav-btn" onclick="showPage('licenses',this)">🔑 Licencias</button>
+      <button class="nav-btn" onclick="showPage('logs',this)">📋 Logs</button>
+    </div>
+    <div class="main" id="main-content"></div>
+  </div>
+</div>
+
+<!-- MODAL NUEVA LICENCIA -->
+<div id="modal-new" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <h3 class="mb-4">Nueva Licencia</h3>
+    <div id="modal-alert"></div>
+    <div class="form-group"><label class="form-label">Plan</label>
+      <select id="new-plan"><option value="FREE">FREE</option><option value="PRO" selected>PRO</option><option value="STUDIO">STUDIO</option></select>
+    </div>
+    <div class="form-group"><label class="form-label">Nombre del cliente</label><input id="new-name" type="text" placeholder="Juan Pérez" /></div>
+    <div class="form-group"><label class="form-label">Email</label><input id="new-email" type="email" placeholder="juan@ejemplo.com" /></div>
+    <div class="form-group"><label class="form-label">Máx. dispositivos</label><input id="new-maxdev" type="number" value="1" min="1" max="10" /></div>
+    <div class="form-group"><label class="form-label">Notas (opcional)</label><textarea id="new-notes" rows="2"></textarea></div>
+    <div class="flex gap-2 mt-4" style="justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-green" onclick="createLicense()">Crear licencia</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let TOKEN = localStorage.getItem("rs_admin_token") ?? "";
+let USERNAME = localStorage.getItem("rs_admin_user") ?? "";
+
+// ─── Auth ────────────────────────────────────────
+async function doLogin() {
+  const user = document.getElementById("login-user").value.trim();
+  const pass = document.getElementById("login-pass").value;
+  const alertEl = document.getElementById("login-alert");
+  alertEl.innerHTML = "";
+  console.log("[login] intentando con usuario:", user, "URL:", `${API}/admin/api/login`);
+  try {
+    const r = await fetch(`${API}/admin/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: user, password: pass }),
+    });
+    console.log("[login] status:", r.status);
+    const data = await r.json();
+    console.log("[login] respuesta:", data);
+    if (!r.ok) { alertEl.innerHTML = `<div class="alert alert-error">${data.error}</div>`; return; }
+    TOKEN = data.token; USERNAME = data.username;
+    localStorage.setItem("rs_admin_token", TOKEN);
+    localStorage.setItem("rs_admin_user", USERNAME);
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("admin-user").textContent = USERNAME;
+    // Esperar un tick para que el DOM actualice antes de buscar .nav-btn
+    setTimeout(() => showPage("dashboard", document.querySelector(".nav-btn")), 0);
+  } catch(err) {
+    console.error("[login] error:", err);
+    alertEl.innerHTML = `<div class="alert alert-error">Error de conexión: ${err.message}</div>`;
+  }
+}
+
+function doLogout() {
+  TOKEN = ""; localStorage.removeItem("rs_admin_token"); localStorage.removeItem("rs_admin_user");
+  location.reload();
+}
+
+async function api(path, opts = {}) {
+  const r = await fetch(`${API}/admin/api${path}`, {
+    ...opts, headers: { "Content-Type": "application/json", Authorization: `Bearer ${TOKEN}`, ...(opts.headers ?? {}) },
+  });
+  if (r.status === 401) { doLogout(); return null; }
+  return r.json();
+}
+
+// ─── Navigation ──────────────────────────────────
+function showPage(page, btn) {
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  btn?.classList.add("active");
+  if (page === "dashboard") renderDashboard();
+  else if (page === "licenses") renderLicenses();
+  else if (page === "logs") renderLogs();
+}
+
+// ─── Dashboard ───────────────────────────────────
+async function renderDashboard() {
+  const mc = document.getElementById("main-content");
+  mc.innerHTML = `<div class="text-muted">Cargando...</div>`;
+  const d = await api("/stats");
+  if (!d) return;
+  mc.innerHTML = `
+    <h2 class="mb-4">Dashboard</h2>
+    <div class="grid-stats">
+      <div class="stat-card"><div class="stat-value">${d.total}</div><div class="stat-label">Licencias totales</div></div>
+      <div class="stat-card"><div class="stat-value text-green">${d.active}</div><div class="stat-label">Activas</div></div>
+      <div class="stat-card"><div class="stat-value">${d.devices}</div><div class="stat-label">Dispositivos activos</div></div>
+      <div class="stat-card"><div class="stat-value">${d.validationsToday}</div><div class="stat-label">Validaciones hoy</div></div>
+    </div>
+    <div class="card">
+      <h3 class="mb-3">Licencias por plan</h3>
+      <div class="flex gap-4">
+        ${d.byPlan.map(p => `<div style="text-align:center;padding:12px 20px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-size:20px;font-weight:700">${p.count}</div>
+          <div class="mt-1"><span class="badge badge-${p.plan.toLowerCase()}">${p.plan}</span></div>
+        </div>`).join("")}
+      </div>
+    </div>`;
+}
+
+// ─── Licenses ────────────────────────────────────
+async function renderLicenses(q = "") {
+  const mc = document.getElementById("main-content");
+  mc.innerHTML = `<div class="text-muted">Cargando...</div>`;
+  const d = await api(`/licenses?q=${encodeURIComponent(q)}&limit=100`);
+  if (!d) return;
+  mc.innerHTML = `
+    <div class="flex items-center justify-between mb-4">
+      <h2>Licencias <span class="text-muted" style="font-size:14px">(${d.total} total)</span></h2>
+      <div class="flex gap-2">
+        <input type="text" placeholder="Buscar..." onkeyup="if(event.key==='Enter')renderLicenses(this.value)" style="width:200px" />
+        <button class="btn btn-green" onclick="openModal()">+ Nueva</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>Key</th><th>Cliente</th><th>Plan</th><th>Estado</th><th>Dispositivos</th><th>Creada</th><th></th></tr></thead>
+        <tbody>
+          ${d.licenses.map(l => `<tr>
+            <td><code style="font-size:12px;color:var(--green)">${l.key}</code></td>
+            <td><div>${l.name}</div><div class="text-muted">${l.email}</div></td>
+            <td><span class="badge badge-${l.plan.toLowerCase()}">${l.plan}</span></td>
+            <td><span class="badge badge-${l.status.toLowerCase()}">${l.status}</span></td>
+            <td>${l.max_devices}</td>
+            <td class="text-muted">${new Date(l.created_at).toLocaleDateString("es-CO")}</td>
+            <td>
+              <div class="flex gap-1">
+                <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="viewLicense('${l.id}')">Ver</button>
+                ${l.status === "ACTIVE" ? `<button class="btn btn-red" style="padding:4px 10px;font-size:11px" onclick="revokeLicense('${l.id}')">Revocar</button>` : ""}
+              </div>
+            </td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function viewLicense(id) {
+  const d = await api(`/licenses/${id}`);
+  if (!d) return;
+  const l = d.license;
+  const mc = document.getElementById("main-content");
+  mc.innerHTML = `
+    <button class="btn btn-ghost mb-4" onclick="renderLicenses()">← Volver</button>
+    <div class="flex gap-4 mb-4">
+      <div class="card" style="flex:1">
+        <h3 class="mb-3">Licencia</h3>
+        <div class="mb-2"><span class="text-muted">Key: </span><code style="color:var(--green)">${l.key}</code></div>
+        <div class="mb-2"><span class="text-muted">Plan: </span><span class="badge badge-${l.plan.toLowerCase()}">${l.plan}</span></div>
+        <div class="mb-2"><span class="text-muted">Estado: </span><span class="badge badge-${l.status.toLowerCase()}">${l.status}</span></div>
+        <div class="mb-2"><span class="text-muted">Cliente: </span>${l.name} · ${l.email}</div>
+        <div class="mb-2"><span class="text-muted">Dispositivos: </span>${d.devices.length} / ${l.max_devices}</div>
+        ${l.notes ? `<div class="mt-2 text-muted">${l.notes}</div>` : ""}
+        ${l.status === "ACTIVE" ? `<button class="btn btn-red mt-3" onclick="revokeLicense('${l.id}')">Revocar licencia</button>` : ""}
+      </div>
+      <div class="card" style="flex:1">
+        <h3 class="mb-3">Features (${l.plan})</h3>
+        ${Object.entries(d.features).map(([k, v]) => `
+          <div class="flex items-center justify-between mb-2">
+            <span style="font-size:13px">${k}</span>
+            <span style="font-weight:700;color:${v === true ? "var(--green)" : v === false ? "var(--red)" : "var(--yellow)"}">${v === true ? "✓" : v === false ? "✗" : v}</span>
+          </div>`).join("")}
+      </div>
+    </div>
+    <div class="card mb-4">
+      <h3 class="mb-3">Dispositivos activados</h3>
+      <table>
+        <thead><tr><th>Device ID</th><th>Nombre</th><th>Plataforma</th><th>Versión</th><th>Última vez</th><th></th></tr></thead>
+        <tbody>
+          ${d.devices.map(dev => `<tr style="${dev.revoked ? "opacity:0.5" : ""}">
+            <td><code style="font-size:11px">${dev.device_id.slice(0,16)}...</code></td>
+            <td>${dev.device_name ?? "—"}</td>
+            <td>${dev.platform ?? "—"}</td>
+            <td>${dev.app_version ?? "—"}</td>
+            <td class="text-muted">${new Date(dev.last_seen_at).toLocaleString("es-CO")}</td>
+            <td>${!dev.revoked ? `<button class="btn btn-red" style="padding:3px 8px;font-size:11px" onclick="revokeDevice('${dev.id}')">Revocar</button>` : '<span class="text-muted">Revocado</span>'}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3 class="mb-3">Historial de validaciones (últimas 50)</h3>
+      <table>
+        <thead><tr><th>Fecha</th><th>Acción</th><th>Resultado</th><th>IP</th></tr></thead>
+        <tbody>
+          ${d.logs.map(log => `<tr>
+            <td class="text-muted">${new Date(log.created_at).toLocaleString("es-CO")}</td>
+            <td>${log.action}</td>
+            <td><span class="badge ${log.result === "OK" ? "badge-active" : "badge-revoked"}">${log.result}</span></td>
+            <td class="text-muted">${log.ip ?? "—"}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function renderLogs() {
+  const mc = document.getElementById("main-content");
+  mc.innerHTML = `<div class="text-muted">Cargando...</div>`;
+  const d = await api("/logs?limit=200");
+  if (!d) return;
+  mc.innerHTML = `
+    <h2 class="mb-4">Logs de validación</h2>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>Fecha</th><th>Acción</th><th>Resultado</th><th>License ID</th><th>Device ID</th><th>IP</th></tr></thead>
+        <tbody>
+          ${d.logs.map(l => `<tr>
+            <td class="text-muted" style="white-space:nowrap">${new Date(l.created_at).toLocaleString("es-CO")}</td>
+            <td>${l.action}</td>
+            <td><span class="badge ${l.result === "OK" ? "badge-active" : "badge-revoked"}">${l.result}</span></td>
+            <td class="text-muted"><code style="font-size:11px">${l.license_id?.slice(0,8) ?? "—"}...</code></td>
+            <td class="text-muted"><code style="font-size:11px">${l.device_id?.slice(0,12) ?? "—"}...</code></td>
+            <td class="text-muted">${l.ip ?? "—"}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ─── Modal nueva licencia ─────────────────────────
+function openModal() { document.getElementById("modal-new").style.display = "flex"; }
+function closeModal() { document.getElementById("modal-new").style.display = "none"; }
+
+async function createLicense() {
+  const plan    = document.getElementById("new-plan").value;
+  const name    = document.getElementById("new-name").value.trim();
+  const email   = document.getElementById("new-email").value.trim();
+  const maxdev  = Number(document.getElementById("new-maxdev").value);
+  const notes   = document.getElementById("new-notes").value.trim();
+  const alertEl = document.getElementById("modal-alert");
+  if (!name || !email) { alertEl.innerHTML = `<div class="alert alert-error">Nombre y email son requeridos</div>`; return; }
+  const d = await api("/licenses", { method: "POST", body: JSON.stringify({ plan, name, email, maxDevices: maxdev, notes: notes || undefined }) });
+  if (!d?.license) { alertEl.innerHTML = `<div class="alert alert-error">${d?.error ?? "Error al crear"}</div>`; return; }
+  alertEl.innerHTML = `<div class="alert alert-success">Licencia creada: <strong>${d.license.key}</strong></div>`;
+  setTimeout(() => { closeModal(); renderLicenses(); }, 1500);
+}
+
+async function revokeLicense(id) {
+  if (!confirm("¿Revocar esta licencia? El cliente perderá acceso.")) return;
+  await api(`/licenses/${id}/revoke`, { method: "POST" });
+  renderLicenses();
+}
+
+async function revokeDevice(id) {
+  if (!confirm("¿Revocar este dispositivo?")) return;
+  await api(`/devices/${id}/revoke`, { method: "POST" });
+  history.back();
+}
+
+// ─── Init ────────────────────────────────────────
+if (TOKEN) {
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("admin-user").textContent = USERNAME;
+  setTimeout(() => showPage("dashboard", document.querySelector(".nav-btn")), 0);
+}
+
+document.getElementById("login-pass").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+</script>
+</body>
+</html>

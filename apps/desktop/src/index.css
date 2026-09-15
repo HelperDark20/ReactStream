@@ -1,3 +1,1794 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --rs-bg-app: #050706;
+  --rs-bg-panel: #080b09;
+  --rs-bg-card: rgba(13, 17, 15, 0.82);
+  --rs-bg-card-solid: #0d1110;
+  --rs-bg-card-hover: #111713;
+  --rs-bg-input: #080b0a;
+  --rs-green: #39ff14;
+  --rs-green-bright: #61ff35;
+  --rs-green-dim: #25d90e;
+  --rs-green-dark: #0d5b18;
+  --rs-green-glow: rgba(57, 255, 20, 0.14);
+  --rs-green-glow-strong: rgba(57, 255, 20, 0.34);
+  --rs-text-primary: #f5f7f5;
+  --rs-text-secondary: #b7bdb9;
+  --rs-text-muted: #6d756f;
+  --rs-border: rgba(255,255,255,.105);
+  --rs-border-soft: rgba(255,255,255,.065);
+  --rs-border-green: rgba(57,255,20,.42);
+  --rs-border-green-strong: rgba(57,255,20,.8);
+  --rs-red: #ef3352;
+  --rs-yellow: #ffbe0b;
+  --rs-blue: #3b82f6;
+  --rs-sidebar-width: 202px;
+  --rs-topbar-height: 112px;
+  --rs-statusbar-height: 38px;
+  --rs-radius-xl: 18px;
+  --rs-radius-lg: 14px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #050706;
+  color: var(--rs-text-primary);
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+button, input { font: inherit; }
+button { color: inherit; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(57,255,20,.28); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(57,255,20,.58); }
+
+input, select, textarea {
+  background: var(--rs-bg-input);
+  border: 1px solid var(--rs-border);
+  color: var(--rs-text-primary);
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: .18s ease;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--rs-border-green);
+  box-shadow: 0 0 0 3px var(--rs-green-glow), 0 0 18px rgba(57,255,20,.07);
+}
+input::placeholder { color: #59615b; }
+
+.btn-green {
+  background: linear-gradient(135deg, #f3fff0 0%, #72ff4f 15%, #39f51f 48%, #25d313 100%);
+  color: #031004;
+  font-weight: 800;
+  font-size: 13px;
+  border: 1px solid rgba(118,255,94,.7);
+  border-radius: 8px;
+  padding: 10px 21px;
+  cursor: pointer;
+  letter-spacing: .02em;
+  box-shadow: 0 0 18px rgba(57,255,20,.18), inset 0 1px rgba(255,255,255,.55), inset 12px 0 18px rgba(255,255,255,.08);
+  transition: .18s ease;
+}
+.btn-green:hover { filter: brightness(1.08); box-shadow: 0 0 25px rgba(57,255,20,.34); }
+.btn-green:active { transform: scale(.975); }
+.btn-green:disabled { opacity: .55; cursor: default; }
+
+.btn-ghost {
+  background: rgba(255,255,255,.018);
+  color: var(--rs-text-secondary);
+  border: 1px solid var(--rs-border);
+  border-radius: 11px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: .18s ease;
+}
+.btn-ghost:hover { border-color: var(--rs-border-green); color: var(--rs-green); background: var(--rs-green-glow); }
+
+.rs-card {
+  background: linear-gradient(145deg, rgba(20,25,22,.88), rgba(9,12,10,.88));
+  border: 1px solid var(--rs-border);
+  border-radius: var(--rs-radius-lg);
+  box-shadow: inset 0 1px rgba(255,255,255,.025), 0 12px 35px rgba(0,0,0,.18);
+}
+.rs-card:hover { border-color: rgba(57,255,20,.2); }
+.text-rs-green { color: var(--rs-green); }
+
+.status-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.status-dot.green { background: var(--rs-green); box-shadow: 0 0 6px var(--rs-green), 0 0 14px rgba(57,255,20,.55); }
+.status-dot.gray { background: #5b625e; }
+.status-dot.red { background: var(--rs-red); box-shadow: 0 0 7px rgba(239,51,82,.5); }
+.status-dot.yellow { background: var(--rs-yellow); box-shadow: 0 0 7px rgba(255,190,11,.5); }
+
+.badge-live {
+  background: rgba(239,51,82,.18);
+  color: #ff536d;
+  border: 1px solid rgba(239,51,82,.2);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 7px;
+  letter-spacing: .05em;
+  box-shadow: 0 0 16px rgba(239,51,82,.08);
+  animation: pulse-live 2s infinite;
+}
+@keyframes pulse-live { 0%,100% { opacity:1; } 50% { opacity:.68; } }
+
+.rs-app-shell {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 68% 48%, rgba(57,255,20,.045), transparent 32%),
+    radial-gradient(circle at 15% 82%, rgba(57,255,20,.025), transparent 26%),
+    #050706;
+}
+
+.rs-app-shell::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.009) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.35), transparent 72%);
+}
+
+.rs-main-row { position: relative; z-index: 1; display: flex; flex: 1; min-height: 0; overflow: hidden; padding: 0 20px 0 20px; gap: 12px; }
+.rs-main-content { min-width: 0; flex: 1; min-height: 0; overflow: hidden; border-radius: 20px; }
+
+@media (max-width: 1050px) {
+  :root { --rs-sidebar-width: 178px; --rs-topbar-height: 112px; }
+  .rs-main-row { padding-left: 12px; padding-right: 12px; }
+  .topbar-logo-panel { flex-basis: 250px; width: 250px; }
+  .topbar-brand-mark { width:82px; height:58px; }
+  .topbar-brand-name { font-size:21px; }
+  .topbar-brand-tagline { font-size:6px; letter-spacing:2.7px; }
+  .topbar-connection { flex-basis: 470px; }
+  .topbar-account { flex-basis: 54px; width: 54px; }
+}
+
+/* Topbar */
+.rs-topbar {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 var(--rs-topbar-height);
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 8px 20px 7px;
+  background: rgba(5,7,6,.94);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.rs-topbar::after {
+  content:"";
+  position:absolute;
+  left:20px;
+  right:20px;
+  bottom:0;
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(57,255,20,.2), transparent);
+}
+
+.topbar-logo-panel {
+  width: 250px;
+  flex: 0 0 250px;
+  border: 1px solid var(--rs-border);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(57,255,20,.06), transparent 58%),
+    #07100b;
+  overflow: hidden;
+  position: relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.topbar-brand {
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  overflow:hidden;
+}
+.topbar-brand-mark {
+  width:112px;
+  height:82px;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 0 10px rgba(57,255,20,.18));
+  margin-top:-2px;
+}
+.topbar-brand-name {
+  margin-top:-3px;
+  color:#f1f3f2;
+  font-size:25px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:-1.1px;
+  font-style:italic;
+  text-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+.topbar-brand-name strong {
+  color:#39ff14;
+  font-weight:800;
+}
+.topbar-brand-tagline {
+  margin-top:7px;
+  color:#c6ccc8;
+  font-size:7px;
+  line-height:1;
+  letter-spacing:3.3px;
+  white-space:nowrap;
+  font-weight:500;
+}
+
+.topbar-connection {
+  position:relative;
+  flex:0 0 470px;
+  padding:10px 18px 6px;
+}
+.card-heading {
+  color:#e2e6e3;
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.035em;
+}
+.connection-row {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:7px;
+}
+.username-input-wrap {
+  position:relative;
+  flex:1;
+}
+.username-input-wrap input {
+  width:100%;
+  height:34px;
+  padding-left:38px;
+  font-size:12px;
+}
+.topbar-icon {
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#c3c8c4;
+  font-size:19px;
+  z-index:1;
+}
+.connection-row .btn-green {
+  height:34px;
+  min-width:132px;
+  font-size:12px;
+}
+.connection-status {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:6px;
+  color:#a9b0aa;
+  font-size:12px;
+}
+
+.topbar-stats {
+  flex:1;
+  min-width:0;
+  padding:10px 18px 5px;
+}
+.stats-title-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.stats-grid {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:11px;
+  margin-top:6px;
+  height:46px;
+}
+.stat-divider {
+  width:1px;
+  height:52px;
+  flex:0 0 1px;
+  align-self:center;
+  background:rgba(255,255,255,.17);
+  opacity:.95;
+}
+.stat-item {
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.stat-icon {
+  width:28px;
+  height:28px;
+  border:2px solid #e8ece9;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:#f0f3f0;
+  flex:0 0 28px;
+}
+.stat-icon svg {
+  width:17px;
+  height:17px;
+  display:block;
+}
+.stat-icon.coin {
+  color:#ffbd09;
+  border-color:#ffbd09;
+  font-weight:900;
+}
+.stat-copy { min-width:0; }
+.stat-label {
+  color:#a5aca7;
+  font-size:8px;
+  letter-spacing:.03em;
+  white-space:nowrap;
+}
+.stat-value {
+  color:#f4f6f4;
+  font-size:15px;
+  font-weight:800;
+  line-height:1.25;
+  white-space:nowrap;
+}
+.stat-value.accent { color:#ffbe0b; }
+.stat-sub {
+  color:#969e98;
+  font-size:8px;
+  white-space:nowrap;
+}
+
+.topbar-account {
+  width:62px;
+  flex:0 0 62px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 0 5px;
+}
+.settings-button {
+  width:42px;
+  height:42px;
+  border:1px solid var(--rs-border);
+  border-radius:13px;
+  background:linear-gradient(145deg,#151a17,#0a0d0b);
+  color:#d7ddd8;
+  font-size:23px;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+}
+.settings-button:hover {
+  color:var(--rs-green);
+  border-color:var(--rs-border-green);
+  box-shadow:0 0 17px var(--rs-green-glow);
+}
+.profile-wrap {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  color:var(--rs-green);
+  font-size:8px;
+}
+.profile-avatar {
+  position:relative;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.15);
+  background:#101412;
+  display:grid;
+  place-items:center;
+  color:#b9c0bb;
+  font-size:22px;
+}
+.profile-avatar span {
+  position:absolute;
+  width:10px;
+  height:10px;
+  right:-1px;
+  bottom:1px;
+  border-radius:50%;
+  background:var(--rs-green);
+  border:2px solid #071009;
+  box-shadow:0 0 7px var(--rs-green);
+}
+
+/* Sidebar */
+.rs-sidebar { position:relative; width:var(--rs-sidebar-width); flex:0 0 var(--rs-sidebar-width); min-height:0; margin-bottom:0; padding:15px 10px 12px; border:1px solid rgba(57,255,20,.22); border-radius:19px; background:linear-gradient(180deg,rgba(9,13,10,.94),rgba(6,9,7,.96)); box-shadow:inset 0 0 30px rgba(57,255,20,.025), 0 0 22px rgba(57,255,20,.035); overflow:hidden; }
+.rs-sidebar::before { content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--rs-green),transparent); opacity:.75; box-shadow:0 0 14px var(--rs-green); }
+.sidebar-nav { display:flex; flex-direction:column; gap:12px; }
+.sidebar-item { position:relative; width:100%; min-height:82px; padding:12px 12px; border:1px solid rgba(255,255,255,.10); border-radius:16px; background:rgba(12,16,14,.72); cursor:pointer; display:flex; align-items:center; gap:14px; text-align:left; transition:.18s ease; }
+.sidebar-item:hover { background:rgba(57,255,20,.045); border-color:rgba(255,255,255,.17); transform:translateX(1px); }
+.sidebar-item.active { background:linear-gradient(100deg,rgba(57,255,20,.13),rgba(57,255,20,.025)); border-color:var(--rs-border-green-strong); box-shadow:0 0 18px rgba(57,255,20,.08), inset 0 0 18px rgba(57,255,20,.035); }
+.sidebar-item.active::before { content:""; position:absolute; left:-1px; top:10px; bottom:10px; width:4px; border-radius:0 5px 5px 0; background:var(--rs-green); box-shadow:0 0 10px var(--rs-green); }
+.sidebar-icon { width:36px; flex:0 0 36px; display:grid; place-items:center; color:#e9edea; font-size:30px; line-height:1; filter:drop-shadow(0 0 5px rgba(255,255,255,.06)); }
+.sidebar-item.active .sidebar-icon { color:var(--rs-green); filter:drop-shadow(0 0 8px rgba(57,255,20,.55)); }
+.sidebar-label { color:#d6dbd7; font-size:14px; font-weight:650; line-height:1.25; white-space:pre-line; }
+.sidebar-item.active .sidebar-label { color:#f2fff0; }
+.sidebar-pro { color:#d8d0a4; }
+
+/* Home */
+
+.home-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(57,255,20,.28);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(57,255,20,.08), transparent 32%),
+    radial-gradient(circle at 4% 45%, rgba(57,255,20,.10), transparent 23%),
+    linear-gradient(135deg, #030504 0%, #060a08 48%, #020403 100%);
+  box-shadow: inset 0 0 70px rgba(57,255,20,.025), 0 0 24px rgba(0,0,0,.35);
+}
+
+.hero-stage {
+  isolation: isolate;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: -18%;
+  z-index: 0;
+  opacity: .9;
+  background:
+    linear-gradient(132deg, transparent 0 25%, rgba(18,25,21,.82) 25.2% 25.7%, transparent 25.9% 45%, rgba(16,22,19,.72) 45.2% 45.7%, transparent 45.9% 66%, rgba(15,21,18,.68) 66.2% 66.7%, transparent 66.9%),
+    linear-gradient(48deg, transparent 0 37%, rgba(13,19,16,.75) 37.2% 37.8%, transparent 38% 59%, rgba(15,21,18,.66) 59.2% 59.8%, transparent 60%);
+  transform: rotate(-2deg);
+}
+
+.hero-stage::before,
+.hero-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-stage::before {
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 7% 78%, rgba(57,255,20,.26), transparent 21%),
+    radial-gradient(ellipse at 96% 18%, rgba(57,255,20,.20), transparent 22%),
+    linear-gradient(118deg, transparent 0 40%, rgba(255,255,255,.035) 40.2% 40.45%, transparent 40.7% 58%, rgba(255,255,255,.025) 58.2% 58.4%, transparent 58.7%);
+}
+
+.hero-stage::after {
+  width: 55%;
+  height: 38%;
+  left: 22%;
+  top: 28%;
+  background: radial-gradient(ellipse, rgba(57,255,20,.065), transparent 67%);
+  filter: blur(24px);
+}
+
+.hero-sweep {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(57,255,20,.72), rgba(112,255,50,.95), transparent);
+  filter: blur(8px);
+  opacity: .8;
+}
+
+.hero-sweep-top {
+  width: 58%;
+  height: 18%;
+  right: -11%;
+  top: -4%;
+  transform: rotate(24deg);
+}
+
+.hero-sweep-bottom {
+  width: 66%;
+  height: 14%;
+  left: -10%;
+  bottom: -1%;
+  transform: rotate(28deg);
+}
+
+.hero-sweep-left {
+  width: 35%;
+  height: 10%;
+  left: -8%;
+  bottom: 25%;
+  transform: rotate(32deg);
+  opacity: .45;
+}
+
+.hero-corner {
+  position: absolute;
+  z-index: 4;
+  width: 34px;
+  height: 34px;
+  pointer-events: none;
+}
+
+.hero-corner::before,
+.hero-corner::after {
+  content: "";
+  position: absolute;
+  background: rgba(57,255,20,.8);
+  box-shadow: 0 0 8px rgba(57,255,20,.12);
+}
+
+.hero-corner::before { width: 2px; height: 34px; }
+.hero-corner::after { width: 34px; height: 2px; }
+
+.hero-corner-tl { left: 3%; top: 6%; }
+.hero-corner-tr { right: 3%; top: 6%; transform: scaleX(-1); }
+.hero-corner-bl { left: 3%; bottom: 14%; transform: scaleY(-1); }
+.hero-corner-br { right: 3%; bottom: 14%; transform: scale(-1); }
+
+.hero-copy {
+  position: absolute;
+  z-index: 5;
+  left: 6%;
+  top: 12%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: rgba(218,225,220,.76);
+  font-size: clamp(9px, .72vw, 12px);
+  line-height: 1.15;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hero-brand {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 48%;
+  width: min(48%, 590px);
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-brand img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 54vh;
+  object-fit: contain;
+  filter: drop-shadow(0 0 14px rgba(57,255,20,.18));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.hero-values {
+  position: absolute;
+  z-index: 5;
+  right: 5.8%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: rgba(218,225,220,.72);
+  font-size: clamp(9px, .72vw, 12px);
+  letter-spacing: .35em;
+  line-height: 1.2;
+}
+
+.hero-values-line {
+  display: block;
+  width: 34px;
+  height: 2px;
+  margin-bottom: 3px;
+  background: #39ff14;
+  box-shadow: 0 0 8px rgba(57,255,20,.6);
+}
+
+.hero-bottom {
+  position: absolute;
+  z-index: 7;
+  left: 2.1%;
+  right: 2.1%;
+  bottom: 2.7%;
+  min-height: 52px;
+  border: 1px solid rgba(57,255,20,.42);
+  border-radius: 15px;
+  background: linear-gradient(90deg, rgba(4,12,7,.72), rgba(5,11,8,.54), rgba(4,12,7,.72));
+  box-shadow: inset 0 0 28px rgba(57,255,20,.025);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+}
+
+.hero-bottom-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(235,240,236,.9);
+  font-size: 13px;
+}
+
+.hero-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #39ff14;
+  box-shadow: 0 0 10px rgba(57,255,20,.8);
+  flex: 0 0 auto;
+}
+
+.hero-bottom-version {
+  color: rgba(220,228,223,.8);
+  font-size: 9px;
+  letter-spacing: .23em;
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .hero-brand { width: min(50%, 520px); }
+  .hero-copy { left: 5.5%; }
+  .hero-values { right: 5%; }
+  .hero-bottom { min-height: 46px; }
+}
+
+@media (max-width: 850px) {
+  .hero-copy { font-size: 8px; letter-spacing: .24em; gap: 4px; }
+  .hero-values { font-size: 8px; gap: 6px; }
+  .hero-brand { width: min(54%, 430px); top: 47%; }
+  .hero-bottom { padding: 0 14px; }
+  .hero-bottom-status { font-size: 11px; }
+  .hero-bottom-version { font-size: 7px; letter-spacing: .15em; }
+}
+
+@media (max-width: 650px) {
+  .hero-copy { left: 5%; top: 9%; font-size: 7px; }
+  .hero-values { right: 4%; font-size: 7px; }
+  .hero-brand { width: 58%; top: 45%; }
+  .hero-corner { width: 24px; height: 24px; }
+  .hero-corner::before { height: 24px; }
+  .hero-corner::after { width: 24px; }
+  .hero-bottom { left: 2%; right: 2%; bottom: 2%; min-height: 42px; border-radius: 12px; }
+  .hero-bottom-version { display: none; }
+}
+
+.sidebar-icon-svg { width: 30px; height: 30px; flex: 0 0 30px; display:block; color:#eef2ef; filter:drop-shadow(0 0 4px rgba(255,255,255,.05)); }
+.sidebar-item.active .sidebar-icon-svg { color:var(--rs-green); filter:drop-shadow(0 0 8px rgba(57,255,20,.58)); }
+.sidebar-icon-svg.sidebar-pro { color:#d9d1a7; }
+.sidebar-item.active .sidebar-icon-svg.sidebar-pro { color:var(--rs-green); }
+.topbar-icon { display:grid; place-items:center; }
+.topbar-icon svg { width:19px; height:19px; display:block; }
+.stat-icon { width:31px; height:31px; border:2px solid #e8ece9; border-radius:50%; display:grid; place-items:center; color:#f0f3f0; flex:0 0 31px; }
+.stat-icon svg { width:20px; height:20px; display:block; }
+.stat-icon.coin { color:#ffbd09; border-color:#ffbd09; }
+.settings-button { display:grid; place-items:center; }
+.settings-button svg { width:24px; height:24px; }
+.profile-avatar svg { width:23px; height:23px; }
+.topbar-connection .card-heading, .topbar-connection .connection-row, .topbar-connection .connection-status { margin-left:70px; }
+.topbar-connection .connection-row { margin-right:0; }
+
+@media (max-width: 900px) {
+  .tiktok-mark { left:10px; top:10px; width:32px; height:32px; border-radius:8px; }
+    .tiktok-mark { left:12px; top:12px; width:56px; height:56px; border-radius:12px; }
+    .topbar-connection .card-heading, .topbar-connection .connection-row { margin-left:70px; }
+.topbar-connection .connection-status { margin-left:0; }
+  .topbar-connection { padding:16px 18px 11px; }
+  .sidebar-icon-svg { width:22px; height:22px; flex-basis:22px; }
+}
+
+/* BANANA v16 — TikTok supplied artwork: crop internal JPG padding without changing the asset */
+.tiktok-mark img { width:52px; height:52px; transform:scale(1.48); }
+
+/* TikTok mark — balanced to match the reference compact header */
+.tiktok-mark {
+  position:absolute;
+  left:14px;
+  top:14px;
+  width:56px;
+  height:56px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:#070a09;
+  border:1px solid rgba(255,255,255,.05);
+  overflow:hidden;
+}
+.tiktok-mark img {
+  width:42px;
+  height:42px;
+  object-fit:cover;
+  display:block;
+  mix-blend-mode:screen;
+  transform:scale(1.12);
+  transform-origin:center;
+}
+.topbar-connection { position:relative; }
+.topbar-connection .card-heading,
+.topbar-connection .connection-row,
+.topbar-connection .connection-status { margin-left:70px; }
+.topbar-connection .connection-row { margin-right:0; }
+@media (max-width: 1050px) {
+  .tiktok-mark { left:12px; top:12px; width:52px; height:52px; border-radius:10px; }
+  .tiktok-mark img { width:38px; height:38px; transform:scale(1.1); }
+  .topbar-connection .card-heading,
+  .topbar-connection .connection-row,
+  .topbar-connection .connection-status { margin-left:64px; }
+}
+
+/* BANANA v18 — TikTok connection reference tuning */
+.topbar-connection .card-heading,
+.topbar-connection .connection-row { margin-left:70px; }
+.topbar-connection .connection-status {
+  margin-left:0;
+  margin-top:9px;
+  gap:9px;
+  color:#b9c0bb;
+  font-size:13px;
+  line-height:1;
+  font-family:"Arial Narrow", "Segoe UI", Arial, sans-serif;
+  letter-spacing:.005em;
+}
+.topbar-connection .connection-status .status-dot { width:9px; height:9px; }
+.topbar-connection .card-heading {
+  font-family:"Arial Narrow", "Segoe UI", Arial, sans-serif;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.025em;
+}
+.topbar-connection .btn-green {
+  background:linear-gradient(135deg, #f3fff0 0%, #72ff4f 15%, #39f51f 48%, #25d313 100%);
+  border-color:rgba(133,255,110,.78);
+  box-shadow:0 0 18px rgba(57,255,20,.2), inset 0 1px rgba(255,255,255,.55), inset 12px 0 18px rgba(255,255,255,.08);
+}
+@media (max-width:1050px) {
+  .topbar-connection .card-heading,
+  .topbar-connection .connection-row { margin-left:64px; }
+  .topbar-connection .connection-status { margin-left:0; }
+}
+
+/* BANANA v19 — refine TikTok connection status against the reference */
+.topbar-connection .connection-status {
+  margin-left: 70px;
+  margin-top: 14px;
+  gap: 9px;
+  font-size: 14px;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: .01em;
+}
+.topbar-connection .connection-status .status-dot {
+  width: 9px;
+  height: 9px;
+}
+@media (max-width: 1050px) {
+  .topbar-connection .connection-status {
+    margin-left: 64px;
+    margin-top: 13px;
+    font-size: 13px;
+  }
+}
+
+/* BANANA v20 — TikTok connection typography/alignment refinement */
+.topbar-connection .card-heading {
+  margin-left: 70px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: .025em;
+  line-height: 1.1;
+}
+.topbar-connection .connection-status {
+  margin-left: 14px;
+  margin-top: 19px;
+  gap: 9px;
+  font-size: 15px;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: .005em;
+}
+.topbar-connection .connection-status .status-dot {
+  width: 9px;
+  height: 9px;
+}
+@media (max-width: 1050px) {
+  .topbar-connection .card-heading { margin-left: 64px; font-size: 14px; }
+  .topbar-connection .connection-status { margin-left: 12px; margin-top: 18px; font-size: 14px; }
+}
+
+/* BANANA v23 — compact topbar: remove child min-content pressure so the header can actually shrink */
+:root {
+  --rs-topbar-height: 104px;
+}
+
+.rs-topbar {
+  flex: 0 0 var(--rs-topbar-height);
+  height: var(--rs-topbar-height);
+  min-height: 0;
+  padding-top: 6px;
+  padding-bottom: 5px;
+}
+
+.topbar-logo-panel,
+.topbar-brand,
+.topbar-connection,
+.topbar-stats,
+.topbar-account {
+  min-height: 0;
+}
+
+.topbar-brand-mark {
+  width: 78px;
+  height: 54px;
+  margin-top: 0;
+  flex: 0 0 54px;
+}
+
+.topbar-brand-name {
+  margin-top: -1px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.topbar-brand-tagline {
+  margin-top: 4px;
+  font-size: 6px;
+  letter-spacing: 2.8px;
+}
+
+.topbar-connection {
+  padding-top: 7px;
+  padding-bottom: 4px;
+}
+
+.topbar-stats {
+  padding-top: 7px;
+  padding-bottom: 3px;
+}
+
+@media (max-width: 1050px) {
+  :root { --rs-topbar-height: 104px; }
+  .rs-topbar { height: var(--rs-topbar-height); }
+  .topbar-brand-mark { width: 72px; height: 50px; flex-basis: 50px; }
+  .topbar-brand-name { font-size: 19px; }
+  .topbar-brand-tagline { font-size: 5.5px; letter-spacing: 2.5px; }
+}
+
+/* BANANA v24 — TikTok connection panel enlarged to match the user's reference sketch */
+:root {
+  --rs-topbar-height: 144px;
+}
+
+.rs-topbar {
+  flex: 0 0 var(--rs-topbar-height);
+  height: var(--rs-topbar-height);
+  min-height: var(--rs-topbar-height);
+  max-height: var(--rs-topbar-height);
+  align-items: stretch;
+  padding: 8px 18px;
+}
+
+/* Connection card: larger, with the status on its own lower row */
+.topbar-connection {
+  flex: 0 0 470px;
+  height: 100%;
+  padding: 13px 18px 11px;
+  position: relative;
+  overflow: hidden;
+}
+
+.topbar-connection .card-heading {
+  margin-left: 78px;
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: .02em;
+  margin-bottom: 11px;
+}
+
+.topbar-connection .connection-row {
+  margin-left: 78px;
+  gap: 10px;
+  align-items: center;
+}
+
+.topbar-connection .connection-row .username-input-wrap {
+  min-width: 0;
+  flex: 1;
+}
+
+.topbar-connection .connection-row input {
+  height: 44px;
+  min-height: 44px;
+  padding-left: 38px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+.topbar-connection .connection-row .topbar-icon {
+  left: 10px;
+}
+
+.topbar-connection .btn-green {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 27px;
+  border-radius: 8px;
+  font-size: 14px;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.topbar-connection .connection-status {
+  margin-left: 12px;
+  margin-top: 15px;
+  gap: 11px;
+  font-size: 17px;
+  line-height: 1.15;
+  font-weight: 500;
+}
+
+.topbar-connection .connection-status .status-dot {
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 8px var(--rs-green), 0 0 16px rgba(57,255,20,.45);
+}
+
+.tiktok-mark {
+  left: 14px;
+  top: 14px;
+  width: 64px;
+  height: 64px;
+  border-radius: 11px;
+}
+
+.tiktok-mark img {
+  width: 47px;
+  height: 47px;
+  transform: scale(1.12);
+}
+
+/* Keep the other topbar blocks vertically balanced with the enlarged header. */
+.topbar-logo-panel,
+.topbar-stats,
+.topbar-account {
+  height: 100%;
+  min-height: 0;
+}
+
+.topbar-stats {
+  padding-top: 12px;
+  padding-bottom: 10px;
+}
+
+@media (max-width: 1050px) {
+  :root { --rs-topbar-height: 144px; }
+  .rs-topbar { height: var(--rs-topbar-height); }
+  .topbar-connection { flex-basis: 420px; }
+  .topbar-connection .card-heading,
+  .topbar-connection .connection-row { margin-left: 70px; }
+  .topbar-connection .connection-status { margin-left: 12px; }
+}
+
+/* BANANA v25 — topbar height fix
+   Keep the enlarged TikTok connection design, but return the header to a compact height. */
+:root {
+  --rs-topbar-height: 126px;
+}
+
+.rs-topbar {
+  flex: 0 0 var(--rs-topbar-height);
+  height: var(--rs-topbar-height);
+  min-height: 0;
+  max-height: var(--rs-topbar-height);
+  padding: 6px 18px 5px;
+  overflow: hidden;
+}
+
+/* Logo block: fit inside the compact header without forcing its height. */
+.topbar-logo-panel {
+  height: 100%;
+  min-height: 0;
+}
+
+.topbar-brand {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.topbar-brand-mark {
+  width: 76px;
+  height: 50px;
+  flex: 0 0 50px;
+}
+
+.topbar-brand-name {
+  margin-top: -1px;
+  font-size: 19px;
+  line-height: 1;
+}
+
+.topbar-brand-tagline {
+  margin-top: 3px;
+  font-size: 5.5px;
+  letter-spacing: 2.5px;
+}
+
+/* TikTok connection: preserve the larger typography while fitting the card. */
+.topbar-connection {
+  height: 100%;
+  min-height: 0;
+  padding: 7px 18px 5px;
+  overflow: hidden;
+}
+
+.topbar-connection .card-heading {
+  margin-left: 70px;
+  margin-bottom: 4px;
+  font-size: 14px;
+  line-height: 1.05;
+}
+
+.topbar-connection .connection-row {
+  margin-left: 70px;
+  margin-top: 0;
+  height: 40px;
+  gap: 10px;
+}
+
+.topbar-connection .connection-row input {
+  height: 40px;
+  min-height: 40px;
+  font-size: 13px;
+}
+
+.topbar-connection .btn-green {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 24px;
+  font-size: 13px;
+}
+
+.topbar-connection .connection-status {
+  margin-left: 12px;
+  margin-top: 8px;
+  gap: 9px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.topbar-connection .connection-status .status-dot {
+  width: 10px;
+  height: 10px;
+}
+
+.tiktok-mark {
+  left: 14px;
+  top: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+}
+
+.tiktok-mark img {
+  width: 42px;
+  height: 42px;
+  transform: scale(1.1);
+}
+
+/* Stats: vertically center the existing data instead of letting it define header height. */
+.topbar-stats {
+  height: 100%;
+  min-height: 0;
+  padding: 8px 18px 4px;
+}
+
+.stats-grid {
+  height: 42px;
+  margin-top: 4px;
+}
+
+/* Account controls stay inside the compact header. */
+.topbar-account {
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 3px;
+}
+
+@media (max-width: 1050px) {
+  :root { --rs-topbar-height: 126px; }
+  .rs-topbar { height: var(--rs-topbar-height); }
+  .topbar-connection { flex-basis: 420px; }
+  .topbar-connection .card-heading,
+  .topbar-connection .connection-row { margin-left: 64px; }
+  .topbar-connection .connection-status { margin-left: 10px; }
+}
+
+/* BANANA v27 — TikTok connection micro-balance */
+.topbar-connection .tiktok-mark,
+.tiktok-mark {
+  left: 14px;
+  top: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 9px;
+}
+
+.topbar-connection .tiktok-mark img,
+.tiktok-mark img {
+  width: 36px;
+  height: 36px;
+  transform: scale(1.08);
+}
+
+.topbar-connection .card-heading,
+.topbar-connection .connection-row {
+  margin-left: 66px;
+}
+
+.topbar-connection .connection-row {
+  gap: 8px;
+  height: 34px;
+}
+
+.topbar-connection .connection-row input {
+  height: 34px;
+  min-height: 34px;
+  padding-left: 34px;
+  font-size: 12px;
+  border-radius: 7px;
+}
+
+.topbar-connection .connection-row .topbar-icon {
+  left: 9px;
+}
+
+.topbar-connection .btn-green {
+  height: 34px;
+  min-height: 34px;
+  min-width: 96px;
+  padding: 0 18px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+/* Status aligned with the left edge of the TikTok tile. */
+.topbar-connection .connection-status {
+  margin-left: 14px;
+  margin-top: 9px;
+  gap: 9px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.topbar-connection .connection-status .status-dot {
+  width: 10px;
+  height: 10px;
+}
+
+@media (max-width: 1050px) {
+  .topbar-connection .card-heading,
+  .topbar-connection .connection-row {
+    margin-left: 62px;
+  }
+
+  .topbar-connection .connection-status {
+    margin-left: 12px;
+  }
+
+  .topbar-connection .tiktok-mark,
+  .tiktok-mark {
+    left: 12px;
+    top: 12px;
+    width: 46px;
+    height: 46px;
+  }
+
+  .topbar-connection .tiktok-mark img,
+  .tiktok-mark img {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* BANANA v28 — TikTok connection reference match
+   Match the supplied reference: TikTok mark on the left, title/input/button to
+   the right, and the status aligned to the TikTok mark's left edge below it. */
+.topbar-connection {
+  padding: 9px 18px 7px;
+}
+
+.topbar-connection .card-heading {
+  margin-left: 78px;
+  margin-bottom: 7px;
+  font-size: 16px;
+  line-height: 1.05;
+}
+
+.topbar-connection .connection-row {
+  margin-left: 78px;
+  margin-top: 0;
+  height: 42px;
+  gap: 12px;
+}
+
+.topbar-connection .connection-row input {
+  height: 42px;
+  min-height: 42px;
+  padding-left: 39px;
+  font-size: 14px;
+  border-radius: 9px;
+}
+
+.topbar-connection .connection-row .topbar-icon {
+  left: 11px;
+}
+
+.topbar-connection .btn-green {
+  height: 42px;
+  min-height: 42px;
+  min-width: 118px;
+  padding: 0 23px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+/* Status starts exactly where the TikTok tile starts. */
+.topbar-connection .connection-status {
+  margin-left: 14px;
+  margin-top: 10px;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.topbar-connection .connection-status .status-dot {
+  width: 11px;
+  height: 11px;
+}
+
+/* Reference-sized TikTok tile. */
+.topbar-connection .tiktok-mark {
+  left: 14px;
+  top: 12px;
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
+}
+
+.topbar-connection .tiktok-mark img {
+  width: 44px;
+  height: 44px;
+  transform: scale(1.1);
+}
+
+@media (max-width: 1050px) {
+  .topbar-connection .card-heading,
+  .topbar-connection .connection-row {
+    margin-left: 70px;
+  }
+
+  .topbar-connection .connection-status {
+    margin-left: 12px;
+  }
+
+  .topbar-connection .tiktok-mark {
+    left: 12px;
+    top: 11px;
+    width: 54px;
+    height: 54px;
+  }
+}
+
+/* BANANA v30 — status exact alignment with TikTok tile */
+.topbar-connection .connection-status {
+  margin-left: -4px !important;
+}
+
+
+
+/* BANANA v31 — LIVE stats reference: typography matched to TikTok connection,
+   icon circles removed, and badge reflects the real live/session state. */
+.topbar-stats .card-heading {
+  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: .025em;
+}
+
+.topbar-stats .stats-title-row {
+  align-items: center;
+}
+
+.topbar-stats .badge-live {
+  min-width: 58px;
+  text-align: center;
+  padding: 5px 9px;
+}
+
+.topbar-stats .badge-live.is-offline {
+  background: rgba(109,117,111,.12);
+  color: #aeb5b0;
+  border-color: rgba(174,181,176,.16);
+  box-shadow: none;
+  animation: none;
+}
+
+.topbar-stats .badge-live.is-live {
+  background: rgba(239,51,82,.18);
+  color: #ff536d;
+  border-color: rgba(239,51,82,.2);
+}
+
+.topbar-stats .stats-grid {
+  align-items: center;
+  margin-top: 8px;
+}
+
+.topbar-stats .stat-icon {
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #e8ece9;
+  box-shadow: none;
+  display: grid;
+  place-items: center;
+}
+
+.topbar-stats .stat-icon svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.topbar-stats .stat-icon.coin {
+  color: #ffbe0b;
+  border: 0;
+}
+
+.topbar-stats .stat-item {
+  gap: 9px;
+}
+
+.topbar-stats .stat-label {
+  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
+  font-size: 8px;
+  letter-spacing: .025em;
+}
+
+.topbar-stats .stat-value {
+  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.topbar-stats .stat-sub {
+  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
+}
+
+/* BANANA v32 — live stats typography enlarged to match reference */
+.topbar-stats .card-heading {
+  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
+  font-size: 19px !important;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: .015em;
+}
+
+.topbar-stats .stats-grid {
+  margin-top: 9px;
+  height: 52px;
+  gap: 16px;
+}
+
+.topbar-stats .stat-item {
+  gap: 11px;
+}
+
+.topbar-stats .stat-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+}
+
+.topbar-stats .stat-icon svg {
+  width: 34px;
+  height: 34px;
+}
+
+.topbar-stats .stat-label {
+  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
+  font-size: 11px !important;
+  font-weight: 500;
+  letter-spacing: .02em;
+  line-height: 1.15;
+}
+
+.topbar-stats .stat-value {
+  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
+  font-size: 19px !important;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.topbar-stats .stat-sub {
+  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
+  font-size: 10px !important;
+  line-height: 1.15;
+}
+
+.topbar-stats .stat-divider {
+  height: 40px;
+}
+
+.topbar-stats .badge-live {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 11px;
+  min-width: 68px;
+}
+
+/* BANANA v33 — compactar y alinear cada icono con su bloque de texto */
+.topbar-stats .stats-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 16px;
+}
+
+.topbar-stats .stat-item {
+  width: 100%;
+  justify-self: start;
+  justify-content: flex-start;
+  gap: 7px;
+}
+
+.topbar-stats .stat-icon {
+  margin-left: 0;
+}
+
+.topbar-stats .stat-copy {
+  text-align: left;
+}
+
+/* Live profile panel — replaces the old settings/profile buttons. */
+.topbar-stats {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.stats-main {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 10px 18px 5px;
+}
+
+.topbar-live-profile {
+  flex: 0 0 190px;
+  min-width: 190px;
+  margin: 8px 8px 8px 0;
+  padding: 0 16px;
+  border-left: 1px solid rgba(255,255,255,.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: .2s ease;
+}
+
+.live-profile-avatar {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #aeb6b0;
+  background: radial-gradient(circle at 35% 30%, #1a211d, #080b09 72%);
+  border: 2px solid rgba(255,255,255,.13);
+  box-shadow: inset 0 0 15px rgba(0,0,0,.35);
+  overflow: visible;
+}
+
+.live-profile-avatar svg {
+  width: 30px;
+  height: 30px;
+}
+
+.topbar-live-profile.is-live .live-profile-avatar {
+  border-color: var(--rs-green);
+  box-shadow: 0 0 14px rgba(57,255,20,.26), inset 0 0 15px rgba(57,255,20,.08);
+}
+
+.live-profile-dot {
+  position: absolute;
+  right: -1px;
+  bottom: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #4c5550;
+  border: 2px solid #080b09;
+}
+
+.topbar-live-profile.is-live .live-profile-dot {
+  background: var(--rs-green);
+  box-shadow: 0 0 8px var(--rs-green);
+}
+
+.live-profile-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.live-profile-name {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f3f6f3;
+  font-size: 15px;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.topbar-live-profile.is-offline .live-profile-name {
+  color: #8c948e;
+}
+
+.live-profile-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #89918b;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.topbar-live-profile.is-live .live-profile-status {
+  color: var(--rs-green);
+  font-weight: 700;
+}
+
+.live-profile-status .status-dot {
+  width: 8px;
+  height: 8px;
+}
+
+@media (max-width: 1050px) {
+  .topbar-live-profile {
+    flex-basis: 165px;
+    min-width: 165px;
+    padding: 0 10px;
+    gap: 9px;
+  }
+  .live-profile-avatar { width: 50px; height: 50px; flex-basis: 50px; }
+  .live-profile-name { font-size: 13px; max-width: 88px; }
+}
+
+/* BANANA v34 — stats shortened to make room for the TikTok live profile. */
+.topbar-stats {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.topbar-stats .stats-main {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 10px 18px 5px;
+}
+
+.topbar-stats .stats-title-row {
+  justify-content: flex-start;
+}
+
+/* The old LIVE/OFFLINE badge is intentionally removed from the stats header.
+   Live state is now represented by the profile block on the right. */
+.topbar-stats .badge-live {
+  display: none;
+}
+
+.topbar-live-profile {
+  flex: 0 0 220px;
+  min-width: 220px;
+  margin: 8px 8px 8px 0;
+  padding: 0 18px;
+  border-left: 1px solid rgba(255,255,255,.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  transition: .2s ease;
+}
+
+.live-profile-avatar {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  flex: 0 0 62px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #aeb6b0;
+  background: radial-gradient(circle at 35% 30%, #1a211d, #080b09 72%);
+  border: 2px solid rgba(255,255,255,.13);
+  box-shadow: inset 0 0 15px rgba(0,0,0,.35);
+  overflow: hidden;
+}
+
+.live-profile-avatar svg {
+  width: 31px;
+  height: 31px;
+}
+
+.live-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.topbar-live-profile.is-live .live-profile-avatar {
+  border-color: var(--rs-green);
+  box-shadow: 0 0 14px rgba(57,255,20,.26), inset 0 0 15px rgba(57,255,20,.08);
+}
+
+.live-profile-dot {
+  position: absolute;
+  right: 1px;
+  bottom: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #4c5550;
+  border: 2px solid #080b09;
+}
+
+.topbar-live-profile.is-live .live-profile-dot {
+  background: var(--rs-green);
+  box-shadow: 0 0 8px var(--rs-green);
+}
+
+.live-profile-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.live-profile-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f3f6f3;
+  font-size: 16px;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.topbar-live-profile.is-offline .live-profile-name {
+  color: #8c948e;
+}
+
+.live-profile-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #89918b;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.topbar-live-profile.is-live .live-profile-status {
+  color: var(--rs-green);
+  font-weight: 700;
+}
+
+.live-profile-status .status-dot {
+  width: 8px;
+  height: 8px;
+}
+
+@media (max-width: 1050px) {
+  .topbar-live-profile {
+    flex-basis: 180px;
+    min-width: 180px;
+    padding: 0 10px;
+    gap: 9px;
+  }
+  .live-profile-avatar { width: 50px; height: 50px; flex-basis: 50px; }
+  .live-profile-name { font-size: 13px; max-width: 88px; }
+}
+
+/* BANANA v35 — logo superior ligeramente más grande, sin modificar el panel */
+.topbar-brand-mark {
+  width: 125px;
+  height: 90px;
+}
+
+.topbar-brand-name {
+  font-size: 28px;
+}
+
+.topbar-brand-tagline {
+  font-size: 8px;
+  letter-spacing: 3.4px;
+}
+
+/* BANANA v36 — logo superior: ajuste intermedio, más pequeño que v35 */
+.topbar-brand-mark {
+  width: 92px;
+  height: 62px;
+  flex: 0 0 62px;
+  margin-top: 0;
+}
+
+.topbar-brand-name {
+  font-size: 21px;
+  margin-top: -2px;
+}
+
+.topbar-brand-tagline {
+  font-size: 6px;
+  letter-spacing: 2.7px;
+  margin-top: 4px;
+}
+
+/* BANANA v37 — divisores de estadísticas fieles a la referencia
+   Líneas verticales limpias entre cada bloque, centradas en el área de métricas. */
+.topbar-stats .stats-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  column-gap: 16px;
+}
+
+.topbar-stats .stat-divider {
+  width: 1px;
+  min-width: 1px;
+  height: 40px;
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.topbar-stats .stat-item {
+  align-self: center;
+}

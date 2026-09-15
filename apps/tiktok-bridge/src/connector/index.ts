@@ -25,7 +25,8 @@ import type { BridgeConfig, BridgeStatus } from "../types/index.js";
 
 export class TikTokConnector {
   private client: CoreWebSocketClient;
-  private tiktokClient: unknown = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private tiktokClient: any = null;
   private sessionId: string = "";
   private status: BridgeStatus = "stopped";
   private config: BridgeConfig;
@@ -49,16 +50,17 @@ export class TikTokConnector {
     this.status = "stopped";
     this.client.stop();
     try {
-      // @ts-expect-error — tiktok-live-connector no tiene tipos oficiales
+      
       this.tiktokClient?.disconnect?.();
     } catch {}
   }
 
   private async connectToTikTok(): Promise<void> {
     try {
-      // Import dinámico para compatibilidad CJS/ESM y Node.js SEA
-      const { WebcastPushConnection } = await import("tiktok-live-connector");
-      // @ts-expect-error — sin tipos oficiales
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mod = await import("tiktok-live-connector") as any;
+      const { WebcastPushConnection } = mod;
+      
       this.tiktokClient = new WebcastPushConnection(this.config.tiktokUsername, {
         enableExtendedGiftInfo: true,
         requestPollingIntervalMs: 2000,
@@ -67,7 +69,7 @@ export class TikTokConnector {
       this.sessionId = randomUUID();
       this.wireEvents();
 
-      // @ts-expect-error
+      
       await this.tiktokClient.connect();
       this.status = "connected";
 
