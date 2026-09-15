@@ -11,6 +11,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
+/// URL del servidor de licencias en producción.
+pub const LICENSE_SERVER_URL: &str = "https://reactstream-production.up.railway.app";
+
 /// Public key del servidor embebida en el binario (Regla #64).
 /// La private key NUNCA sale del servidor de licencias.
 pub const SERVER_PUBLIC_KEY: &str = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApB5TpGOKtMYZy8U0NwEo\ncNs+YLqInlX5U45r1nkoy9d3ffbuMfloM1PzghCi7x7PqHipCxZkn/KM7TGLcGgK\n5AYBVssc3eDcwEpCo6lfoRm5KIjwHuFcwsa+Kb1G8HStbtGSEcm2kOo3wTrvB/Rz\n+sigfMTKMD759y7YLZK4wQ+brS6LEVVRT9dn7TUAPZ1NsNEvvj6gC6U3eKBkHGR3\nWTj+pEvOGL8KrbFkL5cC928Ec10IoGFYf9a1IZHBRF54Wp/9sMVNmQzIJdlGXl79\n1xfrPQ8fLeMyMiwTwWN45288Pm91WTJ/EUD76OW6sAPEV9Scdb/hbFJeDw4nL4Aw\nMQIDAQAB\n-----END PUBLIC KEY-----";
