@@ -34,5 +34,8 @@
   },
   "allowScripts": {
     "esbuild@0.28.2": true
+  },
+  "dependencies": {
+    "tiktok-live-connector": "^1.2.3"
   }
 }

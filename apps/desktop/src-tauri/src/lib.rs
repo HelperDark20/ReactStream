@@ -372,7 +372,7 @@ pub fn run() {
             // Arrancar el WebSocket server en background
             let state = app.state::<CoreState>();
             let ws = state.ws_server.clone();
-            tokio::spawn(async move {
+            tauri::async_runtime::spawn(async move {
                 ws.run().await;
             });
 
