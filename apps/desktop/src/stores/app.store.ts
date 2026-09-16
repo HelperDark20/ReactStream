@@ -11,7 +11,7 @@ export type AppStatus =
 
 export type TikTokConnectionStatus = "DISCONNECTED" | "CONNECTING" | "CONNECTED" | "ERROR";
 
-export type ActivePage = "home" | "actions" | "overlays" | "sounds" | "pro";
+export type ActivePage = "home" | "actions" | "overlays" | "sounds" | "pro" | "settings";
 
 interface AppState {
   // Estado de la app
@@ -21,6 +21,11 @@ interface AppState {
   tiktokDisplayName: string;
   tiktokAvatarUrl: string;
   version: string;
+
+  // Autenticación TikTok (cookies WebView)
+  tiktokLoggedIn: boolean;
+  tiktokLoginPending: boolean;
+  tiktokLoginError: string | null;
 
   // Sesión activa
   sessionActive: boolean;
@@ -42,6 +47,9 @@ interface AppState {
   setAppStatus: (status: AppStatus) => void;
   setVersion: (version: string) => void;
   setSessionActive: (active: boolean) => void;
+  setTikTokLoggedIn: (loggedIn: boolean, username?: string) => void;
+  setTikTokLoginPending: (pending: boolean) => void;
+  setTikTokLoginError: (error: string | null) => void;
   updateSessionStats: (stats: Partial<{
     sessionDuration: number;
     totalCoins: number;
@@ -58,6 +66,9 @@ export const useAppStore = create<AppState>((set) => ({
   tiktokDisplayName: "",
   tiktokAvatarUrl: "",
   version: "1.0.0",
+  tiktokLoggedIn: false,
+  tiktokLoginPending: false,
+  tiktokLoginError: null,
   sessionActive: false,
   sessionDuration: 0,
   totalCoins: 0,
@@ -74,5 +85,13 @@ export const useAppStore = create<AppState>((set) => ({
   setAppStatus: (status) => set({ appStatus: status }),
   setVersion: (version) => set({ version }),
   setSessionActive: (active) => set({ sessionActive: active }),
+  setTikTokLoggedIn: (loggedIn, username) => set((s) => ({
+    tiktokLoggedIn: loggedIn,
+    tiktokLoginPending: false,
+    tiktokLoginError: null,
+    tiktokUsername: username ?? s.tiktokUsername,
+  })),
+  setTikTokLoginPending: (pending) => set({ tiktokLoginPending: pending, tiktokLoginError: null }),
+  setTikTokLoginError: (error) => set({ tiktokLoginError: error, tiktokLoginPending: false }),
   updateSessionStats: (stats) => set((state) => ({ ...state, ...stats })),
 }));

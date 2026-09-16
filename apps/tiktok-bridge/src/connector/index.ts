@@ -55,10 +55,18 @@ export class TikTokConnector {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mod = await import("tiktok-live-connector") as any;
-      const { WebcastPushConnection } = mod;
+      const { WebcastPushConnection, signatureProvider } = mod;
+
+      // When sessionId is available, disable the signing service entirely.
+      // TikTok accepts unsigned webcast requests from authenticated sessions.
+      if (this.config.sessionId) {
+        signatureProvider.config.enabled = false;
+      }
+
       this.tiktokClient = new WebcastPushConnection(this.config.tiktokUsername, {
         enableExtendedGiftInfo: true,
         requestPollingIntervalMs: 2000,
+        ...(this.config.sessionId ? { sessionId: this.config.sessionId } : {}),
       });
 
       this.sessionId = randomUUID();

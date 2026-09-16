@@ -1,4 +1,4 @@
-// ReactStream Desktop — Integración Tauri ↔ Core (Etapa 38)
+// ReactStream Desktop — Integración Tauri ↔ Core
 // Regla #2-3: React nunca ejecuta acciones del sistema ni conecta
 // directamente con TikTok — todo pasa por estos comandos hacia el Core.
 // Regla #83-84: UI refleja solo el estado confirmado por el Core.
@@ -16,25 +16,46 @@ use reactstream_core::{
 };
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
-use tauri::{Manager, State};
+use tauri::{Emitter, Manager, State};
 use uuid::Uuid;
+
+// ============================================================
+// TikTok Session (cookies capturadas del WebView de login)
+// ============================================================
+
+#[derive(Serialize, Deserialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct TikTokSession {
+    pub session_id:    String,
+    pub tt_target_idc: String,
+    pub username:      String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct TikTokLoginResult {
+    pub success:  bool,
+    pub username: Option<String>,
+    pub error:    Option<String>,
+}
 
 // ============================================================
 // Estado global del Core (vive en RAM durante toda la sesión)
 // ============================================================
 
 pub struct CoreState {
-    pub logger:        Arc<InMemoryLogger>,
-    pub event_bus:     Arc<EventBus>,
-    pub session_mgr:   Arc<SessionManager>,
-    pub ranking_mgr:   Arc<RankingEngine>,
-    pub best_gift_mgr: Arc<BestGiftEngine>,
-    pub timer_engine:  Mutex<Option<Arc<TimerEngine>>>,
-    pub settings_mgr:  Arc<SettingsManager>,
-    pub state_mgr:     Arc<StateManager>,
-    pub overlay_engine:Arc<OverlayEngine>,
-    pub ws_server:     Arc<WsServer>,
+    pub logger:          Arc<InMemoryLogger>,
+    pub event_bus:       Arc<EventBus>,
+    pub session_mgr:     Arc<SessionManager>,
+    pub ranking_mgr:     Arc<RankingEngine>,
+    pub best_gift_mgr:   Arc<BestGiftEngine>,
+    pub timer_engine:    Mutex<Option<Arc<TimerEngine>>>,
+    pub settings_mgr:    Arc<SettingsManager>,
+    pub state_mgr:       Arc<StateManager>,
+    pub overlay_engine:  Arc<OverlayEngine>,
+    pub ws_server:       Arc<WsServer>,
     pub tiktok_username: Mutex<String>,
+    pub tiktok_session:  Mutex<Option<TikTokSession>>,
 }
 
 impl CoreState {
@@ -64,12 +85,13 @@ impl CoreState {
             session_mgr,
             ranking_mgr,
             best_gift_mgr,
-            timer_engine: Mutex::new(None),
+            timer_engine:    Mutex::new(None),
             settings_mgr,
             state_mgr,
             overlay_engine,
             ws_server,
             tiktok_username: Mutex::new(String::new()),
+            tiktok_session:  Mutex::new(None),
         }
     }
 }
@@ -344,6 +366,222 @@ async fn update_setting(
 }
 
 // ============================================================
+// TikTok Login — WebView + extracción de cookies
+// ============================================================
+
+#[tauri::command]
+async fn tiktok_login(app_handle: tauri::AppHandle) -> Result<(), String> {
+    use tauri::{WebviewUrl, WebviewWindowBuilder};
+
+    // Cerrar ventana previa si existe
+    if let Some(w) = app_handle.get_webview_window("tiktok-login") {
+        w.close().ok();
+    }
+
+    let login_url = "https://www.tiktok.com/login"
+        .parse::<tauri::Url>()
+        .map_err(|e| e.to_string())?;
+
+    let app_nav = app_handle.clone();
+
+    WebviewWindowBuilder::new(&app_handle, "tiktok-login", WebviewUrl::External(login_url))
+        .title("Conectar cuenta TikTok")
+        .inner_size(520.0, 760.0)
+        .resizable(false)
+        .on_navigation(move |url| {
+            let url_str = url.to_string();
+            // Detectar post-login: URL de TikTok que NO sea login/signup
+            let is_post_login = url_str.starts_with("https://www.tiktok.com")
+                && !url_str.contains("/login")
+                && !url_str.contains("/signup")
+                && !url_str.contains("/explore")
+                && url_str != "https://www.tiktok.com/";
+
+            if is_post_login {
+                let app = app_nav.clone();
+                std::thread::spawn(move || {
+                    // Breve pausa para que WebView2 confirme las cookies
+                    std::thread::sleep(std::time::Duration::from_millis(800));
+                    if let Some(window) = app.get_webview_window("tiktok-login") {
+                        extract_and_store_cookies(window, app.clone());
+                    }
+                });
+            }
+            true // permitir toda navegación
+        })
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+fn extract_and_store_cookies(window: tauri::WebviewWindow, app: tauri::AppHandle) {
+    let window_label = window.label().to_string();
+    let app_outer = app.clone();
+
+    let result = window.with_webview(move |wv| {
+        #[cfg(target_os = "windows")]
+        {
+            let app_for_reg = app.clone();
+            let app_for_err = app.clone();
+            let lbl = window_label.clone();
+            if let Err(e) = register_cookie_extraction(&wv, app_for_reg, window_label) {
+                let _ = app_for_err.emit(
+                    "tiktok-login-result",
+                    TikTokLoginResult { success: false, username: None, error: Some(e) },
+                );
+                if let Some(w) = app_for_err.get_webview_window(&lbl) {
+                    w.close().ok();
+                }
+            }
+            // On success the callback handles close + event emission
+        }
+
+        #[cfg(not(target_os = "windows"))]
+        {
+            let _ = app.emit(
+                "tiktok-login-result",
+                TikTokLoginResult {
+                    success: false, username: None,
+                    error: Some("Extracción de cookies solo soportada en Windows".to_string()),
+                },
+            );
+            if let Some(w) = app.get_webview_window(&window_label) {
+                w.close().ok();
+            }
+        }
+    });
+
+    if let Err(e) = result {
+        let _ = app_outer.emit(
+            "tiktok-login-result",
+            TikTokLoginResult { success: false, username: None, error: Some(e.to_string()) },
+        );
+        window.close().ok();
+    }
+}
+
+// Registra el callback de extracción de cookies y retorna inmediatamente.
+// El callback se invoca de forma asíncrona por WebView2, evitando deadlock.
+#[cfg(target_os = "windows")]
+fn register_cookie_extraction(
+    wv: &tauri::webview::PlatformWebview,
+    app: tauri::AppHandle,
+    window_label: String,
+) -> Result<(), String> {
+    use webview2_com::Microsoft::Web::WebView2::Win32::{
+        ICoreWebView2, ICoreWebView2_2, ICoreWebView2CookieList,
+    };
+    use windows::core::{Interface, HSTRING};
+
+    let controller = wv.controller();
+    let core_wv: ICoreWebView2 = unsafe { controller.CoreWebView2() }
+        .map_err(|e| format!("CoreWebView2: {e}"))?;
+    let core_wv2: ICoreWebView2_2 = core_wv
+        .cast()
+        .map_err(|e| format!("cast ICoreWebView2_2: {e}"))?;
+    let mgr = unsafe { core_wv2.CookieManager() }
+        .map_err(|e| format!("CookieManager: {e}"))?;
+
+    let handler = webview2_com::GetCookiesCompletedHandler::create(Box::new(
+        move |_, cookie_list: Option<ICoreWebView2CookieList>| {
+            let login_result = match parse_tiktok_cookies(cookie_list) {
+                Ok(session) => {
+                    let state = app.state::<CoreState>();
+                    if !session.username.is_empty() {
+                        *state.tiktok_username.lock().unwrap() = session.username.clone();
+                    }
+                    *state.tiktok_session.lock().unwrap() = Some(session.clone());
+                    TikTokLoginResult {
+                        success: true,
+                        username: Some(session.username),
+                        error: None,
+                    }
+                }
+                Err(e) => TikTokLoginResult { success: false, username: None, error: Some(e) },
+            };
+            let _ = app.emit("tiktok-login-result", login_result);
+            if let Some(w) = app.get_webview_window(&window_label) {
+                w.close().ok();
+            }
+            Ok(())
+        },
+    ));
+
+    let uri = HSTRING::from("https://www.tiktok.com");
+    unsafe { mgr.GetCookies(&uri, &handler) }
+        .map_err(|e| format!("GetCookies: {e}"))?;
+
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+fn parse_tiktok_cookies(
+    cookie_list: Option<webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2CookieList>,
+) -> Result<TikTokSession, String> {
+    use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Cookie;
+    use windows::core::PWSTR;
+
+    let list = cookie_list.ok_or_else(|| "Lista de cookies vacía".to_string())?;
+    let mut count = 0u32;
+    unsafe { list.Count(&mut count) }.map_err(|e| format!("Count: {e}"))?;
+
+    let mut session_id: Option<String> = None;
+    let mut tt_target_idc: Option<String> = None;
+
+    for i in 0..count {
+        let cookie: ICoreWebView2Cookie = match unsafe { list.GetValueAtIndex(i) } {
+            Ok(c) => c,
+            Err(_) => continue,
+        };
+
+        let mut name_pw = PWSTR(std::ptr::null_mut());
+        let mut val_pw  = PWSTR(std::ptr::null_mut());
+        let _ = unsafe { cookie.Name(&mut name_pw) };
+        let _ = unsafe { cookie.Value(&mut val_pw) };
+
+        let name  = pwstr_to_string(name_pw);
+        let value = pwstr_to_string(val_pw);
+
+        match name.as_str() {
+            "sessionid"     => session_id    = Some(value),
+            "tt-target-idc" => tt_target_idc = Some(value),
+            _ => {}
+        }
+    }
+
+    Ok(TikTokSession {
+        session_id:    session_id
+            .ok_or_else(|| "Cookie 'sessionid' no encontrada. Completa el login.".to_string())?,
+        tt_target_idc: tt_target_idc.unwrap_or_default(),
+        username:      String::new(),
+    })
+}
+
+#[cfg(target_os = "windows")]
+fn pwstr_to_string(pwstr: windows::core::PWSTR) -> String {
+    if pwstr.0.is_null() {
+        return String::new();
+    }
+    let len = (0usize..).take_while(|&i| unsafe { *pwstr.0.add(i) } != 0).count();
+    String::from_utf16_lossy(unsafe { std::slice::from_raw_parts(pwstr.0, len) })
+}
+
+#[tauri::command]
+async fn get_tiktok_session(
+    state: State<'_, CoreState>,
+) -> Result<Option<TikTokSession>, String> {
+    Ok(state.tiktok_session.lock().unwrap().clone())
+}
+
+#[tauri::command]
+async fn tiktok_logout(state: State<'_, CoreState>) -> Result<(), String> {
+    *state.tiktok_session.lock().unwrap() = None;
+    *state.tiktok_username.lock().unwrap() = String::new();
+    Ok(())
+}
+
+// ============================================================
 // Bootstrap
 // ============================================================
 
@@ -364,6 +602,9 @@ pub fn run() {
             get_gift_catalog,
             get_settings,
             update_setting,
+            tiktok_login,
+            get_tiktok_session,
+            tiktok_logout,
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();

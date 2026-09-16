@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../stores/app.store";
 
 function FrozenBadge() {
@@ -30,6 +31,67 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ fontSize: 12, fontWeight: 700, color: "var(--rs-green)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 20, marginBottom: 4, paddingBottom: 6, borderBottom: "1px solid var(--rs-border-green)" }}>
       {children}
+    </div>
+  );
+}
+
+function TikTokLoginSection() {
+  const {
+    tiktokLoggedIn, tiktokLoginPending, tiktokLoginError,
+    tiktokUsername, setTikTokLoginPending, setTikTokLoggedIn,
+  } = useAppStore();
+
+  async function handleLogin() {
+    setTikTokLoginPending(true);
+    try {
+      await invoke("tiktok_login");
+      // Result arrives via "tiktok-login-result" event in App.tsx
+    } catch (e) {
+      setTikTokLoginPending(false);
+      console.error("[settings] tiktok_login error:", e);
+    }
+  }
+
+  async function handleLogout() {
+    await invoke("tiktok_logout");
+    setTikTokLoggedIn(false);
+  }
+
+  if (tiktokLoggedIn) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--rs-green)", display: "inline-block" }} />
+          <span style={{ fontSize: 13, fontWeight: 500 }}>
+            {tiktokUsername ? `@${tiktokUsername}` : "Sesión activa"}
+          </span>
+        </div>
+        <button className="btn-ghost" style={{ fontSize: 12, padding: "3px 10px" }} onClick={handleLogout}>
+          Cerrar sesión
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <button
+        className="btn-green"
+        style={{ display: "flex", alignItems: "center", gap: 8 }}
+        onClick={handleLogin}
+        disabled={tiktokLoginPending}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V9.2a8.16 8.16 0 0 0 4.77 1.52V7.27a4.85 4.85 0 0 1-1-.58z"/>
+        </svg>
+        {tiktokLoginPending ? "Abriendo TikTok..." : "Conectar cuenta TikTok"}
+      </button>
+      {tiktokLoginError && (
+        <span style={{ fontSize: 11, color: "#f87171" }}>{tiktokLoginError}</span>
+      )}
+      <span style={{ fontSize: 11, color: "var(--rs-text-muted)" }}>
+        Se abrirá una ventana de TikTok para iniciar sesión con tu cuenta.
+      </span>
     </div>
   );
 }
@@ -76,6 +138,9 @@ export default function SettingsPage() {
       </SettingRow>
 
       <SectionTitle>🎮 Cuenta TikTok</SectionTitle>
+      <SettingRow label="Iniciar sesión" desc="Autentícate con tu cuenta de TikTok para conectarte sin servicio de firma">
+        <TikTokLoginSection />
+      </SettingRow>
       <SettingRow label="Username por defecto" desc="Se pre-rellena en el campo de conexión al abrir la app">
         <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="sin @" style={{ width: 160 }} />
       </SettingRow>

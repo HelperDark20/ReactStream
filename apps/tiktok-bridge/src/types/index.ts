@@ -11,6 +11,10 @@ export interface BridgeConfig {
   coreWsUrl: string;
   reconnectDelayMs: number;
   maxReconnectAttempts: number;
+  /** sessionid cookie from TikTok WebView login — bypasses signing service */
+  sessionId?: string;
+  /** tt-target-idc cookie from TikTok WebView login */
+  ttTargetIdc?: string;
 }
 
 export interface RawGiftData {
