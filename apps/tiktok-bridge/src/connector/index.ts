@@ -66,7 +66,10 @@ export class TikTokConnector {
       this.tiktokClient = new WebcastPushConnection(this.config.tiktokUsername, {
         enableExtendedGiftInfo: true,
         requestPollingIntervalMs: 2000,
-        ...(this.config.sessionId ? { sessionId: this.config.sessionId } : {}),
+        ...(this.config.sessionId   ? { sessionId: this.config.sessionId } : {}),
+        ...(this.config.cookieString ? {
+          requestHeaders: { Cookie: this.config.cookieString },
+        } : {}),
       });
 
       this.sessionId = randomUUID();
@@ -74,6 +77,21 @@ export class TikTokConnector {
 
       const state = await this.tiktokClient.connect();
       this.status = "connected";
+
+      // Enviar foto de perfil y nombre del dueño del live
+      // La API de TikTok usa snake_case: avatar_thumb, avatar_large, url_list
+      const owner: any = state?.roomInfo?.owner ?? state?.owner ?? null;
+      if (owner) {
+        const avatarUrl: string =
+          owner?.avatar_thumb?.url_list?.[0] ??
+          owner?.avatar_large?.url_list?.[0] ??
+          owner?.avatar_medium?.url_list?.[0] ??
+          "";
+        const displayName: string = owner?.nickname ?? owner?.display_id ?? "";
+        if (avatarUrl || displayName) {
+          this.client.sendProfileUpdate(avatarUrl, displayName);
+        }
+      }
 
       // Capturar catálogo de regalos disponibles al conectarse
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -103,10 +121,50 @@ export class TikTokConnector {
 
       this.client.send(normalizeLiveStarted(this.sessionId));
       console.log(`[bridge:connector] conectado a @${this.config.tiktokUsername}`);
-    } catch (err) {
+    } catch (err: any) {
       this.status = "error";
-      console.error("[bridge:connector] error al conectar con TikTok:", err);
-      this.scheduleReconnect();
+      const msg: string = err?.message ?? String(err);
+      console.error("[bridge:connector] error al conectar con TikTok:", msg);
+
+      // Errores terminales — no reintentar
+      const isNotLive =
+        err?.constructor?.name === "UserOfflineError" ||
+        msg.includes("LIVE has ended") ||
+        msg.includes("LIVE_NOT_FOUND") ||
+        msg.includes("not live") ||
+        msg.includes("currently not live") ||
+        msg.includes("LIVE_NOT_STARTED") ||
+        msg.includes("STREAM_PAUSED");
+
+      const isUserNotFound =
+        err?.constructor?.name === "ExtractRoomIdError" ||
+        msg.includes("user_not_found") ||
+        msg.includes("19881007") ||
+        msg.includes("Failed to retrieve room_id");
+
+      const isAuthError =
+        err?.constructor?.name === "SignatureError" ||
+        msg.includes("status code 403") ||
+        msg.includes("Failed to sign request");
+
+      const isTerminal = isNotLive || isUserNotFound || isAuthError;
+
+      const statusType = isNotLive ? "not_live" : isUserNotFound ? "user_not_found" : "auth_error";
+      const userMessage = isNotLive
+        ? `@${this.config.tiktokUsername} no está en vivo`
+        : isUserNotFound
+        ? `Usuario @${this.config.tiktokUsername} no encontrado en TikTok`
+        : isAuthError
+        ? "Sesión TikTok expirada — vuelve a iniciar sesión en la app"
+        : msg;
+
+      this.client.sendStatus(statusType, userMessage);
+
+      if (!isTerminal) {
+        this.scheduleReconnect();
+      } else {
+        this.status = "stopped";
+      }
     }
   }
 

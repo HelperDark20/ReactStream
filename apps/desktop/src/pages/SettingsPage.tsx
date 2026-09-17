@@ -40,12 +40,13 @@ function TikTokLoginSection() {
     tiktokLoggedIn, tiktokLoginPending, tiktokLoginError,
     tiktokUsername, setTikTokLoginPending, setTikTokLoggedIn,
   } = useAppStore();
+  const [copied, setCopied] = useState(false);
+  const [sessionDebug, setSessionDebug] = useState<string | null>(null);
 
   async function handleLogin() {
     setTikTokLoginPending(true);
     try {
       await invoke("tiktok_login");
-      // Result arrives via "tiktok-login-result" event in App.tsx
     } catch (e) {
       setTikTokLoginPending(false);
       console.error("[settings] tiktok_login error:", e);
@@ -55,20 +56,51 @@ function TikTokLoginSection() {
   async function handleLogout() {
     await invoke("tiktok_logout");
     setTikTokLoggedIn(false);
+    setSessionDebug(null);
+  }
+
+  async function handleCopySession() {
+    try {
+      const session = await invoke<{ sessionId: string; ttTargetIdc: string; username: string; cookieString: string } | null>("get_tiktok_session");
+      if (!session?.sessionId) {
+        setSessionDebug("sessionId vacío — la extracción de cookies falló");
+        return;
+      }
+      const envCmd = [
+        `$env:REACTSTREAM_TIKTOK_SESSION_ID = "${session.sessionId}"`,
+        `$env:REACTSTREAM_TIKTOK_COOKIES = "${session.cookieString.replace(/"/g, '\\"')}"`,
+      ].join("\n");
+      await navigator.clipboard.writeText(envCmd);
+      setSessionDebug(`Copiado (${session.cookieString.split(";").length} cookies)`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch (e) {
+      setSessionDebug(String(e));
+    }
   }
 
   if (tiktokLoggedIn) {
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--rs-green)", display: "inline-block" }} />
-          <span style={{ fontSize: 13, fontWeight: 500 }}>
-            {tiktokUsername ? `@${tiktokUsername}` : "Sesión activa"}
-          </span>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--rs-green)", display: "inline-block" }} />
+            <span style={{ fontSize: 13, fontWeight: 500 }}>
+              {tiktokUsername ? `@${tiktokUsername}` : "Sesión activa"}
+            </span>
+          </div>
+          <button className="btn-ghost" style={{ fontSize: 12, padding: "3px 10px" }} onClick={handleCopySession}>
+            {copied ? "Copiado!" : "Copiar sessionId"}
+          </button>
+          <button className="btn-ghost" style={{ fontSize: 12, padding: "3px 10px" }} onClick={handleLogout}>
+            Cerrar sesión
+          </button>
         </div>
-        <button className="btn-ghost" style={{ fontSize: 12, padding: "3px 10px" }} onClick={handleLogout}>
-          Cerrar sesión
-        </button>
+        {sessionDebug && (
+          <span style={{ fontSize: 11, color: sessionDebug.includes("vacío") || sessionDebug.includes("Error") ? "#f87171" : "var(--rs-green)", fontFamily: "monospace" }}>
+            {sessionDebug}
+          </span>
+        )}
       </div>
     );
   }

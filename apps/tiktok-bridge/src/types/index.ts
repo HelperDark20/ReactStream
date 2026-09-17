@@ -15,6 +15,8 @@ export interface BridgeConfig {
   sessionId?: string;
   /** tt-target-idc cookie from TikTok WebView login */
   ttTargetIdc?: string;
+  /** Full cookie string "k=v; k2=v2" from WebView — avoids X-Bogus requirement */
+  cookieString?: string;
 }
 
 export interface RawGiftData {

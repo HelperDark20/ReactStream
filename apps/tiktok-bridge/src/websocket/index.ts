@@ -18,6 +18,7 @@ export class CoreWebSocketClient {
   private pingTimer: NodeJS.Timeout | null = null;
   private stopped = false;
   private queue: AppEvent[] = [];
+  private statusQueue: string[] = [];
 
   constructor(private readonly url: string) {}
 
@@ -31,7 +32,11 @@ export class CoreWebSocketClient {
       // Identificarse ante el Core (protocolo interno ReactStream)
       this.ws?.send(JSON.stringify({ clientType: "bridge" }));
       this.startPing();
-      // Drenar cola acumulada durante la reconexión
+      // Drenar colas acumuladas durante la reconexión
+      while (this.statusQueue.length > 0) {
+        const s = this.statusQueue.shift();
+        if (s) this.ws?.send(s);
+      }
       while (this.queue.length > 0) {
         const event = this.queue.shift();
         if (event) this.sendRaw(event);
@@ -62,6 +67,39 @@ export class CoreWebSocketClient {
     } else {
       // Acumular en cola mientras el WebSocket no esté listo
       this.queue.push(event);
+    }
+  }
+
+  /** Envía datos de perfil del dueño del live al Core. */
+  sendProfileUpdate(avatarUrl: string, displayName: string): void {
+    const payload = JSON.stringify({
+      protocolVersion: 1,
+      messageId: crypto.randomUUID(),
+      messageType: "profile_update",
+      timestamp: Date.now(),
+      payload: { avatarUrl, displayName },
+    });
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(payload);
+    } else {
+      this.statusQueue.push(payload);
+    }
+  }
+
+  /** Envía un mensaje de estado del bridge (not_live, error, etc.) al Core. */
+  sendStatus(status: string, message: string): void {
+    const payload = JSON.stringify({
+      protocolVersion: 1,
+      messageId: crypto.randomUUID(),
+      messageType: "bridge_status",
+      timestamp: Date.now(),
+      payload: { type: "bridge_status", status, message },
+    });
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(payload);
+    } else {
+      // Guardar en cola — se enviará cuando el WS abra
+      this.statusQueue.push(payload);
     }
   }
 

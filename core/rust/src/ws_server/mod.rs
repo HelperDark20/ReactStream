@@ -12,6 +12,7 @@ use crate::contracts::AppEvent;
 use crate::event_bus::EventBus;
 use crate::logging::{ErrorCode, LogEntry, LogLevel, Logger};
 use crate::overlays::OverlayEngine;
+use crate::session::SessionManager;
 use futures_util::{SinkExt, StreamExt};
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -27,12 +28,46 @@ pub const WS_HOST: &str = "127.0.0.1";
 /// conectados de esa ruta (Regla #23: el bus distribuye, no el servidor).
 type OverlayBroadcast = broadcast::Sender<String>;
 
+/// Regalo del catálogo TikTok — almacenado en RAM al recibir gift_catalog_sync.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct CatalogGift {
+    pub id:        String,
+    pub name:      String,
+    pub coins:     u64,
+    pub image_url: Option<String>,
+}
+
 pub struct WsServer {
-    event_bus:     Arc<EventBus>,
-    overlay_engine:Arc<OverlayEngine>,
-    logger:        Arc<dyn Logger>,
+    event_bus:      Arc<EventBus>,
+    overlay_engine: Arc<OverlayEngine>,
+    logger:         Arc<dyn Logger>,
+    session_mgr:    Arc<SessionManager>,
     /// Un canal broadcast por overlay_id (timer, donors, tappers, etc.)
-    channels:      Arc<Mutex<HashMap<String, OverlayBroadcast>>>,
+    channels:       Arc<Mutex<HashMap<String, OverlayBroadcast>>>,
+    /// Catálogo de regalos recibido del bridge (gift_catalog_sync).
+    pub gift_catalog: Arc<Mutex<Vec<CatalogGift>>>,
+    /// Último error de estado recibido del bridge (bridge_status).
+    pub bridge_status: Arc<Mutex<Option<BridgeStatus>>>,
+    /// Datos de perfil del dueño del live (avatar + display name).
+    pub profile_update: Arc<Mutex<Option<ProfileUpdate>>>,
+    /// Espectadores actuales (actualizado por cada ViewerCount event).
+    pub current_viewers: Arc<Mutex<u64>>,
+    /// Username TikTok para el inicio de sesión (seteado antes de conectar).
+    pub session_username: Arc<Mutex<String>>,
+    /// Timestamp ms del inicio del live actual (para calcular duración en tiempo real).
+    pub live_started_ms: Arc<Mutex<Option<u64>>>,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct BridgeStatus {
+    pub status:  String,
+    pub message: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ProfileUpdate {
+    pub avatar_url:   String,
+    pub display_name: String,
 }
 
 impl WsServer {
@@ -40,12 +75,20 @@ impl WsServer {
         event_bus: Arc<EventBus>,
         overlay_engine: Arc<OverlayEngine>,
         logger: Arc<dyn Logger>,
+        session_mgr: Arc<SessionManager>,
     ) -> Self {
         Self {
             event_bus,
             overlay_engine,
             logger,
-            channels: Arc::new(Mutex::new(HashMap::new())),
+            channels:       Arc::new(Mutex::new(HashMap::new())),
+            session_mgr,
+            gift_catalog:      Arc::new(Mutex::new(Vec::new())),
+            bridge_status:     Arc::new(Mutex::new(None)),
+            profile_update:    Arc::new(Mutex::new(None)),
+            current_viewers:   Arc::new(Mutex::new(0)),
+            session_username:  Arc::new(Mutex::new(String::new())),
+            live_started_ms:   Arc::new(Mutex::new(None)),
         }
     }
 
@@ -149,13 +192,9 @@ impl WsServer {
 
         match client_type {
             "bridge" => {
-                self.logger.log(LogEntry::new(
-                    &ProductionClock,
-                    LogLevel::Info,
-                    "ws_server",
-                    "Bridge TikTok conectado",
-                ));
+                println!("[core:ws] Bridge TikTok conectado");
                 self.handle_bridge(read).await;
+                println!("[core:ws] Bridge TikTok desconectado");
             }
             "overlay" => {
                 self.logger.log(LogEntry::new(
@@ -205,17 +244,60 @@ impl WsServer {
             };
 
             // Mensaje especial: sincronización del catálogo de regalos
-            if value["type"] == "gift_catalog_sync" {
-                self.logger.log(LogEntry::new(
-                    &ProductionClock,
-                    LogLevel::Info,
-                    "ws_server",
-                    format!(
-                        "catálogo de regalos recibido: {} items",
-                        value["gifts"].as_array().map(|a| a.len()).unwrap_or(0)
-                    ),
-                ));
-                // TODO(Etapa 38+): persistir en SQLite vía GiftCatalogSyncRepository
+            // El bridge lo envuelve en payload, así que chequeamos ahí.
+            let payload_type = value.get("payload")
+                .and_then(|p| p.get("type"))
+                .and_then(|t| t.as_str())
+                .unwrap_or("");
+            if payload_type == "gift_catalog_sync" {
+                if let Some(gifts) = value["payload"]["gifts"].as_array() {
+                    let mut seen = std::collections::HashSet::new();
+                    let items: Vec<CatalogGift> = gifts.iter()
+                        .filter_map(|g| {
+                            let id = g["id"].as_str()?.to_string();
+                            if !seen.insert(id.clone()) { return None; } // deduplicar por id
+                            Some(CatalogGift {
+                                id,
+                                name:      g["name"].as_str()?.to_string(),
+                                coins:     g["coins"].as_u64()?,
+                                image_url: g["imageUrl"].as_str().map(|s| s.to_string()),
+                            })
+                        })
+                        .collect();
+                    let n = items.len();
+                    *self.gift_catalog.lock().expect("lock envenenado") = items;
+                    println!("[core:ws] catálogo de regalos: {n} items únicos almacenados");
+                }
+                continue;
+            }
+
+            // Estado del bridge (not_live, error, etc.)
+            if value["messageType"] == "bridge_status" {
+                if let (Some(status), Some(message)) = (
+                    value["payload"]["status"].as_str(),
+                    value["payload"]["message"].as_str(),
+                ) {
+                    println!("[core:ws] bridge_status: {status} — {message}");
+                    *self.bridge_status.lock().expect("lock") = Some(BridgeStatus {
+                        status:  status.to_string(),
+                        message: message.to_string(),
+                    });
+                }
+                continue;
+            }
+
+            // Perfil del dueño del live (avatar + display name)
+            if value["messageType"] == "profile_update" {
+                if let (Some(avatar_url), Some(display_name)) = (
+                    value["payload"]["avatarUrl"].as_str(),
+                    value["payload"]["displayName"].as_str(),
+                ) {
+                    println!("[core:ws] profile_update: display_name={display_name}");
+                    *self.profile_update.lock().expect("lock") = Some(ProfileUpdate {
+                        avatar_url:   avatar_url.to_string(),
+                        display_name: display_name.to_string(),
+                    });
+                }
                 continue;
             }
 
@@ -228,29 +310,36 @@ impl WsServer {
             if let Some(payload) = value.get("payload") {
                 match serde_json::from_value::<AppEvent>(payload.clone()) {
                     Ok(event) => {
-                        self.logger.log(LogEntry::new(
-                            &ProductionClock,
-                            LogLevel::Debug,
-                            "ws_server",
-                            format!("evento recibido: {:?} id={}", event.event_type(), event.id()),
-                        ));
+                        // Ciclo de vida de la sesión + stats en tiempo real
+                        match &event {
+                            AppEvent::LiveStarted(e) => {
+                                let username = self.session_username.lock().expect("lock").clone();
+                                let now_ms = ProductionClock.now_ms();
+                                self.session_mgr.start_session(
+                                    &ProductionClock,
+                                    e.session_id.clone(),
+                                    "",
+                                    username,
+                                );
+                                *self.live_started_ms.lock().expect("lock") = Some(now_ms);
+                                *self.current_viewers.lock().expect("lock") = 0;
+                            }
+                            AppEvent::ViewerCount(v) => {
+                                *self.current_viewers.lock().expect("lock") = v.count;
+                            }
+                            AppEvent::LiveEnded(_) => {
+                                self.session_mgr.end_session(&ProductionClock);
+                                *self.current_viewers.lock().expect("lock") = 0;
+                                *self.live_started_ms.lock().expect("lock") = None;
+                            }
+                            _ => {}
+                        }
+                        println!("[core:ws] evento {:?} id={}", event.event_type(), event.id());
                         let outcome = self.event_bus.publish(event);
-                        self.logger.log(LogEntry::new(
-                            &ProductionClock,
-                            LogLevel::Debug,
-                            "ws_server",
-                            format!("publicado en Event Bus: {outcome:?}"),
-                        ));
+                        println!("[core:ws] outcome={outcome:?}");
                     }
                     Err(e) => {
-                        self.logger.log(
-                            LogEntry::new(
-                                &ProductionClock,
-                                LogLevel::Warn,
-                                "ws_server",
-                                format!("no se pudo deserializar evento: {e}"),
-                            )
-                        );
+                        println!("[core:ws] ERROR deserializar: {e}  raw={}", serde_json::to_string(payload).unwrap_or_default());
                     }
                 }
             }

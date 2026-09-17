@@ -1,10 +1,9 @@
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, useRef, lazy, Suspense } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useAppStore } from "./stores/app.store";
-import Topbar from "./components/Topbar";
 import Sidebar from "./components/Sidebar";
-import Statusbar from "./components/Statusbar";
+import ProfileCard from "./components/ProfileCard";
 import HomePage from "./pages/HomePage";
 
 const ActionsPage = lazy(() => import("./pages/ActionsPage"));
@@ -15,28 +14,98 @@ const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 
 function PageContent() {
   const { activePage } = useAppStore();
-  return <Suspense fallback={<PageLoader />}>
-    {activePage === "home" && <HomePage />}
-    {activePage === "actions" && <ActionsPage />}
-    {activePage === "overlays" && <OverlaysPage />}
-    {activePage === "sounds" && <SoundsPage />}
-    {activePage === "pro" && <ProPage />}
-    {activePage === "settings" && <SettingsPage />}
-  </Suspense>;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      {activePage === "home" && <HomePage />}
+      {activePage === "actions" && <ActionsPage />}
+      {activePage === "overlays" && <OverlaysPage />}
+      {activePage === "sounds" && <SoundsPage />}
+      {activePage === "pro" && <ProPage />}
+      {activePage === "settings" && <SettingsPage />}
+    </Suspense>
+  );
 }
 
 function PageLoader() {
-  return <div style={{ height: "100%", display: "grid", placeItems: "center", color: "var(--rs-text-muted)" }}>Cargando...</div>;
+  return <div className="rs-page-loader">Cargando...</div>;
+}
+
+interface SessionStats {
+  totalCoins: number;
+  totalLikes: number;
+  maxViewers: number;
+  currentViewers: number;
+  durationSeconds: number;
 }
 
 export default function App() {
-  const { setVersion, setAppStatus, setTikTokLoggedIn, setTikTokLoginError } = useAppStore();
+  const {
+    setVersion,
+    setAppStatus,
+    setTikTokLoggedIn,
+    setTikTokLoginError,
+    setTikTokDisplayName,
+    setTikTokAvatarUrl,
+    tiktokStatus,
+    updateSessionStats,
+    setSessionActive,
+  } = useAppStore();
+  const statsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    invoke<{ version: string; application: string }>("get_status")
-      .then((status) => { setVersion(status.version); setAppStatus("READY"); })
+    invoke<{
+      version: string;
+      application: string;
+      tiktokLoggedIn?: boolean;
+      tiktokUsername?: string;
+      tiktokDisplayName?: string;
+      tiktokAvatarUrl?: string;
+    }>("get_status")
+      .then((status) => {
+        setVersion(status.version);
+        setAppStatus("READY");
+        if (status.tiktokLoggedIn) {
+          setTikTokLoggedIn(true, status.tiktokUsername);
+          if (status.tiktokDisplayName) setTikTokDisplayName(status.tiktokDisplayName);
+          if (status.tiktokAvatarUrl) setTikTokAvatarUrl(status.tiktokAvatarUrl);
+        }
+      })
       .catch(() => setAppStatus("ERROR"));
-  }, [setVersion, setAppStatus]);
+  }, [setVersion, setAppStatus, setTikTokLoggedIn, setTikTokDisplayName, setTikTokAvatarUrl]);
+
+  useEffect(() => {
+    if (statsIntervalRef.current) {
+      clearInterval(statsIntervalRef.current);
+      statsIntervalRef.current = null;
+    }
+    if (tiktokStatus !== "CONNECTED") return;
+
+    statsIntervalRef.current = setInterval(async () => {
+      try {
+        const stats = await invoke<SessionStats | null>("get_session_stats");
+        if (stats) {
+          setSessionActive(true);
+          updateSessionStats({
+            totalCoins: stats.totalCoins,
+            totalLikes: stats.totalLikes,
+            viewers: stats.currentViewers,
+            maxViewers: stats.maxViewers,
+            sessionDuration: stats.durationSeconds,
+          });
+        } else {
+          setSessionActive(false);
+          updateSessionStats({ viewers: 0 });
+        }
+      } catch {}
+    }, 1000);
+
+    return () => {
+      if (statsIntervalRef.current) {
+        clearInterval(statsIntervalRef.current);
+        statsIntervalRef.current = null;
+      }
+    };
+  }, [tiktokStatus, updateSessionStats, setSessionActive]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -55,12 +124,11 @@ export default function App() {
 
   return (
     <div className="rs-app-shell">
-      <Topbar />
-      <div className="rs-main-row">
-        <Sidebar />
-        <main className="rs-main-content"><PageContent /></main>
-      </div>
-      <Statusbar />
+      <main className="rs-main-content">
+        <PageContent />
+      </main>
+      <Sidebar />
+      <ProfileCard />
     </div>
   );
 }

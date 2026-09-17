@@ -1,14 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
-
-// Intentar importar invoke de Tauri (no disponible en dev browser)
-let tauriInvoke: ((cmd: string) => Promise<unknown>) | null = null;
-try {
-  // @ts-ignore
-  const tauri = await import("@tauri-apps/api/core");
-  tauriInvoke = tauri.invoke;
-} catch {
-  tauriInvoke = null;
-}
+import { useState, useMemo, useEffect, useRef } from "react";
+import { invoke } from "@tauri-apps/api/core";
 
 export interface GiftItem {
   id: string;
@@ -18,25 +9,45 @@ export interface GiftItem {
   region: string;
 }
 
-// Catálogo completo de regalos Colombia (seed de la Etapa 6)
+const LS_KEY = "reactstream_gift_catalog_v2";
+
+function loadCatalogFromStorage(): GiftItem[] {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as GiftItem[];
+  } catch { return []; }
+}
+
+function saveCatalogToStorage(items: GiftItem[]): void {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(items)); } catch {}
+}
+
+/** Fusiona catálogo fresco con el guardado.
+ *  Solo actualiza un regalo si el nombre, coins o imagen cambiaron. */
+function mergeCatalog(fresh: GiftItem[], stored: GiftItem[]): { catalog: GiftItem[]; changed: boolean } {
+  const map = new Map(stored.map(g => [g.id, g]));
+  let changed = false;
+  for (const g of fresh) {
+    const prev = map.get(g.id);
+    if (!prev || prev.coins !== g.coins || prev.imageUrl !== g.imageUrl || prev.name !== g.name) {
+      map.set(g.id, g);
+      changed = true;
+    }
+  }
+  return { catalog: Array.from(map.values()).sort((a, b) => a.coins - b.coins), changed };
+}
+
+// Catálogo mínimo de fallback (sin imágenes) — solo se usa si no hay nada guardado
 export const GIFT_CATALOG: GiftItem[] = [
-  { id:"7445", name:"Taza de café",         coins:1,     region:"CO" },
-  { id:"6861", name:"Helado",               coins:1,     region:"CO" },
-  { id:"6268", name:"Palomitas",            coins:1,     region:"CO" },
-  { id:"5655", name:"Rosa",                 coins:1,     region:"CO" },
-  { id:"6480", name:"Dedo pulgar",          coins:1,     region:"CO" },
-  { id:"5657", name:"TikTok",              coins:1,     region:"CO" },
-  { id:"6136", name:"Corazón me encanta",  coins:1,     region:"CO" },
-  { id:"7022", name:"Osito abrazable",      coins:1,     region:"CO" },
-  { id:"5888", name:"Manos de amor",        coins:5,     region:"CO" },
-  { id:"6140", name:"Corazones rosas",      coins:5,     region:"CO" },
-  { id:"6741", name:"Teléfono inteligente", coins:5,     region:"CO" },
-  { id:"6488", name:"Globos de corazón",   coins:10,    region:"CO" },
-  { id:"7333", name:"Chispa mágica",       coins:10,    region:"CO" },
-  { id:"5904", name:"Perfume",              coins:20,    region:"CO" },
-  { id:"7191", name:"Cohete espacial",      coins:20,    region:"CO" },
-  { id:"6139", name:"Micrófono",           coins:25,    region:"CO" },
-  { id:"7004", name:"Casco de fútbol",     coins:25,    region:"CO" },
+  { id:"5655", name:"Rosa",             coins:1,  region:"CO" },
+  { id:"7934", name:"Corazón",          coins:1,  region:"CO" },
+  { id:"5487", name:"Corazón con dedos",coins:5,  region:"CO" },
+  { id:"5827", name:"Cono de helado",   coins:1,  region:"CO" },
+  { id:"5658", name:"Perfume",          coins:20, region:"CO" },
+  { id:"5879", name:"Dona",             coins:30, region:"CO" },
+  { id:"7122", name:"Pistola de gemas", coins:500,region:"CO" },
+  { id:"7123", name:"Globo brillante",  coins:1000,region:"CO" },
   { id:"6748", name:"Coche deportivo",      coins:50,    region:"CO" },
   { id:"6407", name:"Trofeo",              coins:50,    region:"CO" },
   { id:"5662", name:"Palmas",              coins:99,    region:"CO" },
@@ -117,28 +128,43 @@ interface GiftPickerModalProps {
 export default function GiftPickerModal({ onSelect, onClose, selectedId }: GiftPickerModalProps) {
   const [search, setSearch] = useState("");
   const [rangeIdx, setRangeIdx] = useState(0);
-  const [catalog, setCatalog] = useState<GiftItem[]>(GIFT_CATALOG);
-  const [loading, setLoading] = useState(false);
+  const stored = loadCatalogFromStorage();
+  const [catalog, setCatalog] = useState<GiftItem[]>(stored.length > 0 ? stored : GIFT_CATALOG);
+  const [loading, setLoading] = useState(stored.length === 0);
+  const [fromTikTok, setFromTikTok] = useState(stored.length > 0);
 
-  // Intentar cargar el catálogo real desde Tauri (disponible tras conectarse a TikTok)
+  const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Carga catálogo fresco del bridge; reintenta cada 2s hasta tenerlo.
+  // Solo actualiza si hay regalos nuevos o cambió algún precio/imagen.
   useEffect(() => {
-    if (!tauriInvoke) return;
-    setLoading(true);
-    tauriInvoke("get_gift_catalog")
-      .then((items) => {
-        const typed = items as Array<{ id: string; name: string; coins: number; imageUrl?: string }>;
-        if (typed && typed.length > 0) {
-          setCatalog(typed.map((g) => ({
-            id: g.id,
-            name: g.name,
-            coins: g.coins,
-            imageUrl: g.imageUrl,
-            region: "CO",
-          })));
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const items = await invoke<Array<{ id: string; name: string; coins: number; imageUrl?: string }>>("get_gift_catalog");
+        if (!cancelled && items && items.length > 0) {
+          const fresh = items.map(g => ({ id: g.id, name: g.name, coins: g.coins, imageUrl: g.imageUrl, region: "CO" }));
+          const current = loadCatalogFromStorage();
+          const { catalog: merged, changed } = mergeCatalog(fresh, current);
+          if (changed || current.length === 0) {
+            setCatalog(merged);
+            saveCatalogToStorage(merged);
+          }
+          setFromTikTok(true);
+          setLoading(false);
+          return;
         }
-      })
-      .catch(() => {}) // fallback al catálogo estático
-      .finally(() => setLoading(false));
+      } catch {}
+      if (!cancelled) {
+        setLoading(false);
+        retryRef.current = setTimeout(load, 2000);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+      if (retryRef.current) clearTimeout(retryRef.current);
+    };
   }, []);
 
   const range = COIN_RANGES[rangeIdx] ?? COIN_RANGES[0]!;
@@ -166,7 +192,11 @@ export default function GiftPickerModal({ onSelect, onClose, selectedId }: GiftP
           <div>
             <div style={{ fontSize:14, fontWeight:700 }}>Seleccionar Regalo</div>
             <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)", marginTop:2 }}>
-              {loading ? "Cargando catálogo..." : `${filtered.length} regalos · ${catalog === GIFT_CATALOG ? "catálogo base (conecta TikTok para ver todos)" : "catálogo sincronizado con TikTok ✓"}`}
+              {loading
+                ? "Cargando catálogo..."
+                : fromTikTok
+                  ? `${filtered.length} regalos · TikTok en vivo ✓`
+                  : `${filtered.length} regalos · caché guardada`}
             </div>
           </div>
           <button onClick={onClose} style={{ background:"none", border:"none", color:"rgba(255,255,255,0.5)", cursor:"pointer", fontSize:20, lineHeight:1, padding:4 }}>×</button>

@@ -1525,6 +1525,37 @@ input::placeholder { color: #59615b; }
   height: 30px;
 }
 
+/* Botón de cerrar sesión — aparece en hover sobre el avatar */
+.live-profile-logout-btn {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0f1410;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.15s, transform 0.15s, color 0.15s, border-color 0.15s;
+  padding: 0;
+  z-index: 2;
+}
+.live-profile-logout-btn:hover {
+  color: #fca5a5;
+  border-color: rgba(239,68,68,0.5);
+  background: rgba(239,68,68,0.1);
+}
+.live-profile-avatar:hover .live-profile-logout-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .topbar-live-profile.is-live .live-profile-avatar {
   border-color: var(--rs-green);
   box-shadow: 0 0 14px rgba(57,255,20,.26), inset 0 0 15px rgba(57,255,20,.08);
@@ -1791,4 +1822,1134 @@ input::placeholder { color: #59615b; }
 
 .topbar-stats .stat-item {
   align-self: center;
+}
+
+/* ReactStream v35 — cuenta TikTok integrada en el panel de estadísticas. */
+.topbar-stats {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.topbar-stats .stats-main {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 10px 18px 5px;
+}
+
+.topbar-stats .stats-title-row {
+  justify-content: flex-start;
+}
+
+.topbar-live-profile {
+  flex: 0 0 190px;
+  min-width: 190px;
+  margin: 8px 8px 8px 0;
+  padding: 8px 10px;
+  border-left: 1px solid rgba(255,255,255,.13);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: .2s ease;
+}
+
+.live-profile-avatar {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #aeb6b0;
+  background: radial-gradient(circle at 35% 30%, #1a211d, #080b09 72%);
+  border: 2px solid rgba(255,255,255,.13);
+  box-shadow: inset 0 0 15px rgba(0,0,0,.35);
+  overflow: hidden;
+}
+
+.live-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.live-profile-avatar svg {
+  width: 30px;
+  height: 30px;
+}
+
+.topbar-live-profile.is-live .live-profile-avatar {
+  border-color: var(--rs-green);
+  box-shadow: 0 0 14px rgba(57,255,20,.26), inset 0 0 15px rgba(57,255,20,.08);
+}
+
+.live-profile-dot {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--rs-green);
+  border: 2px solid #080b09;
+  box-shadow: 0 0 8px var(--rs-green);
+}
+
+.live-profile-copy {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.live-profile-username {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f3f6f3;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.live-profile-name {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #9ca59f;
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.live-profile-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  color: var(--rs-green);
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.live-profile-status .status-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.topbar-tiktok-login {
+  width: 166px;
+  min-height: 32px;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.topbar-tiktok-login svg { flex: 0 0 auto; }
+
+@media (max-width: 1250px) {
+  .topbar-live-profile {
+    flex-basis: 175px;
+    min-width: 175px;
+  }
+  .topbar-tiktok-login { width: 150px; font-size: 9px; }
+}
+
+@media (max-width: 1050px) {
+  .topbar-live-profile {
+    flex-basis: 155px;
+    min-width: 155px;
+  }
+  .live-profile-avatar { width: 50px; height: 50px; flex-basis: 50px; }
+  .topbar-tiktok-login { width: 135px; font-size: 9px; }
+}
+
+/* ============================================================
+   REACTSTREAM — GLASS SHELL v1
+   Home artwork is the single visual source of truth. The UI
+   chrome floats above it instead of reserving layout space.
+   ============================================================ */
+:root {
+  --rs-glass: rgba(8, 16, 11, .38);
+  --rs-glass-strong: rgba(7, 15, 10, .58);
+  --rs-glass-border: rgba(255,255,255,.14);
+  --rs-glass-highlight: rgba(255,255,255,.10);
+  --rs-glass-blur: 28px;
+  --rs-sidebar-width: 204px;
+}
+
+.rs-app-shell {
+  position: relative !important;
+  display: block !important;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #020403;
+}
+
+.rs-app-shell::before,
+.rs-app-shell::after { display: none !important; }
+
+.rs-main-content {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden !important;
+  border-radius: 0 !important;
+  z-index: 1;
+}
+
+.rs-page-loader {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,.7);
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(8px);
+}
+
+.home-page.home-artwork-page {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #020403 !important;
+  box-shadow: none !important;
+}
+
+.home-artwork-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: fill;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Floating Liquid Glass navigation */
+.rs-sidebar.glass-sidebar {
+  position: absolute !important;
+  z-index: 20;
+  left: 14px;
+  top: 12px;
+  bottom: 12px;
+  width: var(--rs-sidebar-width);
+  min-height: 0;
+  margin: 0;
+  padding: 10px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.025)),
+    rgba(5, 14, 9, .34);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 0 34px rgba(57,255,20,.055),
+    0 18px 50px rgba(0,0,0,.42),
+    0 0 35px rgba(57,255,20,.045);
+  backdrop-filter: blur(var(--rs-glass-blur)) saturate(145%);
+  -webkit-backdrop-filter: blur(var(--rs-glass-blur)) saturate(145%);
+  overflow: hidden;
+}
+
+.rs-sidebar.glass-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgba(255,255,255,.12), transparent 24%, transparent 72%, rgba(57,255,20,.09));
+  opacity: .7;
+}
+
+.glass-sidebar-logo {
+  position: relative;
+  z-index: 1;
+  height: 98px;
+  flex: 0 0 98px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+.glass-sidebar-logo img {
+  width: 104px;
+  height: 72px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(57,255,20,.28));
+}
+
+.glass-sidebar .sidebar-nav {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+}
+
+.sidebar-top-items,
+.sidebar-bottom-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.glass-sidebar-item {
+  position: relative;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 15px;
+  border: 1px solid transparent;
+  border-radius: 17px;
+  background: rgba(0,0,0,.10);
+  color: #e7ebe8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.glass-sidebar-item:hover {
+  background: rgba(255,255,255,.065);
+  border-color: rgba(255,255,255,.11);
+}
+
+.glass-sidebar-item.active {
+  background: linear-gradient(105deg, rgba(57,255,20,.18), rgba(57,255,20,.045));
+  border-color: rgba(100,255,75,.35);
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 0 22px rgba(57,255,20,.09);
+}
+
+.glass-sidebar-item.active::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 13px;
+  bottom: 13px;
+  width: 3px;
+  border-radius: 0 5px 5px 0;
+  background: var(--rs-green);
+  box-shadow: 0 0 12px var(--rs-green);
+}
+
+.glass-sidebar-item .sidebar-icon-svg {
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  color: rgba(245,248,246,.9);
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,.35));
+}
+
+.glass-sidebar-item.active .sidebar-icon-svg {
+  color: var(--rs-green);
+  filter: drop-shadow(0 0 8px rgba(57,255,20,.58));
+}
+
+.glass-sidebar-item .sidebar-label {
+  color: rgba(244,247,245,.88);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.22;
+  white-space: pre-line;
+}
+
+.glass-sidebar-item.active .sidebar-label { color: #f5fff2; }
+
+/* Floating David R card */
+.rs-profile-card {
+  position: absolute;
+  z-index: 30;
+  top: 12px;
+  right: 14px;
+  min-width: 190px;
+  height: 68px;
+  padding: 8px 14px 8px 9px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 22px;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.10), rgba(255,255,255,.025)),
+    rgba(5,14,9,.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 0 22px rgba(57,255,20,.045),
+    0 16px 42px rgba(0,0,0,.38);
+  backdrop-filter: blur(28px) saturate(145%);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
+}
+
+.rs-profile-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(120deg, rgba(255,255,255,.08), transparent 35%, rgba(57,255,20,.06));
+}
+
+.rs-profile-avatar {
+  position: relative;
+  width: 49px;
+  height: 49px;
+  flex: 0 0 49px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.055);
+  color: rgba(255,255,255,.72);
+  box-shadow: 0 4px 14px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.10);
+}
+
+.rs-profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rs-profile-avatar svg { width: 25px; height: 25px; }
+.rs-profile-avatar span:not(.rs-profile-status-dot) { font-weight: 800; color: var(--rs-green); }
+
+.rs-profile-status-dot {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--rs-green);
+  border: 2px solid rgba(5,14,9,.92);
+  box-shadow: 0 0 9px rgba(57,255,20,.9);
+}
+
+.rs-profile-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+.rs-profile-copy strong {
+  color: #f5f7f5;
+  font-size: 15px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.rs-profile-copy span {
+  color: rgba(220,227,222,.64);
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  :root { --rs-sidebar-width: 174px; }
+  .rs-sidebar.glass-sidebar { left: 9px; top: 9px; bottom: 9px; width: var(--rs-sidebar-width); border-radius: 22px; }
+  .glass-sidebar-logo { height: 84px; flex-basis: 84px; }
+  .glass-sidebar-logo img { width: 86px; height: 62px; }
+  .glass-sidebar-item { min-height: 55px; padding: 8px 11px; gap: 10px; }
+  .glass-sidebar-item .sidebar-icon-svg { width: 22px; height: 22px; flex-basis: 22px; }
+  .glass-sidebar-item .sidebar-label { font-size: 12px; }
+  .rs-profile-card { top: 9px; right: 9px; min-width: 168px; height: 60px; border-radius: 19px; }
+  .rs-profile-avatar { width: 43px; height: 43px; flex-basis: 43px; }
+}
+
+/* Legacy header/footer are intentionally not part of the new shell. */
+.rs-topbar,
+.rs-statusbar { display: none !important; }
+
+/* Sidebar refinement — exact visual proportions from the approved reference */
+:root { --rs-sidebar-width: 218px; }
+
+.rs-sidebar.glass-sidebar {
+  left: 8px;
+  top: 8px;
+  bottom: 8px;
+  width: var(--rs-sidebar-width);
+  padding: 10px 10px 12px;
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+    rgba(5, 14, 9, .34);
+  backdrop-filter: blur(34px) saturate(150%);
+  -webkit-backdrop-filter: blur(34px) saturate(150%);
+}
+
+.glass-sidebar-logo {
+  height: 138px;
+  flex: 0 0 138px;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: center;
+  padding: 5px 7px 9px;
+}
+
+.glass-sidebar-mark {
+  width: 122px !important;
+  height: 82px !important;
+  object-fit: contain;
+  filter: drop-shadow(0 0 13px rgba(57,255,20,.3));
+}
+
+.glass-sidebar-wordmark {
+  width: 170px !important;
+  height: 57px !important;
+  object-fit: contain;
+  object-position: center;
+  margin-top: -7px;
+  filter: drop-shadow(0 0 8px rgba(57,255,20,.13));
+}
+
+.glass-sidebar .sidebar-nav {
+  padding-top: 12px;
+  gap: 14px;
+}
+
+.sidebar-top-items,
+.sidebar-bottom-items {
+  gap: 8px;
+}
+
+.glass-sidebar-item {
+  min-height: 76px;
+  padding: 11px 16px;
+  border-radius: 18px;
+  gap: 15px;
+}
+
+.glass-sidebar-item .sidebar-icon-svg {
+  width: 29px;
+  height: 29px;
+  flex-basis: 29px;
+}
+
+.glass-sidebar-item .sidebar-label {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.18;
+}
+
+.sidebar-config-divider {
+  height: 1px;
+  width: calc(100% - 22px);
+  margin: 4px auto 8px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+  box-shadow: 0 1px 0 rgba(57,255,20,.025);
+}
+
+.rs-profile-card {
+  top: 8px;
+  right: 8px;
+  min-width: 198px;
+  height: 70px;
+  border-radius: 22px;
+}
+
+@media (max-width: 900px) {
+  :root { --rs-sidebar-width: 190px; }
+  .rs-sidebar.glass-sidebar { left: 7px; top: 7px; bottom: 7px; width: var(--rs-sidebar-width); }
+  .glass-sidebar-logo { height: 116px; flex-basis: 116px; }
+  .glass-sidebar-mark { width: 80px !important; height: 56px !important; }
+  .glass-sidebar-wordmark { width: 148px !important; height: 50px !important; }
+  .glass-sidebar-item { min-height: 64px; padding: 9px 13px; }
+  .glass-sidebar-item .sidebar-icon-svg { width: 25px; height: 25px; flex-basis: 25px; }
+  .glass-sidebar-item .sidebar-label { font-size: 13px; }
+}
+
+/* Complete ReactStream branding: one transparent asset, no split logo/text layers. */
+.glass-sidebar-logo {
+  height: 158px;
+  flex: 0 0 158px;
+  padding: 6px 10px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(255,255,255,.11);
+}
+
+.glass-sidebar-complete-logo {
+  display: block;
+  width: 190px;
+  height: 128px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(57,255,20,.16));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+@media (max-width: 900px) {
+  .glass-sidebar-logo { height: 132px; flex-basis: 132px; }
+  .glass-sidebar-complete-logo { width: 164px; height: 110px; }
+}
+
+
+/* Final branding proportions — complete logo as a single transparent asset */
+.rs-sidebar.glass-sidebar {
+  --rs-sidebar-width: 218px;
+}
+
+.glass-sidebar-logo {
+  height: 168px !important;
+  flex: 0 0 168px !important;
+  padding: 4px 0 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.glass-sidebar-complete-logo {
+  width: 224px !important;
+  height: 150px !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  filter: drop-shadow(0 0 14px rgba(57,255,20,.22));
+}
+
+@media (max-width: 900px) {
+  .glass-sidebar-logo {
+    height: 148px !important;
+    flex-basis: 148px !important;
+  }
+  .glass-sidebar-complete-logo {
+    width: 196px !important;
+    height: 132px !important;
+  }
+}
+
+
+/* Home visual layer: SVG background + unified central ReactStream logo */
+.home-background-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+.home-central-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(58vw, 900px);
+  height: auto;
+  max-height: 78vh;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  z-index: 2;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 0 18px rgba(57,255,20,.10));
+}
+
+@media (max-width: 900px) {
+  .home-central-logo {
+    width: min(62vw, 680px);
+    max-height: 70vh;
+  }
+}
+
+/* ============================================================
+   SHELL POLISH — points 2, 3, 4, 5 & 6
+   ============================================================ */
+
+/* 2. David R — larger reference-sized glass card */
+.rs-profile-card {
+  top: 14px;
+  right: 16px;
+  width: 248px;
+  min-width: 248px;
+  height: 84px;
+  padding: 10px 17px 10px 11px;
+  gap: 13px;
+  border-radius: 24px;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.105), rgba(255,255,255,.028)),
+    rgba(5,14,9,.30);
+  border-color: rgba(255,255,255,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 0 24px rgba(57,255,20,.055),
+    0 16px 44px rgba(0,0,0,.38),
+    0 0 22px rgba(57,255,20,.035);
+  backdrop-filter: blur(34px) saturate(150%);
+  -webkit-backdrop-filter: blur(34px) saturate(150%);
+}
+
+.rs-profile-avatar {
+  width: 56px;
+  height: 56px;
+  flex-basis: 56px;
+  border-color: rgba(255,255,255,.20);
+  box-shadow: 0 5px 16px rgba(0,0,0,.30), inset 0 1px rgba(255,255,255,.12);
+}
+
+.rs-profile-avatar svg { width: 28px; height: 28px; }
+
+.rs-profile-status-dot {
+  right: 0;
+  bottom: 1px;
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.rs-profile-copy { gap: 4px; }
+.rs-profile-copy strong { font-size: 17px; }
+.rs-profile-copy span { font-size: 11px; }
+
+/* 3. More transparent / deeper Liquid Glass */
+.rs-sidebar.glass-sidebar {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+    rgba(4,12,8,.28);
+  border-color: rgba(255,255,255,.18);
+  backdrop-filter: blur(40px) saturate(155%);
+  -webkit-backdrop-filter: blur(40px) saturate(155%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 0 38px rgba(57,255,20,.045),
+    0 20px 54px rgba(0,0,0,.40),
+    0 0 32px rgba(57,255,20,.045);
+}
+
+.rs-sidebar.glass-sidebar::before {
+  background:
+    linear-gradient(115deg, rgba(255,255,255,.13), transparent 23%, transparent 68%, rgba(57,255,20,.075));
+  opacity: .72;
+}
+
+/* 4. Let the lower-left green glow bleed through the glass without
+      turning the whole sidebar into a green panel. */
+.rs-sidebar.glass-sidebar::after {
+  content: "";
+  position: absolute;
+  left: -35%;
+  right: -25%;
+  bottom: -14%;
+  height: 48%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at 35% 72%, rgba(57,255,20,.22), rgba(57,255,20,.07) 36%, transparent 70%);
+  filter: blur(24px);
+  opacity: .72;
+}
+
+/* 5. Modules — slightly larger, airier and closer to the reference */
+.glass-sidebar .sidebar-nav {
+  padding-top: 14px;
+  gap: 16px;
+}
+
+.sidebar-top-items,
+.sidebar-bottom-items { gap: 10px; }
+
+.glass-sidebar-item {
+  min-height: 80px;
+  padding: 12px 17px;
+  border-radius: 19px;
+  gap: 16px;
+  background: rgba(0,0,0,.075);
+}
+
+.glass-sidebar-item:hover {
+  background: rgba(255,255,255,.055);
+  border-color: rgba(255,255,255,.105);
+}
+
+.glass-sidebar-item.active {
+  background:
+    linear-gradient(105deg, rgba(57,255,20,.205), rgba(57,255,20,.055)),
+    rgba(5,18,8,.12);
+  border-color: rgba(100,255,75,.38);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.09),
+    inset 0 0 22px rgba(57,255,20,.035),
+    0 0 22px rgba(57,255,20,.095);
+}
+
+.glass-sidebar-item.active::before {
+  top: 11px;
+  bottom: 11px;
+  width: 4px;
+}
+
+.glass-sidebar-item .sidebar-icon-svg {
+  width: 31px;
+  height: 31px;
+  flex-basis: 31px;
+}
+
+.glass-sidebar-item .sidebar-label {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.18;
+}
+
+/* 6. Config divider — longer, cleaner and visually separated */
+.sidebar-config-divider {
+  width: calc(100% - 28px);
+  height: 1px;
+  margin: 8px auto 12px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.20) 18%, rgba(255,255,255,.20) 82%, transparent);
+  box-shadow: 0 1px 0 rgba(57,255,20,.035);
+}
+
+/* Keep the bottom Config button visually balanced after enlarging modules. */
+.sidebar-bottom-items .glass-sidebar-item {
+  min-height: 76px;
+}
+
+@media (max-width: 900px) {
+  .rs-profile-card {
+    top: 9px;
+    right: 10px;
+    width: 205px;
+    min-width: 205px;
+    height: 70px;
+  }
+  .rs-profile-avatar {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+  }
+  .rs-profile-copy strong { font-size: 15px; }
+  .rs-profile-copy span { font-size: 10px; }
+
+  .glass-sidebar-item { min-height: 68px; }
+  .glass-sidebar-item .sidebar-icon-svg { width: 27px; height: 27px; flex-basis: 27px; }
+  .glass-sidebar-item .sidebar-label { font-size: 13px; }
+}
+
+
+/* ============================================================
+   ACTIONS & EVENTS — KEYSTROKE V10
+   Visual layer for the approved Liquid Glass shell.
+   Logic remains in the existing React pages.
+   ============================================================ */
+.actions-module-shell {
+  position: absolute;
+  inset: 0;
+  padding: 52px 66px 14px 232px;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #f4f8f5;
+}
+
+.actions-module-header {
+  height: 86px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.actions-module-title-row { display: flex; align-items: center; gap: 17px; }
+.actions-module-title-icon {
+  width: 48px; height: 58px; display: block;
+  flex: 0 0 48px;
+  color: var(--rs-green);
+  transform: none;
+  filter: drop-shadow(0 0 11px rgba(57,255,20,.45));
+}
+.actions-module-header h1 { margin: 0; font-size: 25px; line-height: 1.05; font-weight: 800; letter-spacing: -.02em; }
+.actions-module-header p { margin: 7px 0 0; color: rgba(231,238,234,.72); font-size: 13px; }
+
+.actions-module-card {
+  height: calc(100% - 86px);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(57,255,20,.42);
+  border-radius: 22px;
+  background: linear-gradient(120deg, rgba(7,18,11,.50), rgba(4,10,7,.32));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 50px rgba(57,255,20,.025), 0 18px 50px rgba(0,0,0,.28), 0 0 28px rgba(57,255,20,.07);
+  backdrop-filter: blur(26px) saturate(145%);
+  -webkit-backdrop-filter: blur(26px) saturate(145%);
+}
+.actions-module-tabs {
+  height: 58px; flex: 0 0 58px; display: flex; align-items: stretch; gap: 3px;
+  padding: 6px 12px 0; border-bottom: 1px solid rgba(255,255,255,.10);
+  background: rgba(3,10,6,.18);
+}
+.actions-module-tab {
+  min-width: 168px; height: 51px; padding: 0 21px; border: 1px solid transparent; border-bottom: 0;
+  border-radius: 12px 12px 0 0; background: transparent; color: rgba(237,244,240,.72);
+  display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 650;
+  transition: .18s ease; position: relative;
+}
+.actions-module-tab:hover { color: #fff; background: rgba(255,255,255,.035); }
+.actions-module-tab.active {
+  color: var(--rs-green); background: rgba(57,255,20,.075); border-color: rgba(57,255,20,.60);
+  box-shadow: inset 0 -2px 0 var(--rs-green), 0 0 18px rgba(57,255,20,.10);
+}
+.actions-module-tab-icon { font-size: 13px; }
+.actions-module-content { flex: 1; min-height: 0; overflow: hidden; margin: 0; padding: 18px 20px 18px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+
+.keystroke-workspace { width: 100%; height: 100%; min-height: 0; display: flex; overflow: hidden; }
+.keystroke-list-panel {
+  width: 350px; flex: 0 0 350px; min-height: 0; display: flex; flex-direction: column;
+  border-right: 1px solid rgba(255,255,255,.10); background: rgba(3,10,6,.14);
+}
+.keystroke-list-head { height: 56px; flex: 0 0 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; }
+.keystroke-list-head > span { font-size: 12px; letter-spacing: .15em; font-weight: 800; color: rgba(220,230,224,.70); }
+.keystroke-list-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 18px 16px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; scrollbar-color: rgba(57,255,20,.25) transparent; }
+.keystroke-list-item {
+  width: 100%; min-height: 70px; padding: 11px 12px; display: flex; align-items: center; gap: 9px; text-align: left;
+  border: 1px solid rgba(255,255,255,.13); border-radius: 13px; background: rgba(5,13,9,.42); color: #fff; cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035); transition: .18s ease;
+}
+.keystroke-list-item:hover { border-color: rgba(57,255,20,.30); background: rgba(10,24,14,.52); }
+.keystroke-list-item.active { border-color: rgba(57,255,20,.75); background: linear-gradient(100deg, rgba(57,255,20,.15), rgba(57,255,20,.045)); box-shadow: inset 0 0 22px rgba(57,255,20,.05), 0 0 16px rgba(57,255,20,.08); }
+.keystroke-list-item.disabled { opacity: .58; }
+.keystroke-item-icon { width: 25px; flex: 0 0 25px; font-size: 19px; text-align: center; }
+.keystroke-item-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.keystroke-item-copy strong { font-size: 13px; font-weight: 750; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.keystroke-item-copy small { color: rgba(220,230,224,.56); font-size: 11px; }
+.keystroke-menu { color: rgba(255,255,255,.55); font-size: 19px; line-height: 1; }
+
+.module-toggle { width: 34px; height: 19px; border-radius: 999px; background: rgba(255,255,255,.17); flex: 0 0 34px; padding: 2px; display: flex; align-items: center; cursor: pointer; transition: .16s ease; }
+.module-toggle span { width: 15px; height: 15px; border-radius: 50%; background: #9da5a0; transition: .16s ease; }
+.module-toggle.on { background: var(--rs-green); box-shadow: 0 0 12px rgba(57,255,20,.35); justify-content: flex-end; }
+.module-toggle.on span { background: #fff; }
+
+.keystroke-editor { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; padding: 15px 20px 16px 20px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: thin; scrollbar-color: rgba(57,255,20,.25) transparent; }
+.autoit-banner {
+  min-height: 52px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; gap: 10px;
+  border: 1px solid rgba(245,158,11,.42); border-radius: 12px; background: rgba(74,49,4,.20); box-shadow: inset 0 0 20px rgba(245,158,11,.025);
+}
+.autoit-icon { width: 25px; height: 25px; display: grid; place-items: center; color: #fbbf24; font-size: 21px; }
+.autoit-banner > div { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.autoit-banner strong { color: #f7b928; font-size: 12px; }
+.autoit-banner span { color: rgba(237,241,238,.67); font-size: 11px; }
+.autoit-button { padding: 8px 14px; border-radius: 9px; background: #f5a900; color: #111; text-decoration: none; font-size: 11px; font-weight: 800; white-space: nowrap; box-shadow: 0 0 14px rgba(245,158,11,.12); }
+
+.module-section { min-width: 0; }
+.module-section-title { margin-bottom: 6px; text-transform: uppercase; letter-spacing: .13em; font-size: 10px; font-weight: 800; color: rgba(205,216,209,.60); }
+.module-input { width: 100%; height: 36px; box-sizing: border-box; padding: 0 11px; border: 1px solid rgba(255,255,255,.12); border-radius: 9px; outline: none; background: rgba(2,8,5,.46); color: #f3f8f5; font-size: 11px; transition: .15s ease; }
+.module-input:focus { border-color: rgba(57,255,20,.62); box-shadow: 0 0 0 2px rgba(57,255,20,.07), 0 0 16px rgba(57,255,20,.06); }
+.module-input::placeholder { color: rgba(255,255,255,.28); }
+.trigger-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.trigger-chip { height: 34px; padding: 0 11px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,.13); border-radius: 9px; background: rgba(3,10,6,.32); color: rgba(239,245,241,.74); cursor: pointer; font-size: 11px; transition: .16s ease; }
+.trigger-chip:hover { border-color: rgba(57,255,20,.32); color: #fff; }
+.trigger-chip.active { color: var(--rs-green); border-color: rgba(57,255,20,.70); background: rgba(57,255,20,.09); box-shadow: inset 0 0 14px rgba(57,255,20,.045), 0 0 12px rgba(57,255,20,.06); font-weight: 750; }
+.gift-filter-row { display: flex; align-items: center; gap: 7px; }
+.gift-filter { flex: 1; text-align: left; cursor: pointer; display: flex; align-items: center; }
+.gift-filter:not(.filled) { color: rgba(255,255,255,.30); }
+.icon-danger-button { width: 36px; height: 36px; border-radius: 9px; border: 1px solid rgba(239,68,68,.34); background: rgba(239,68,68,.035); color: #ef4444; font-size: 18px; cursor: pointer; }
+.module-help { margin: 6px 0 0; color: rgba(218,227,221,.43); font-size: 11px; }
+.key-chips { min-height: 32px; display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 9px; }
+.key-chip { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 8px; border: 1px solid rgba(57,255,20,.64); border-radius: 8px; background: rgba(57,255,20,.08); color: var(--rs-green); font: 700 11px/1 monospace; }
+.key-chip button { padding: 0; border: 0; background: none; color: rgba(255,255,255,.48); cursor: pointer; font-size: 13px; }
+.add-key-row { display: flex; gap: 7px; }
+.two-column-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.two-column-fields label { display: flex; flex-direction: column; gap: 5px; }
+.two-column-fields label > span { color: rgba(229,237,232,.72); font-size: 11px; }
+.simulation-card { padding: 11px; border: 1px solid rgba(57,255,20,.56); border-radius: 12px; background: rgba(2,8,5,.38); box-shadow: inset 0 0 25px rgba(57,255,20,.025); }
+.simulation-buttons { display: flex; gap: 10px; }
+.simulation-run { flex: 1; height: 36px; }
+.simulation-log { min-height: 42px; padding-top: 8px; font: 10px/1.4 monospace; color: rgba(219,229,222,.50); }
+.simulation-log .log-success { color: var(--rs-green); }
+.simulation-log .log-warning { color: #f59e0b; }
+.editor-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: -2px; }
+
+.module-green-button, .module-ghost-button, .module-danger-button { border-radius: 9px; height: 36px; padding: 0 15px; font-size: 11px; font-weight: 800; cursor: pointer; transition: .16s ease; }
+.module-green-button { border: 1px solid rgba(57,255,20,.45); color: #061006; background: linear-gradient(110deg, #c8ffbf 0%, #39ff14 35%, #27e30b 100%); box-shadow: 0 0 16px rgba(57,255,20,.18); }
+.module-green-button:hover { filter: brightness(1.06); box-shadow: 0 0 22px rgba(57,255,20,.26); }
+.module-green-button:disabled, .module-ghost-button:disabled { opacity: .55; cursor: not-allowed; }
+.module-small-button { height: 34px; padding: 0 12px; }
+.module-ghost-button { border: 1px solid rgba(255,255,255,.13); color: rgba(239,245,241,.76); background: rgba(2,8,5,.34); }
+.module-ghost-button:hover { border-color: rgba(57,255,20,.35); color: #fff; }
+.module-danger-button { border: 1px solid rgba(239,68,68,.38); color: #ff6666; background: rgba(239,68,68,.025); }
+.module-danger-button:hover { background: rgba(239,68,68,.08); }
+.save-button { min-width: 164px; }
+
+@media (max-width: 1100px) {
+  .actions-module-shell { padding-left: 206px; padding-right: 30px; }
+  .keystroke-list-panel { width: 330px; flex-basis: 330px; }
+}
+@media (max-width: 900px) {
+  .actions-module-shell { padding: 48px 18px 10px 190px; }
+  .actions-module-header { height: 78px; }
+  .actions-module-card { height: calc(100% - 78px); }
+  .actions-module-header h1 { font-size: 22px; }
+  .actions-module-header p { font-size: 11px; }
+  .actions-module-title-icon { width: 48px; height: 58px; flex-basis: 48px; }
+  .actions-module-tab { min-width: 145px; padding: 0 14px; font-size: 11px; }
+  .keystroke-list-panel { width: 285px; flex-basis: 285px; }
+  .keystroke-list-scroll { padding-inline: 14px; }
+  .keystroke-editor { padding-inline: 16px; }
+}
+
+/* V15 — Shared ReactStream background + larger Actions icon */
+.actions-module-shell {
+  isolation: isolate;
+}
+
+.actions-module-background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  z-index: -1;
+}
+
+.actions-module-title-icon {
+  width: 58px;
+  height: 68px;
+  flex-basis: 58px;
+  filter: drop-shadow(0 0 14px rgba(57,255,20,.55));
+}
+
+.actions-module-title-row {
+  gap: 15px;
+}
+
+/* V12 — Keystroke spacing polish
+   Give the module content more breathing room from the tab selector
+   and keep the whole workspace comfortably clear of the floating sidebar. */
+.actions-module-shell {
+  padding-left: 246px;
+  padding-right: 66px;
+}
+
+.actions-module-content {
+  margin: 0;
+  padding: 18px 20px 18px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 1100px) {
+  .actions-module-shell {
+    padding-left: 220px;
+    padding-right: 34px;
+  }
+
+  .actions-module-content {
+    margin: 0;
+    padding: 16px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .actions-module-shell {
+    padding-left: 202px;
+    padding-right: 20px;
+  }
+
+  .actions-module-content {
+    margin: 0;
+    padding: 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+/* V16 — Keystroke shares the Actions & Events frame.
+   No secondary/inset container around the selected module. */
+.actions-module-card {
+  overflow: hidden;
+}
+
+.actions-module-content {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.keystroke-workspace {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.keystroke-list-panel,
+.keystroke-editor {
+  border-radius: 0;
+}
+
+.keystroke-list-panel {
+  background: rgba(3,10,6,.08);
+}
+
+.keystroke-editor {
+  padding: 18px 20px 18px 22px;
+}
+
+@media (max-width: 1100px) {
+  .actions-module-content { padding: 0; }
+  .keystroke-editor { padding: 16px 18px; }
+}
+
+@media (max-width: 900px) {
+  .actions-module-content { padding: 0; }
+  .keystroke-editor { padding: 14px 16px; }
 }

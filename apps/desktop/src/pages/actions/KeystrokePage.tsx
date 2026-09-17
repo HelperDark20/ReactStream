@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import GiftPickerModal, { type GiftItem } from "../../components/GiftPickerModal";
 
 const TRIGGERS = [
@@ -26,6 +26,9 @@ const MOCK: KeystrokeConfig[] = [
   { id: "ks1", name: "Rosa → Space", trigger: "gift", giftFilter: "Rosa", keys: ["Space"], repeatCount: 1, delayMs: 0, enabled: true },
   { id: "ks2", name: "Follow → F9 x5", trigger: "follow", giftFilter: "", keys: ["F9"], repeatCount: 5, delayMs: 200, enabled: true },
   { id: "ks3", name: "León → G G G G G", trigger: "gift", giftFilter: "León", keys: ["G", "G", "G", "G", "G"], repeatCount: 1, delayMs: 150, enabled: false },
+  { id: "ks4", name: "Like → Enter", trigger: "like", giftFilter: "", keys: ["Enter"], repeatCount: 1, delayMs: 0, enabled: true },
+  { id: "ks5", name: "Comentario → Ctrl + C", trigger: "comment", giftFilter: "", keys: ["Ctrl+C"], repeatCount: 1, delayMs: 0, enabled: false },
+  { id: "ks6", name: "Compartida → Alt + S", trigger: "share", giftFilter: "", keys: ["Alt+S"], repeatCount: 1, delayMs: 0, enabled: true },
 ];
 
 export default function KeystrokePage() {
@@ -89,111 +92,91 @@ export default function KeystrokePage() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
-      {/* Lista izquierda */}
-      <div style={{ width: 260, borderRight: "1px solid var(--rs-border)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
-        <div style={{ padding: "12px 12px 8px", borderBottom: "1px solid var(--rs-border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-secondary)", letterSpacing: "0.08em" }}>KEYSTROKE</span>
-          <button className="btn-green" style={{ padding: "4px 10px", fontSize: 11 }}>+ Nuevo</button>
+    <div className="keystroke-workspace">
+      <aside className="keystroke-list-panel">
+        <div className="keystroke-list-head">
+          <span>KEYSTROKE</span>
+          <button className="module-green-button module-small-button">+ Nuevo</button>
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+
+        <div className="keystroke-list-scroll">
           {configs.map((c) => {
             const trig = TRIGGERS.find((t) => t.id === c.trigger);
+            const active = selected === c.id;
             return (
               <button
                 key={c.id}
+                className={`keystroke-list-item ${active ? "active" : ""} ${!c.enabled ? "disabled" : ""}`}
                 onClick={() => { setSelected(c.id); setSimLog([]); }}
-                style={{
-                  width: "100%", textAlign: "left", padding: "10px 12px",
-                  background: selected === c.id ? "rgba(57,255,20,0.08)" : "rgba(12,16,14,0.72)",
-                  border: `1px solid ${selected === c.id ? "var(--rs-border-green)" : "rgba(255,255,255,0.1)"}`,
-                  borderRadius: 10, cursor: "pointer", opacity: c.enabled ? 1 : 0.5, transition: "all 0.15s",
-                }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                  <span>{trig?.icon}</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--rs-text-primary)", flex: 1 }}>{c.name}</span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setConfigs((prev) => prev.map((x) => x.id === c.id ? { ...x, enabled: !x.enabled } : x)); }}
-                    style={{ width: 32, height: 18, borderRadius: 9, border: "none", cursor: "pointer", background: c.enabled ? "var(--rs-green)" : "#333", position: "relative", flexShrink: 0 }}
-                  />
-                </div>
-                <div style={{ fontSize: 11, color: "var(--rs-text-muted)" }}>
-                  {c.keys.join(" → ")} · ×{c.repeatCount}
-                </div>
+                <span className="keystroke-item-icon">{trig?.icon}</span>
+                <span className="keystroke-item-copy">
+                  <strong>{c.name}</strong>
+                  <small>{c.keys.join(" → ")} · ×{c.repeatCount}</small>
+                </span>
+                <span
+                  role="switch"
+                  aria-checked={c.enabled}
+                  className={`module-toggle ${c.enabled ? "on" : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setConfigs((prev) => prev.map((x) => x.id === c.id ? { ...x, enabled: !x.enabled } : x));
+                  }}
+                >
+                  <span />
+                </span>
+                <span className="keystroke-menu">⋮</span>
               </button>
             );
           })}
         </div>
-      </div>
+      </aside>
 
-      {/* Panel derecho */}
       {!cfg ? (
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 10 }}>
-          <span style={{ fontSize: 32 }}>⌨</span>
-          <span style={{ color: "var(--rs-text-muted)", fontSize: 14 }}>Selecciona un KeyStroke para editarlo</span>
+        <div className="keystroke-empty">
+          <span>⌨</span>
+          <p>Selecciona un KeyStroke para editarlo</p>
         </div>
       ) : (
-        <div style={{ flex: 1, overflowY: "auto", padding: 20, display: "flex", flexDirection: "column", gap: 18 }}>
-          {/* AutoIt banner */}
+        <div className="keystroke-editor">
           {!autoitInstalled && (
-            <div style={{ padding: "10px 14px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 10, display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 20 }}>⚠️</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#f59e0b" }}>AutoIt no detectado</div>
-                <div style={{ fontSize: 12, color: "var(--rs-text-secondary)" }}>KeyStroke requiere AutoIt para ejecutar pulsaciones reales en el sistema</div>
+            <div className="autoit-banner">
+              <span className="autoit-icon">⚠</span>
+              <div>
+                <strong>AutoIt no detectado</strong>
+                <span>KeyStroke requiere AutoIt para ejecutar pulsaciones reales en el sistema</span>
               </div>
-              <a
-                href="https://www.autoitscript.com/files/autoit3/autoit-v3-setup.zip"
-                target="_blank" rel="noreferrer"
-                style={{ background: "#f59e0b", color: "#000", fontWeight: 700, fontSize: 12, padding: "6px 14px", borderRadius: 7, textDecoration: "none", flexShrink: 0 }}
-              >
-                Descargar AutoIt
-              </a>
+              <a href="https://www.autoitscript.com/files/autoit3/autoit-v3-setup.zip" target="_blank" rel="noreferrer" className="autoit-button">⇩ Descargar AutoIt</a>
             </div>
           )}
 
           <Section title="Nombre">
-            <input value={cfg.name} onChange={(e) => updateCfg({ name: e.target.value })} style={{ width: "100%" }} />
+            <input className="module-input" value={cfg.name} onChange={(e) => updateCfg({ name: e.target.value })} />
           </Section>
 
           <Section title="Trigger">
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {TRIGGERS.map((t) => (
-                <button key={t.id} onClick={() => updateCfg({ trigger: t.id })} style={{
-                  padding: "6px 12px", borderRadius: 8,
-                  border: `1px solid ${cfg.trigger === t.id ? "var(--rs-border-green)" : "var(--rs-border)"}`,
-                  background: cfg.trigger === t.id ? "rgba(57,255,20,0.08)" : "transparent",
-                  color: cfg.trigger === t.id ? "var(--rs-green)" : "var(--rs-text-secondary)",
-                  cursor: "pointer", fontSize: 12, fontWeight: cfg.trigger === t.id ? 700 : 400,
-                }}>
-                  {t.icon} {t.label}
-                </button>
-              ))}
+            <div className="trigger-row">
+              {TRIGGERS.map((t) => {
+                const active = cfg.trigger === t.id;
+                return (
+                  <button key={t.id} className={`trigger-chip ${active ? "active" : ""}`} onClick={() => updateCfg({ trigger: t.id })}>
+                    <span>{t.icon}</span>{t.label}
+                  </button>
+                );
+              })}
             </div>
           </Section>
 
           {cfg.trigger === "gift" && (
-            <Section title="Filtro de regalo">
-              <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-                <div style={{ flex:1, padding:"8px 12px", background:"rgba(5,7,6,0.9)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, fontSize:13, color: cfg.giftFilter ? "#fff" : "rgba(255,255,255,0.3)", cursor:"pointer" }}
-                  onClick={() => setShowGiftPicker(true)}>
+            <Section title="Filtro de regalo (nombre o ID)">
+              <div className="gift-filter-row">
+                <button className={`module-input gift-filter ${cfg.giftFilter ? "filled" : ""}`} onClick={() => setShowGiftPicker(true)}>
                   {cfg.giftFilter || "Seleccionar regalo..."}
-                </div>
-                {cfg.giftFilter && (
-                  <button className="btn-ghost" style={{ fontSize:12, padding:"6px 10px", color:"#ef4444", borderColor:"rgba(239,68,68,0.3)" }}
-                    onClick={() => updateCfg({ giftFilter: "" })}>
-                    ✕
-                  </button>
-                )}
-                <button className="btn-green" style={{ fontSize:12, padding:"7px 14px" }}
-                  onClick={() => setShowGiftPicker(true)}>
-                  🎁 Elegir
                 </button>
+                {cfg.giftFilter && <button className="icon-danger-button" onClick={() => updateCfg({ giftFilter: "" })}>×</button>}
+                <button className="module-green-button" onClick={() => setShowGiftPicker(true)}>🎁 Elegir</button>
               </div>
-              <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)", marginTop:5 }}>
-                Vacío = cualquier regalo dispara la acción
-              </div>
+              <p className="module-help">Vacío = cualquier regalo dispara la acción</p>
               {showGiftPicker && (
                 <GiftPickerModal
                   selectedId={cfg.giftFilter}
@@ -205,69 +188,44 @@ export default function KeystrokePage() {
           )}
 
           <Section title="Secuencia de teclas">
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+            <div className="key-chips">
               {cfg.keys.map((k, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", background: "rgba(57,255,20,0.08)", border: "1px solid var(--rs-border-green)", borderRadius: 7 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--rs-green)", fontFamily: "monospace" }}>{k}</span>
-                  <button onClick={() => removeKey(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--rs-text-muted)", fontSize: 14, lineHeight: 1, padding: 0 }}>×</button>
-                </div>
+                <span key={i} className="key-chip">
+                  {k}<button onClick={() => removeKey(i)}>×</button>
+                </span>
               ))}
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <input
-                value={newKey}
-                onChange={(e) => setNewKey(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") addKey(); }}
-                placeholder="Ej: Space, F9, G, Ctrl+C"
-                style={{ flex: 1 }}
-              />
-              <button className="btn-green" onClick={addKey}>Agregar</button>
+            <div className="add-key-row">
+              <input className="module-input" value={newKey} onChange={(e) => setNewKey(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") addKey(); }} placeholder="Ej: Space, F9, G, Ctrl+C" />
+              <button className="module-green-button" onClick={addKey}>Agregar</button>
             </div>
-            <div style={{ fontSize: 11, color: "var(--rs-text-muted)", marginTop: 6 }}>
-              Presiona Enter para agregar. Puedes escribir combinaciones como Ctrl+C, Alt+F4 queda bloqueado por seguridad.
-            </div>
+            <p className="module-help">Presiona Enter para agregar. Puedes escribir combinaciones como Ctrl+C, Alt+F4 queda bloqueado por seguridad.</p>
           </Section>
 
           <Section title="Repetición y delay">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div>
-                <div style={{ fontSize: 12, color: "var(--rs-text-secondary)", marginBottom: 6 }}>Repetir x veces</div>
-                <input type="number" min={1} max={100} value={cfg.repeatCount} onChange={(e) => updateCfg({ repeatCount: Number(e.target.value) })} style={{ width: "100%" }} />
-              </div>
-              <div>
-                <div style={{ fontSize: 12, color: "var(--rs-text-secondary)", marginBottom: 6 }}>Delay entre pulsaciones (ms)</div>
-                <input type="number" min={0} max={5000} value={cfg.delayMs} onChange={(e) => updateCfg({ delayMs: Number(e.target.value) })} style={{ width: "100%" }} />
-              </div>
+            <div className="two-column-fields">
+              <label><span>Repetir x veces</span><input className="module-input" type="number" min={1} max={100} value={cfg.repeatCount} onChange={(e) => updateCfg({ repeatCount: Number(e.target.value) })} /></label>
+              <label><span>Delay entre pulsaciones (ms)</span><input className="module-input" type="number" min={0} max={5000} value={cfg.delayMs} onChange={(e) => updateCfg({ delayMs: Number(e.target.value) })} /></label>
             </div>
           </Section>
 
           <Section title="Simulación">
-            <div style={{ background: "rgba(5,7,6,0.9)", border: "1px solid var(--rs-border-green)", borderRadius: 10, padding: 14 }}>
-              <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
-                <button className="btn-green" onClick={() => runSim(0)} disabled={simRunning} style={{ flex: 1 }}>
-                  ▶ Ejecutar ahora
-                </button>
-                <button className="btn-ghost" onClick={() => runSim(5000)} disabled={simRunning} style={{ flex: 1 }}>
-                  ⏱ Ejecutar en 5s
-                </button>
+            <div className="simulation-card">
+              <div className="simulation-buttons">
+                <button className="module-green-button simulation-run" onClick={() => runSim(0)} disabled={simRunning}>▶ Ejecutar ahora</button>
+                <button className="module-ghost-button simulation-run" onClick={() => runSim(5000)} disabled={simRunning}>◷ Ejecutar en 5s</button>
               </div>
-              <div style={{ fontFamily: "monospace", fontSize: 12, display: "flex", flexDirection: "column", gap: 3, minHeight: 72 }}>
-                {simLog.length === 0 && !simRunning && (
-                  <span style={{ color: "var(--rs-text-muted)" }}>Pulsa un botón para simular la secuencia. Safe Action Mode ON — no se pulsarán teclas reales.</span>
-                )}
-                {simLog.map((line, i) => (
-                  <div key={i} style={{ color: line.startsWith("✓") ? "var(--rs-green)" : line.startsWith("  ⌨") ? "#a3e635" : line.startsWith("⏳") ? "#f59e0b" : "var(--rs-text-secondary)" }}>
-                    {line}
-                  </div>
-                ))}
-                {simRunning && <div style={{ color: "var(--rs-text-muted)" }}>⏳ Procesando...</div>}
+              <div className="simulation-log">
+                {simLog.length === 0 && !simRunning && <span>Pulsa un botón para simular la secuencia. Safe Action Mode ON — no se pulsarán teclas reales.</span>}
+                {simLog.map((line, i) => <div key={i} className={line.startsWith("✓") ? "log-success" : line.startsWith("⏳") ? "log-warning" : ""}>{line}</div>)}
+                {simRunning && <div>⏳ Procesando...</div>}
               </div>
             </div>
           </Section>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-            <button className="btn-ghost" style={{ color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}>Eliminar</button>
-            <button className="btn-green">Guardar cambios</button>
+          <div className="editor-actions">
+            <button className="module-danger-button">Eliminar</button>
+            <button className="module-green-button save-button">▣ Guardar cambios</button>
           </div>
         </div>
       )}
@@ -275,13 +233,11 @@ export default function KeystrokePage() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-muted)", letterSpacing: "0.1em", marginBottom: 8, textTransform: "uppercase" }}>
-        {title}
-      </div>
+    <section className="module-section">
+      <div className="module-section-title">{title}</div>
       {children}
-    </div>
+    </section>
   );
 }

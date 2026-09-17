@@ -10,6 +10,7 @@ const CORE_WS_URL = process.env["REACTSTREAM_CORE_WS_URL"] ?? "ws://127.0.0.1:47
 const TIKTOK_USERNAME = process.env["REACTSTREAM_TIKTOK_USERNAME"] ?? "";
 const TIKTOK_SESSION_ID  = process.env["REACTSTREAM_TIKTOK_SESSION_ID"]  ?? "";
 const TIKTOK_TARGET_IDC  = process.env["REACTSTREAM_TIKTOK_TARGET_IDC"]  ?? "";
+const TIKTOK_COOKIES     = process.env["REACTSTREAM_TIKTOK_COOKIES"]     ?? "";
 
 if (!TIKTOK_USERNAME) {
   console.error("[bridge] ERROR: REACTSTREAM_TIKTOK_USERNAME no configurado");
@@ -27,8 +28,9 @@ const connector = new TikTokConnector({
   coreWsUrl: CORE_WS_URL,
   reconnectDelayMs: 3_000,
   maxReconnectAttempts: 20,
-  sessionId:   TIKTOK_SESSION_ID  || undefined,
-  ttTargetIdc: TIKTOK_TARGET_IDC  || undefined,
+  sessionId:    TIKTOK_SESSION_ID  || undefined,
+  ttTargetIdc:  TIKTOK_TARGET_IDC  || undefined,
+  cookieString: TIKTOK_COOKIES     || undefined,
 });
 
 process.on("SIGINT", () => {
