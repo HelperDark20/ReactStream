@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { LayersIcon, UIIcon } from "../components/icons";
 import TimerPreview from "../components/overlays/TimerPreview";
 import DonorsPreview from "../components/overlays/DonorsPreview";
 import TappersPreview from "../components/overlays/TappersPreview";
 import BestGiftPreview from "../components/overlays/BestGiftPreview";
 import LikesPreview from "../components/overlays/LikesPreview";
 import JarPreview from "../components/overlays/JarPreview";
+import background from "../assets/reactstream-background.svg";
 
 type OverlayId = "timer" | "donors" | "tappers" | "best-gift" | "likes" | "jar";
 
@@ -18,12 +20,12 @@ interface OverlayConfig {
 }
 
 const OVERLAYS: OverlayConfig[] = [
-  { id: "timer", icon: "⏱", name: "Timer", desc: "Cuenta regresiva alimentada por coins", url: "ws://127.0.0.1:47821/overlay/timer", settings: { initialSeconds: 300, coinsPerSecond: 10, reactivateOnZero: true } },
-  { id: "donors", icon: "🏆", name: "Top Donors", desc: "Ranking de donadores por monedas", url: "ws://127.0.0.1:47821/overlay/donors", settings: { topN: 10 } },
-  { id: "tappers", icon: "❤️", name: "Top Tap Tap", desc: "Ranking por cantidad de likes", url: "ws://127.0.0.1:47821/overlay/tappers", settings: { topN: 10 } },
-  { id: "best-gift", icon: "👑", name: "Mejor Regalo", desc: "Regalo de mayor valor unitario", url: "ws://127.0.0.1:47821/overlay/best-gift", settings: {} },
-  { id: "likes", icon: "💚", name: "Likes / Tap Tap", desc: "Corazones flotantes con avatar", url: "ws://127.0.0.1:47821/overlay/likes", settings: { cooldownPerUserMs: 10000 } },
-  { id: "jar", icon: "🫙", name: "Gift Jar", desc: "Frasco con regalos, tamaño proporcional", url: "ws://127.0.0.1:47821/overlay/jar", settings: { maxGifts: 50 } },
+  { id: "timer",     icon: "⏱",  name: "Timer",           desc: "Cuenta regresiva alimentada por coins",   url: "http://localhost:47820/overlay/timer.html",     settings: { initialSeconds: 300, coinsPerSecond: 10, reactivateOnZero: true } },
+  { id: "donors",    icon: "🏆", name: "Top Donors",      desc: "Ranking de donadores por monedas",        url: "http://localhost:47820/overlay/donors.html",    settings: { topN: 10 } },
+  { id: "tappers",   icon: "❤️", name: "Top Tap Tap",     desc: "Ranking por cantidad de likes",           url: "http://localhost:47820/overlay/tappers.html",   settings: { topN: 10 } },
+  { id: "best-gift", icon: "👑", name: "Mejor Regalo",    desc: "Regalo de mayor valor unitario",          url: "http://localhost:47820/overlay/best-gift.html", settings: {} },
+  { id: "likes",     icon: "💚", name: "Likes / Tap Tap", desc: "Corazones flotantes con avatar",          url: "http://localhost:47820/overlay/likes.html",     settings: { cooldownPerUserMs: 10000 } },
+  { id: "jar",       icon: "🫙", name: "Gift Jar",        desc: "Frasco con regalos, tamaño proporcional", url: "http://localhost:47820/overlay/jar.html",       settings: { maxGifts: 50 } },
 ];
 
 export default function OverlaysPage() {
@@ -31,91 +33,105 @@ export default function OverlaysPage() {
   const ov = OVERLAYS.find((o) => o.id === selected)!;
 
   return (
-    <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
-      {/* Lista izquierda */}
-      <div style={{ width: 200, borderRight: "1px solid var(--rs-border)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
-        <div style={{ padding: "12px 12px 8px", borderBottom: "1px solid var(--rs-border)" }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-secondary)", letterSpacing: "0.08em" }}>OVERLAYS</span>
+    <section className="actions-module-shell">
+      <img className="actions-module-background" src={background} alt="" draggable={false} />
+
+      <header className="actions-module-header">
+        <div className="actions-module-title-row">
+          <LayersIcon className="actions-module-title-icon" />
+          <div>
+            <h1>Overlays</h1>
+            <p>Configura y previsualiza los overlays para TikTok Studio</p>
+          </div>
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: 8, display: "flex", flexDirection: "column", gap: 4 }}>
-          {OVERLAYS.map((o) => (
-            <button
-              key={o.id}
-              onClick={() => setSelected(o.id)}
-              style={{
-                width: "100%", textAlign: "left", padding: "10px 12px",
-                background: selected === o.id ? "rgba(57,255,20,0.08)" : "rgba(12,16,14,0.72)",
-                border: `1px solid ${selected === o.id ? "var(--rs-border-green)" : "rgba(255,255,255,0.1)"}`,
-                borderRadius: 10, cursor: "pointer", transition: "all 0.15s",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 18 }}>{o.icon}</span>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: selected === o.id ? 700 : 400, color: selected === o.id ? "var(--rs-green)" : "var(--rs-text-primary)" }}>{o.name}</div>
-                  <div style={{ fontSize: 10, color: "var(--rs-text-muted)", marginTop: 1 }}>{o.desc}</div>
+      </header>
+
+      <div className="actions-module-card">
+        <div className="actions-module-content">
+          <div className="keystroke-workspace">
+            {/* Lista izquierda */}
+            <aside className="keystroke-list-panel">
+              <div className="keystroke-list-head">
+                <span>OVERLAYS</span>
+              </div>
+              <div className="keystroke-list-scroll">
+                {OVERLAYS.map((o) => {
+                  const active = selected === o.id;
+                  return (
+                    <button
+                      key={o.id}
+                      className={`keystroke-list-item ${active ? "active" : ""}`}
+                      onClick={() => setSelected(o.id)}
+                    >
+                      <span className="keystroke-item-icon overlay-emoji-icon">{o.icon}</span>
+                      <span className="keystroke-item-copy">
+                        <strong>{o.name}</strong>
+                        <small>{o.desc}</small>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </aside>
+
+            {/* Panel derecho */}
+            <div className="overlay-right-panel">
+              <div className="overlay-panel-header">
+                <span className="overlay-emoji-title">{ov.icon}</span>
+                <span style={{ fontSize: 15, fontWeight: 700 }}>{ov.name}</span>
+                <span style={{ fontSize: 12, color: "var(--rs-text-muted)", flex: 1 }}>{ov.desc}</span>
+                <button className="module-ghost-button" onClick={() => navigator.clipboard.writeText(ov.url)}>
+                  <UIIcon name="copy" size={14} /> Copiar URL
+                </button>
+                <button className="module-green-button">
+                  <UIIcon name="check" size={14} /> Guardar config
+                </button>
+              </div>
+
+              <div className="overlay-content-split">
+                {/* Vista previa */}
+                <div className="overlay-preview-area">
+                  <div className="overlay-preview-label">
+                    <span>VISTA PREVIA (datos de ejemplo)</span>
+                    <span style={{ fontSize: 10, color: "var(--rs-text-muted)" }}>Animación real en OBS durante el LIVE</span>
+                  </div>
+                  <div className="overlay-preview-canvas">
+                    {ov.id === "timer"     && <TimerPreview />}
+                    {ov.id === "donors"    && <DonorsPreview />}
+                    {ov.id === "tappers"   && <TappersPreview />}
+                    {ov.id === "best-gift" && <BestGiftPreview />}
+                    {ov.id === "likes"     && <LikesPreview />}
+                    {ov.id === "jar"       && <JarPreview />}
+                  </div>
+                </div>
+
+                {/* Configuración */}
+                <div className="overlay-settings-panel">
+                  <section className="module-section">
+                    <div className="module-section-title">CONFIGURACIÓN</div>
+                    <OverlaySettings overlay={ov} />
+                  </section>
+
+                  <section className="module-section">
+                    <div className="module-section-title">URL PARA TIKTOK STUDIO</div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <div className="overlay-url-box" style={{ flex: 1 }}>{ov.url}</div>
+                      <button className="module-ghost-button" onClick={() => navigator.clipboard.writeText(ov.url)}>
+                        <UIIcon name="copy" size={14} /> Copiar
+                      </button>
+                    </div>
+                    <p className="module-help" style={{ marginTop: 6 }}>
+                      En TikTok Studio → <span style={{ color: "var(--rs-green)" }}>Escena → Fuente → Navegador → URL</span>.
+                      También funciona en OBS Studio → Sources → Browser Source.
+                    </p>
+                  </section>
                 </div>
               </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Panel derecho */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {/* Topbar del overlay */}
-        <div style={{ padding: "12px 18px", borderBottom: "1px solid var(--rs-border)", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-          <span style={{ fontSize: 20 }}>{ov.icon}</span>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>{ov.name}</span>
-          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-            <button className="btn-ghost" style={{ fontSize: 12 }} onClick={() => navigator.clipboard.writeText(ov.url)}>
-              📋 Copiar URL
-            </button>
-            <button className="btn-green" style={{ fontSize: 12 }}>Guardar config</button>
-          </div>
-        </div>
-
-        <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-          {/* Vista previa */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", borderRight: "1px solid var(--rs-border)" }}>
-            <div style={{ padding: "8px 14px", borderBottom: "1px solid var(--rs-border)", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-muted)", letterSpacing: "0.08em" }}>VISTA PREVIA (datos de ejemplo)</span>
-              <span style={{ fontSize:10, color:"var(--rs-text-muted)" }}>Animación real en OBS durante el LIVE</span>
-            </div>
-            <div style={{ flex: 1, background: "#000", position: "relative", overflow: "hidden" }}>
-              {ov.id === "timer"     && <TimerPreview />}
-              {ov.id === "donors"    && <DonorsPreview />}
-              {ov.id === "tappers"   && <TappersPreview />}
-              {ov.id === "best-gift" && <BestGiftPreview />}
-              {ov.id === "likes"     && <LikesPreview />}
-              {ov.id === "jar"       && <JarPreview />}
-            </div>
-          </div>
-
-          {/* Configuración */}
-          <div style={{ width: 280, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 16, flexShrink: 0 }}>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-muted)", letterSpacing: "0.08em", marginBottom: 8, textTransform: "uppercase" }}>
-                CONFIGURACIÓN
-              </div>
-              <OverlaySettings overlay={ov} />
-            </div>
-
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-muted)", letterSpacing: "0.08em", marginBottom: 8, textTransform: "uppercase" }}>
-                URL PARA OBS
-              </div>
-              <div style={{ background: "rgba(5,7,6,0.9)", border: "1px solid var(--rs-border)", borderRadius: 8, padding: "8px 10px", fontFamily: "monospace", fontSize: 11, color: "var(--rs-text-muted)", wordBreak: "break-all", lineHeight: 1.5 }}>
-                {ov.url}
-              </div>
-              <div style={{ fontSize: 11, color: "var(--rs-text-muted)", marginTop: 6, lineHeight: 1.5 }}>
-                Agrega esta URL como <span style={{ color: "var(--rs-green)" }}>Browser Source</span> en OBS Studio.
-              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -128,15 +144,25 @@ function OverlaySettings({ overlay }: { overlay: OverlayConfig }) {
 
   if (overlay.id === "timer") {
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <SettingField label="Tiempo inicial (segundos)" frozen>
-          <input type="number" value={settings["initialSeconds"] as number} onChange={(e) => update("initialSeconds", Number(e.target.value))} style={{ width: "100%" }} />
+      <div className="overlay-settings-fields">
+        <SettingField label="Tiempo inicial (seg)" frozen>
+          <input type="number" className="module-input" value={settings["initialSeconds"] as number}
+            onChange={(e) => update("initialSeconds", Number(e.target.value))} />
         </SettingField>
         <SettingField label="Coins por segundo" frozen>
-          <input type="number" value={settings["coinsPerSecond"] as number} onChange={(e) => update("coinsPerSecond", Number(e.target.value))} style={{ width: "100%" }} />
+          <input type="number" className="module-input" value={settings["coinsPerSecond"] as number}
+            onChange={(e) => update("coinsPerSecond", Number(e.target.value))} />
         </SettingField>
         <SettingField label="Reactivar al llegar a cero" frozen>
-          <Toggle value={settings["reactivateOnZero"] as boolean} onChange={(v) => update("reactivateOnZero", v)} />
+          <span
+            role="switch"
+            aria-checked={settings["reactivateOnZero"] as boolean}
+            className={`module-toggle ${settings["reactivateOnZero"] ? "on" : ""}`}
+            style={{ cursor: "pointer" }}
+            onClick={() => update("reactivateOnZero", !settings["reactivateOnZero"])}
+          >
+            <span />
+          </span>
         </SettingField>
       </div>
     );
@@ -144,53 +170,50 @@ function OverlaySettings({ overlay }: { overlay: OverlayConfig }) {
 
   if (overlay.id === "donors" || overlay.id === "tappers") {
     return (
-      <SettingField label="Cantidad en el ranking (Top N)">
-        <select value={settings["topN"] as number} onChange={(e) => update("topN", Number(e.target.value))} style={{ width: "100%" }}>
-          {[2, 3, 5, 10, 20].map((n) => <option key={n} value={n}>Top {n}</option>)}
-        </select>
-      </SettingField>
+      <div className="overlay-settings-fields">
+        <SettingField label="Cantidad en el ranking (Top N)">
+          <select className="module-input" value={settings["topN"] as number}
+            onChange={(e) => update("topN", Number(e.target.value))}>
+            {[2, 3, 5, 10, 20].map((n) => <option key={n} value={n}>Top {n}</option>)}
+          </select>
+        </SettingField>
+      </div>
     );
   }
 
   if (overlay.id === "likes") {
     return (
-      <SettingField label="Cooldown por usuario (ms)">
-        <input type="number" value={settings["cooldownPerUserMs"] as number} onChange={(e) => update("cooldownPerUserMs", Number(e.target.value))} style={{ width: "100%" }} />
-      </SettingField>
+      <div className="overlay-settings-fields">
+        <SettingField label="Cooldown por usuario (ms)">
+          <input type="number" className="module-input" value={settings["cooldownPerUserMs"] as number}
+            onChange={(e) => update("cooldownPerUserMs", Number(e.target.value))} />
+        </SettingField>
+      </div>
     );
   }
 
   if (overlay.id === "jar") {
     return (
-      <SettingField label="Máximo de regalos en el frasco">
-        <input type="number" value={settings["maxGifts"] as number} onChange={(e) => update("maxGifts", Number(e.target.value))} style={{ width: "100%" }} />
-      </SettingField>
+      <div className="overlay-settings-fields">
+        <SettingField label="Máximo de regalos en el frasco">
+          <input type="number" className="module-input" value={settings["maxGifts"] as number}
+            onChange={(e) => update("maxGifts", Number(e.target.value))} />
+        </SettingField>
+      </div>
     );
   }
 
-  return <div style={{ fontSize: 12, color: "var(--rs-text-muted)" }}>Sin configuración adicional para este overlay.</div>;
+  return <p className="module-help">Sin configuración adicional para este overlay.</p>;
 }
 
 function SettingField({ label, frozen, children }: { label: string; frozen?: boolean; children: React.ReactNode }) {
   return (
-    <div>
+    <div className="overlay-setting-field">
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
         <span style={{ fontSize: 12, color: "var(--rs-text-secondary)" }}>{label}</span>
-        {frozen && <span style={{ fontSize: 10, padding: "1px 5px", borderRadius: 3, background: "rgba(245,158,11,0.12)", color: "#f59e0b", fontWeight: 600 }}>Congelado en LIVE</span>}
+        {frozen && <span className="frozen-badge">Congelado en LIVE</span>}
       </div>
       {children}
-    </div>
-  );
-}
-
-function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <button
-        onClick={() => onChange(!value)}
-        style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", background: value ? "var(--rs-green)" : "#333", position: "relative", transition: "background 0.2s" }}
-      />
-      <span style={{ fontSize: 12, color: value ? "var(--rs-green)" : "var(--rs-text-muted)" }}>{value ? "Activado" : "Desactivado"}</span>
     </div>
   );
 }

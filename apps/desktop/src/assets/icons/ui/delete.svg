@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="redBody" x1="33" y1="17" x2="96" y2="111" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB0B8"/>
+      <stop offset="0.18" stop-color="#FF5C68"/>
+      <stop offset="0.52" stop-color="#FF263A"/>
+      <stop offset="1" stop-color="#B70022"/>
+    </linearGradient>
+
+    <linearGradient id="redEdge" x1="25" y1="100" x2="103" y2="24" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C50025"/>
+      <stop offset="0.42" stop-color="#FFE3E6"/>
+      <stop offset="0.65" stop-color="#FF5D68"/>
+      <stop offset="1" stop-color="#FFB1BA"/>
+    </linearGradient>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4.6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="coreGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Soft red bloom -->
+  <g filter="url(#softGlow)" opacity="0.72">
+    <rect x="28" y="36" width="72" height="73" rx="9"
+          fill="#FF1F37" opacity="0.16"/>
+    <rect x="24" y="29" width="80" height="8" rx="4"
+          fill="#FF1F37" opacity="0.25"/>
+  </g>
+
+  <!-- Lid -->
+  <rect x="22" y="28" width="84" height="13" rx="6.5"
+        fill="url(#redBody)" fill-opacity="0.35"
+        stroke="#FF3A4C" stroke-width="5"
+        filter="url(#softGlow)"/>
+
+  <rect x="22" y="28" width="84" height="13" rx="6.5"
+        stroke="url(#redEdge)" stroke-width="2.7"/>
+
+  <!-- Handle -->
+  <path d="M46 28 V22 Q46 16 52 16 H76 Q82 16 82 22 V28"
+        stroke="#FF3D4D" stroke-width="6" stroke-linecap="round"
+        stroke-linejoin="round" opacity="0.7"
+        filter="url(#softGlow)"/>
+  <path d="M46 28 V22 Q46 16 52 16 H76 Q82 16 82 22 V28"
+        stroke="url(#redEdge)" stroke-width="2.8"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Basket -->
+  <path d="M30 41 H98 V98 Q98 108 88 108 H40 Q30 108 30 98 Z"
+        fill="url(#redBody)" fill-opacity="0.17"
+        stroke="#FF233B" stroke-width="6"
+        stroke-linejoin="round"
+        filter="url(#softGlow)"/>
+
+  <path d="M30 41 H98 V98 Q98 108 88 108 H40 Q30 108 30 98 Z"
+        stroke="url(#redEdge)" stroke-width="3.1"
+        stroke-linejoin="round"
+        filter="url(#coreGlow)"/>
+
+  <!-- Inner body -->
+  <path d="M35 47 H93 V96 Q93 102 87 102 H41 Q35 102 35 96 Z"
+        fill="#470817" fill-opacity="0.22"/>
+
+  <!-- Vertical slats -->
+  <g stroke="#FFF1F3" stroke-width="3.6" stroke-linecap="round" opacity="0.92"
+     filter="url(#coreGlow)">
+    <path d="M45 56 V92"/>
+    <path d="M64 56 V92"/>
+    <path d="M83 56 V92"/>
+  </g>
+
+  <g stroke="#FF6F7A" stroke-width="1.5" stroke-linecap="round" opacity="0.85">
+    <path d="M45 58 V91"/>
+    <path d="M64 58 V91"/>
+    <path d="M83 58 V91"/>
+  </g>
+
+  <!-- Fine highlights -->
+  <path d="M29 31 H66" stroke="#FFF7F7" stroke-width="1.3" stroke-linecap="round" opacity="0.8"/>
+  <path d="M34 46 V96" stroke="#FFDDE1" stroke-width="1.3" stroke-linecap="round" opacity="0.45"/>
+  <path d="M35 103 H62" stroke="#FFF2F4" stroke-width="1.3" stroke-linecap="round" opacity="0.5"/>
+</svg>

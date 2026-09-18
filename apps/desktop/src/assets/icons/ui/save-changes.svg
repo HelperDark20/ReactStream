@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="greenBody" x1="26" y1="16" x2="101" y2="111" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D8FF8A"/>
+      <stop offset="0.18" stop-color="#72FF2C"/>
+      <stop offset="0.55" stop-color="#20FF1A"/>
+      <stop offset="1" stop-color="#00A83B"/>
+    </linearGradient>
+
+    <linearGradient id="greenEdge" x1="22" y1="105" x2="104" y2="20" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0BCB48"/>
+      <stop offset="0.45" stop-color="#E6FFD0"/>
+      <stop offset="0.7" stop-color="#63FF2A"/>
+      <stop offset="1" stop-color="#C7FF6A"/>
+    </linearGradient>
+
+    <linearGradient id="slot" x1="64" y1="26" x2="64" y2="50" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EAFFE0"/>
+      <stop offset="0.45" stop-color="#7BFF4C"/>
+      <stop offset="1" stop-color="#14D94A"/>
+    </linearGradient>
+
+    <linearGradient id="label" x1="38" y1="72" x2="89" y2="102" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C9FF93"/>
+      <stop offset="0.5" stop-color="#5CFF35"/>
+      <stop offset="1" stop-color="#11D94B"/>
+    </linearGradient>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="coreGlow" x="-45%" y="-45%" width="190%" height="190%">
+      <feGaussianBlur stdDeviation="1.7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Soft outer bloom -->
+  <rect x="18" y="16" width="92" height="96" rx="13"
+        stroke="#20FF2B" stroke-width="7" opacity="0.22" filter="url(#softGlow)"/>
+
+  <!-- Main body -->
+  <path d="M27 18 H84 L105 39 V99 Q105 109 95 109 H27 Q17 109 17 99 V28 Q17 18 27 18 Z"
+        fill="url(#greenBody)" fill-opacity="0.16"/>
+
+  <!-- Outer neon frame -->
+  <path d="M27 18 H84 L105 39 V99 Q105 109 95 109 H27 Q17 109 17 99 V28 Q17 18 27 18 Z"
+        stroke="#1BFF45" stroke-width="6.5" stroke-linejoin="round" opacity="0.65"
+        filter="url(#softGlow)"/>
+
+  <!-- Bright contour -->
+  <path d="M27 18 H84 L105 39 V99 Q105 109 95 109 H27 Q17 109 17 99 V28 Q17 18 27 18 Z"
+        stroke="url(#greenEdge)" stroke-width="3.2" stroke-linejoin="round"
+        filter="url(#coreGlow)"/>
+
+  <!-- Top disk cutout -->
+  <path d="M35 22 H80 V48 H35 Z"
+        fill="#073C1C" fill-opacity="0.34"
+        stroke="url(#slot)" stroke-width="2.4"/>
+  <path d="M40 25 H75 V45 H40 Z"
+        fill="#062C18" fill-opacity="0.38"
+        stroke="#CFFF9B" stroke-width="1.1" opacity="0.72"/>
+
+  <!-- Folded corner -->
+  <path d="M84 18 V39 H105" fill="#0B6A2C" fill-opacity="0.18"/>
+  <path d="M84 18 V39 H105"
+        stroke="#C4FF84" stroke-width="2.2" stroke-linejoin="round"
+        opacity="0.8"/>
+
+  <!-- Lower label frame -->
+  <rect x="33" y="66" width="62" height="31" rx="7"
+        fill="#0B6E2A" fill-opacity="0.16"
+        stroke="#31FF45" stroke-width="2.2" opacity="0.9"/>
+  <rect x="37" y="70" width="54" height="23" rx="4"
+        fill="#032C18" fill-opacity="0.24"
+        stroke="url(#label)" stroke-width="1.5" opacity="0.82"/>
+
+  <!-- Inner save slot / label -->
+  <path d="M47 78 H81" stroke="#E9FFD8" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M47 86 H71" stroke="#71FF48" stroke-width="2.3" stroke-linecap="round"/>
+
+  <!-- Fine specular highlights -->
+  <path d="M28 21 H67" stroke="#F4FFE9" stroke-width="1.4" stroke-linecap="round" opacity="0.85"/>
+  <path d="M20.5 90 V99" stroke="#E5FFD3" stroke-width="1.5" stroke-linecap="round" opacity="0.55"/>
+</svg>

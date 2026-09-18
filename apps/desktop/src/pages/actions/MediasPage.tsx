@@ -1,149 +1,186 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+import { EventIcon, GiftIcon, type EventIconType } from "../../components/icons/EventIcon";
+import { UIIcon } from "../../components/icons";
 import GiftPickerModal, { type GiftItem } from "../../components/GiftPickerModal";
+import { useActionsStore, type MediaType } from "../../stores/actions.store";
 
-const TRIGGERS = [
-  { id: "gift", icon: "🎁", label: "Regalo" },
-  { id: "like", icon: "❤️", label: "Like" },
-  { id: "follow", icon: "➕", label: "Follow" },
-  { id: "comment", icon: "💬", label: "Comentario" },
-  { id: "share", icon: "🔗", label: "Compartida" },
-  { id: "member", icon: "👤", label: "Nuevo miembro" },
-  { id: "superfan", icon: "⭐", label: "Super Fan" },
-];
-
-type MediaType = "image" | "audio" | "animation" | "gift_overlay";
-
-interface MediaAction {
-  id: string;
-  name: string;
-  trigger: string;
-  giftFilter: string;
-  mediaType: MediaType;
-  url: string;
-  durationMs: number;
-  enabled: boolean;
+interface TikTokEvent {
+  type: string;
+  giftId?: string;
+  username?: string;
 }
 
-const MOCK: MediaAction[] = [
-  { id: "m1", name: "Explosión Rosa", trigger: "gift", giftFilter: "Rosa", mediaType: "animation", url: "http://127.0.0.1:47821/overlay/effects/rose-explosion", durationMs: 3000, enabled: true },
-  { id: "m2", name: "Foto León", trigger: "gift", giftFilter: "León", mediaType: "image", url: "http://127.0.0.1:47821/overlay/effects/lion-image", durationMs: 5000, enabled: true },
-  { id: "m3", name: "Confetti Follow", trigger: "follow", giftFilter: "", mediaType: "animation", url: "http://127.0.0.1:47821/overlay/effects/confetti", durationMs: 2000, enabled: false },
+const TRIGGERS: { id: EventIconType; label: string }[] = [
+  { id: "gift", label: "Regalo" },
+  { id: "like", label: "Like" },
+  { id: "follow", label: "Follow" },
+  { id: "comment", label: "Comentario" },
+  { id: "share", label: "Compartida" },
+  { id: "member", label: "Nuevo miembro" },
+  { id: "superfan", label: "Super Fan" },
 ];
 
-const MEDIA_ICONS: Record<MediaType, string> = {
-  image: "🖼",
-  audio: "🔊",
-  animation: "✨",
-  gift_overlay: "🎁",
-};
-
-const MEDIA_LABELS: Record<MediaType, string> = {
-  image: "Imagen",
-  audio: "Audio",
-  animation: "Animación",
-  gift_overlay: "Overlay de regalo",
-};
+const MEDIA_TYPES: { id: MediaType; label: string; icon: "image" | "audio" | "sparkles" | "gift" }[] = [
+  { id: "image", label: "Imagen", icon: "image" },
+  { id: "audio", label: "Audio", icon: "audio" },
+  { id: "animation", label: "Animación", icon: "sparkles" },
+  { id: "gift_overlay", label: "Overlay regalo", icon: "gift" },
+];
 
 export default function MediasPage() {
-  const [medias, setMedias] = useState<MediaAction[]>(MOCK);
-  const [selected, setSelected] = useState<string | null>(MOCK[0]?.id ?? null);
+  const { medias, updateMedia, addMedia, deleteMedia } = useActionsStore();
+  const [selected, setSelected] = useState<string | null>(medias[0]?.id ?? null);
   const [showGiftPicker, setShowGiftPicker] = useState(false);
 
   const cfg = medias.find((m) => m.id === selected);
 
-  function updateCfg(patch: Partial<MediaAction>) {
-    setMedias((prev) => prev.map((m) => m.id === selected ? { ...m, ...patch } : m));
+  function updateCfg(patch: Partial<typeof cfg>) {
+    if (!cfg) return;
+    updateMedia(cfg.id, patch as never);
   }
+
+  function handleNew() {
+    const id = `m${Date.now()}`;
+    addMedia({ id, name: "Nuevo Medio", trigger: "gift", giftFilter: "", mediaType: "animation", url: "", durationMs: 3000, enabled: true });
+    setSelected(id);
+  }
+
+  function handleDelete() {
+    if (!cfg) return;
+    const idx = medias.findIndex((m) => m.id === cfg.id);
+    deleteMedia(cfg.id);
+    const remaining = medias.filter((m) => m.id !== cfg.id);
+    setSelected(remaining[Math.max(0, idx - 1)]?.id ?? null);
+  }
+
+  // Keep ref updated so event listener always sees latest medias
+  const mediasRef = useRef(medias);
+  useEffect(() => { mediasRef.current = medias; }, [medias]);
+
+  // Listen to TikTok events and trigger matching media overlays
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listen<TikTokEvent>("rs-tiktok-event", async (event) => {
+      const { type, giftId } = event.payload;
+      for (const m of mediasRef.current) {
+        if (!m.enabled || !m.url) continue;
+        if (m.trigger !== type) continue;
+        if (type === "gift" && m.giftFilter && m.giftFilter !== giftId) continue;
+        // Extract overlay id from URL path (last segment)
+        const overlayId = m.url.split("/").pop() ?? m.url;
+        try {
+          await invoke("trigger_media_overlay", {
+            overlayId,
+            payload: { action: "show", durationMs: m.durationMs, mediaType: m.mediaType, url: m.url },
+          });
+        } catch (e) {
+          console.error("[media] trigger_media_overlay error:", e);
+        }
+        break; // one overlay per event batch is enough
+      }
+    }).then((fn) => { unlisten = fn; });
+    return () => { unlisten?.(); };
+  }, []);
 
   function copyUrl(url: string) {
     navigator.clipboard.writeText(url).catch(() => {});
   }
 
+  function openInBrowser(url: string) {
+    if (!url) return;
+    invoke("open_in_browser", { url }).catch(console.error);
+  }
+
   return (
-    <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+    <div className="keystroke-workspace">
       {/* Lista izquierda */}
-      <div style={{ width: 260, borderRight: "1px solid var(--rs-border)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
-        <div style={{ padding: "12px 12px 8px", borderBottom: "1px solid var(--rs-border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-secondary)", letterSpacing: "0.08em" }}>MEDIOS Y OVERLAYS</span>
-          <button className="btn-green" style={{ padding: "4px 10px", fontSize: 11 }}>+ Nuevo</button>
+      <aside className="keystroke-list-panel">
+        <div className="keystroke-list-head">
+          <span>MEDIOS Y OVERLAYS</span>
+          <button className="module-green-button module-small-button" onClick={handleNew}>+ Nuevo</button>
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+
+        <div className="keystroke-list-scroll">
           {medias.map((m) => {
             const trig = TRIGGERS.find((t) => t.id === m.trigger);
+            const mt = MEDIA_TYPES.find((t) => t.id === m.mediaType);
+            const active = selected === m.id;
             return (
               <button
                 key={m.id}
+                className={`keystroke-list-item ${active ? "active" : ""} ${!m.enabled ? "disabled" : ""}`}
                 onClick={() => setSelected(m.id)}
-                style={{
-                  width: "100%", textAlign: "left", padding: "10px 12px",
-                  background: selected === m.id ? "rgba(57,255,20,0.08)" : "rgba(12,16,14,0.72)",
-                  border: `1px solid ${selected === m.id ? "var(--rs-border-green)" : "rgba(255,255,255,0.1)"}`,
-                  borderRadius: 10, cursor: "pointer", opacity: m.enabled ? 1 : 0.5, transition: "all 0.15s",
-                }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                  <span style={{ fontSize: 16 }}>{MEDIA_ICONS[m.mediaType]}</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--rs-text-primary)", flex: 1 }}>{m.name}</span>
-                </div>
-                <div style={{ fontSize: 11, color: "var(--rs-text-muted)" }}>
-                  {trig?.icon} {trig?.label} · {MEDIA_LABELS[m.mediaType]} · {m.durationMs / 1000}s
-                </div>
+                <span className="keystroke-item-icon">
+                  <EventIcon type={trig?.id ?? "gift"} size={28} />
+                </span>
+                <span className="keystroke-item-copy">
+                  <strong>{m.name}</strong>
+                  <small><UIIcon name={mt?.icon ?? "sparkles"} size={11} /> {mt?.label} · {m.durationMs / 1000}s</small>
+                </span>
+                <span
+                  role="switch"
+                  aria-checked={m.enabled}
+                  className={`module-toggle ${m.enabled ? "on" : ""}`}
+                  onClick={(e) => { e.stopPropagation(); updateMedia(m.id, { enabled: !m.enabled }); }}
+                >
+                  <span />
+                </span>
+                <span className="keystroke-menu"><UIIcon name="more" size={17} /></span>
               </button>
             );
           })}
         </div>
-      </div>
+      </aside>
 
       {/* Panel derecho */}
       {!cfg ? (
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 10 }}>
-          <span style={{ fontSize: 32 }}>🎬</span>
-          <span style={{ color: "var(--rs-text-muted)", fontSize: 14 }}>Selecciona un medio para editarlo</span>
+        <div className="keystroke-empty" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
+          <span className="media-empty-icon"><UIIcon name="film" size={30} /></span>
+          <p style={{ color: "var(--rs-text-muted)", fontSize: 14 }}>Selecciona un medio para editarlo</p>
         </div>
       ) : (
-        <div style={{ flex: 1, overflowY: "auto", padding: 20, display: "flex", flexDirection: "column", gap: 18 }}>
-
+        <div className="keystroke-editor">
           <Section title="Nombre">
-            <input value={cfg.name} onChange={(e) => updateCfg({ name: e.target.value })} style={{ width: "100%" }} />
+            <input className="module-input" value={cfg.name} onChange={(e) => updateCfg({ name: e.target.value })} />
           </Section>
 
           <Section title="Trigger">
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {TRIGGERS.map((t) => (
-                <button key={t.id} onClick={() => updateCfg({ trigger: t.id })} style={{
-                  padding: "6px 12px", borderRadius: 8,
-                  border: `1px solid ${cfg.trigger === t.id ? "var(--rs-border-green)" : "var(--rs-border)"}`,
-                  background: cfg.trigger === t.id ? "rgba(57,255,20,0.08)" : "transparent",
-                  color: cfg.trigger === t.id ? "var(--rs-green)" : "var(--rs-text-secondary)",
-                  cursor: "pointer", fontSize: 12, fontWeight: cfg.trigger === t.id ? 700 : 400,
-                }}>
-                  {t.icon} {t.label}
-                </button>
-              ))}
+            <div className="trigger-row">
+              {TRIGGERS.map((t) => {
+                const active = cfg.trigger === t.id;
+                return (
+                  <button key={t.id} className={`trigger-chip ${active ? "active" : ""}`} onClick={() => updateCfg({ trigger: t.id })}>
+                    <EventIcon type={t.id} size={16} state={active ? "selected" : "default"} />{t.label}
+                  </button>
+                );
+              })}
             </div>
           </Section>
 
           {cfg.trigger === "gift" && (
             <Section title="Filtro de regalo">
-              <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-                <div
+              <div className="gift-filter-row">
+                <button
+                  className={`module-input gift-filter ${cfg.giftFilter ? "filled" : ""}`}
                   onClick={() => setShowGiftPicker(true)}
-                  style={{ flex:1, padding:"8px 12px", background:"rgba(5,7,6,0.9)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, fontSize:13, color: cfg.giftFilter ? "#fff" : "rgba(255,255,255,0.3)", cursor:"pointer" }}
                 >
-                  {cfg.giftFilter || "Seleccionar regalo..."}
-                </div>
+                  {cfg.giftFilter
+                    ? <><GiftIcon giftId={cfg.giftFilter} size={22} /> {cfg.giftFilter}</>
+                    : "Seleccionar regalo..."}
+                </button>
                 {cfg.giftFilter && (
-                  <button className="btn-ghost" style={{ fontSize:12, padding:"6px 10px", color:"#ef4444", borderColor:"rgba(239,68,68,0.3)" }}
-                    onClick={() => updateCfg({ giftFilter: "" })}>✕</button>
+                  <button className="icon-danger-button" onClick={() => updateCfg({ giftFilter: "" })} title="Quitar filtro">
+                    <UIIcon name="x" size={14} />
+                  </button>
                 )}
-                <button className="btn-green" style={{ fontSize:12, padding:"7px 14px" }}
-                  onClick={() => setShowGiftPicker(true)}>
-                  🎁 Elegir
+                <button className="module-green-button gift-action-button" onClick={() => setShowGiftPicker(true)}>
+                  <GiftIcon size={16} /> Elegir
                 </button>
               </div>
-              <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)", marginTop:5 }}>
-                Vacío = se activa con cualquier regalo
-              </div>
+              <p className="module-help">Vacío = se activa con cualquier regalo</p>
               {showGiftPicker && (
                 <GiftPickerModal
                   selectedId={cfg.giftFilter}
@@ -155,53 +192,67 @@ export default function MediasPage() {
           )}
 
           <Section title="Tipo de medio">
-            <div style={{ display: "flex", gap: 8 }}>
-              {(Object.keys(MEDIA_ICONS) as MediaType[]).map((type) => (
-                <button key={type} onClick={() => updateCfg({ mediaType: type })} style={{
-                  padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontSize: 12,
-                  border: `1px solid ${cfg.mediaType === type ? "var(--rs-border-green)" : "var(--rs-border)"}`,
-                  background: cfg.mediaType === type ? "rgba(57,255,20,0.08)" : "transparent",
-                  color: cfg.mediaType === type ? "var(--rs-green)" : "var(--rs-text-secondary)",
-                  fontWeight: cfg.mediaType === type ? 700 : 400,
-                }}>
-                  {MEDIA_ICONS[type]} {MEDIA_LABELS[type]}
-                </button>
-              ))}
+            <div className="trigger-row">
+              {MEDIA_TYPES.map((t) => {
+                const active = cfg.mediaType === t.id;
+                return (
+                  <button key={t.id} className={`trigger-chip ${active ? "active" : ""}`} onClick={() => updateCfg({ mediaType: t.id })}>
+                    <UIIcon name={t.icon} size={14} /> {t.label}
+                  </button>
+                );
+              })}
             </div>
           </Section>
 
-          <Section title="URL del medio (Browser Source de OBS)">
+          <Section title="URL del overlay (Browser Source)">
             <div style={{ display: "flex", gap: 8 }}>
-              <input value={cfg.url} onChange={(e) => updateCfg({ url: e.target.value })} style={{ flex: 1, fontFamily: "monospace", fontSize: 12 }} placeholder="http://127.0.0.1:47821/overlay/..." />
-              <button className="btn-ghost" onClick={() => copyUrl(cfg.url)}>📋 Copiar</button>
+              <input
+                className="module-input"
+                value={cfg.url}
+                onChange={(e) => updateCfg({ url: e.target.value })}
+                placeholder="http://localhost:47820/overlay/timer.html"
+                style={{ flex: 1, fontFamily: "monospace" }}
+              />
+              <button className="module-ghost-button" onClick={() => copyUrl(cfg.url)}>
+                <UIIcon name="copy" size={14} /> Copiar
+              </button>
             </div>
-            <div style={{ fontSize: 11, color: "var(--rs-text-muted)", marginTop: 6 }}>
-              Agrega esta URL como Browser Source en OBS. ReactStream enviará la señal cuando se dispare el trigger.
-            </div>
+            <p className="module-help">Pega la URL del overlay desde el módulo Overlays. ReactStream enviará la señal cuando se dispare el trigger.</p>
           </Section>
 
           <Section title="Duración de visualización">
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <input type="number" min={500} max={30000} value={cfg.durationMs} onChange={(e) => updateCfg({ durationMs: Number(e.target.value) })} style={{ width: 100 }} />
-              <span style={{ fontSize: 12, color: "var(--rs-text-secondary)" }}>ms ({cfg.durationMs / 1000}s)</span>
+              <input
+                className="module-input"
+                type="number" min={500} max={30000}
+                value={cfg.durationMs}
+                onChange={(e) => updateCfg({ durationMs: Number(e.target.value) })}
+                style={{ width: 110 }}
+              />
+              <span style={{ fontSize: 12, color: "var(--rs-text-secondary)" }}>ms · {(cfg.durationMs / 1000).toFixed(1)}s</span>
             </div>
           </Section>
 
           <Section title="Estado">
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <button
+              <span
+                role="switch"
+                aria-checked={cfg.enabled}
+                className={`module-toggle ${cfg.enabled ? "on" : ""}`}
+                style={{ cursor: "pointer" }}
                 onClick={() => updateCfg({ enabled: !cfg.enabled })}
-                style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", background: cfg.enabled ? "var(--rs-green)" : "#333", position: "relative" }}
-              />
+              >
+                <span />
+              </span>
               <span style={{ fontSize: 13, color: cfg.enabled ? "var(--rs-green)" : "var(--rs-text-muted)" }}>
                 {cfg.enabled ? "Activo" : "Desactivado"}
               </span>
             </div>
           </Section>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-            <button className="btn-ghost" style={{ color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}>Eliminar</button>
-            <button className="btn-green">Guardar cambios</button>
+          <div className="editor-actions">
+            <button className="module-danger-button" onClick={handleDelete}><UIIcon name="trash" size={14} /> Eliminar</button>
+            <button className="module-green-button save-button"><UIIcon name="check" size={14} /> Guardar cambios</button>
           </div>
         </div>
       )}
@@ -209,13 +260,11 @@ export default function MediasPage() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--rs-text-muted)", letterSpacing: "0.1em", marginBottom: 8, textTransform: "uppercase" }}>
-        {title}
-      </div>
+    <section className="module-section">
+      <div className="module-section-title">{title}</div>
       {children}
-    </div>
+    </section>
   );
 }

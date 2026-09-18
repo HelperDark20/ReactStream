@@ -1,35 +1,34 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../stores/app.store";
+import { GeneralSettingsIcon, UIIcon } from "../components/icons";
+import background from "../assets/reactstream-background.svg";
 
 function FrozenBadge() {
-  return (
-    <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 4, background: "rgba(245,158,11,0.15)", color: "#f59e0b", fontWeight: 600 }}>
-      Congelado en LIVE
-    </span>
-  );
+  return <span className="frozen-badge">Congelado en LIVE</span>;
 }
 
 function SettingRow({ label, desc, frozen, children }: {
   label: string; desc?: string; frozen?: boolean; children: React.ReactNode;
 }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: "1px solid var(--rs-border)" }}>
-      <div style={{ flex: 1 }}>
+    <div className="setting-row">
+      <div className="setting-row-label">
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
           <span style={{ fontSize: 13, fontWeight: 500 }}>{label}</span>
           {frozen && <FrozenBadge />}
         </div>
         {desc && <div style={{ fontSize: 12, color: "var(--rs-text-secondary)" }}>{desc}</div>}
       </div>
-      <div>{children}</div>
+      <div className="setting-row-control">{children}</div>
     </div>
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ icon, children }: { icon?: string; children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--rs-green)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 20, marginBottom: 4, paddingBottom: 6, borderBottom: "1px solid var(--rs-border-green)" }}>
+    <div className="settings-section-title">
+      {icon && <span>{icon}</span>}
       {children}
     </div>
   );
@@ -81,23 +80,21 @@ function TikTokLoginSection() {
 
   if (tiktokLoggedIn) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div className="tiktok-login-status">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--rs-green)", display: "inline-block" }} />
-            <span style={{ fontSize: 13, fontWeight: 500 }}>
-              {tiktokUsername ? `@${tiktokUsername}` : "Sesión activa"}
-            </span>
-          </div>
-          <button className="btn-ghost" style={{ fontSize: 12, padding: "3px 10px" }} onClick={handleCopySession}>
+          <span className="status-dot online" />
+          <span style={{ fontSize: 13, fontWeight: 500 }}>
+            {tiktokUsername ? `@${tiktokUsername}` : "Sesión activa"}
+          </span>
+          <button className="module-ghost-button module-small-button" onClick={handleCopySession}>
             {copied ? "Copiado!" : "Copiar sessionId"}
           </button>
-          <button className="btn-ghost" style={{ fontSize: 12, padding: "3px 10px" }} onClick={handleLogout}>
+          <button className="module-ghost-button module-small-button" onClick={handleLogout}>
             Cerrar sesión
           </button>
         </div>
         {sessionDebug && (
-          <span style={{ fontSize: 11, color: sessionDebug.includes("vacío") || sessionDebug.includes("Error") ? "#f87171" : "var(--rs-green)", fontFamily: "monospace" }}>
+          <span className={`session-debug ${sessionDebug.includes("vacío") || sessionDebug.includes("Error") ? "error" : "success"}`}>
             {sessionDebug}
           </span>
         )}
@@ -106,9 +103,9 @@ function TikTokLoginSection() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+    <div className="tiktok-login-status">
       <button
-        className="btn-green"
+        className="module-green-button"
         style={{ display: "flex", alignItems: "center", gap: 8 }}
         onClick={handleLogin}
         disabled={tiktokLoginPending}
@@ -119,7 +116,7 @@ function TikTokLoginSection() {
         {tiktokLoginPending ? "Abriendo TikTok..." : "Conectar cuenta TikTok"}
       </button>
       {tiktokLoginError && (
-        <span style={{ fontSize: 11, color: "#f87171" }}>{tiktokLoginError}</span>
+        <span className="session-debug error">{tiktokLoginError}</span>
       )}
       <span style={{ fontSize: 11, color: "var(--rs-text-muted)" }}>
         Se abrirá una ventana de TikTok para iniciar sesión con tu cuenta.
@@ -138,49 +135,86 @@ export default function SettingsPage() {
   const [username, setUsername] = useState(tiktokUsername);
 
   return (
-    <div style={{ padding: 20, height: "100%", overflowY: "auto" }}>
-      <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 2 }}>Configuración</h2>
-      <p style={{ fontSize: 12, color: "var(--rs-text-secondary)", marginBottom: 4 }}>
-        Los campos marcados como <span style={{ color: "#f59e0b" }}>Congelado en LIVE</span> no pueden editarse mientras hay una sesión activa.
-      </p>
+    <section className="actions-module-shell">
+      <img className="actions-module-background" src={background} alt="" draggable={false} />
 
-      <SectionTitle>⏱ Timer</SectionTitle>
-      <SettingRow label="Tiempo inicial" desc="Valor de arranque al iniciar el LIVE (segundos)" frozen>
-        <input type="number" value={timerInitial} onChange={(e) => setTimerInitial(Number(e.target.value))} disabled={sessionActive} style={{ width: 80 }} />
-        <span style={{ fontSize: 12, color: "var(--rs-text-muted)", marginLeft: 6 }}>seg</span>
-      </SettingRow>
-      <SettingRow label="Coins por segundo" desc="Cuántas monedas suman 1 segundo al timer" frozen>
-        <input type="number" value={coinsPerSec} onChange={(e) => setCoinsPerSec(Number(e.target.value))} disabled={sessionActive} style={{ width: 80 }} />
-        <span style={{ fontSize: 12, color: "var(--rs-text-muted)", marginLeft: 6 }}>coins</span>
-      </SettingRow>
-      <SettingRow label="Reactivar tras llegar a cero" desc="Si llega un regalo después de TIMER_ZERO, el timer vuelve a correr automáticamente" frozen>
-        <button className={`rs-toggle ${reactivate ? "on" : "off"}`} onClick={() => !sessionActive && setReactivate(!reactivate)} />
-      </SettingRow>
+      <header className="actions-module-header">
+        <div className="actions-module-title-row">
+          <GeneralSettingsIcon className="actions-module-title-icon" />
+          <div>
+            <h1>Configuración</h1>
+            <p>Ajusta los parámetros globales de ReactStream</p>
+          </div>
+        </div>
+      </header>
 
-      <SectionTitle>🏆 Rankings</SectionTitle>
-      <SettingRow label="Top Donors — cantidad" desc="Editable durante el LIVE sin perder datos acumulados">
-        <select value={donorTopN} onChange={(e) => setDonorTopN(Number(e.target.value))} style={{ width: 80 }}>
-          {[2, 3, 5, 10, 20].map((n) => <option key={n} value={n}>{n}</option>)}
-        </select>
-      </SettingRow>
-      <SettingRow label="Top Tap Tap — cantidad" desc="Editable durante el LIVE sin perder datos acumulados">
-        <select value={tapTopN} onChange={(e) => setTapTopN(Number(e.target.value))} style={{ width: 80 }}>
-          {[2, 3, 5, 10, 20].map((n) => <option key={n} value={n}>{n}</option>)}
-        </select>
-      </SettingRow>
+      <div className="actions-module-card">
+        <div className="actions-module-content settings-content">
 
-      <SectionTitle>🎮 Cuenta TikTok</SectionTitle>
-      <SettingRow label="Iniciar sesión" desc="Autentícate con tu cuenta de TikTok para conectarte sin servicio de firma">
-        <TikTokLoginSection />
-      </SettingRow>
-      <SettingRow label="Username por defecto" desc="Se pre-rellena en el campo de conexión al abrir la app">
-        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="sin @" style={{ width: 160 }} />
-      </SettingRow>
+          <SectionTitle icon="⏱">Timer</SectionTitle>
+          <SettingRow label="Tiempo inicial" desc="Valor de arranque al iniciar el LIVE (segundos)" frozen>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <input type="number" className="module-input" value={timerInitial}
+                onChange={(e) => setTimerInitial(Number(e.target.value))}
+                disabled={sessionActive} style={{ width: 80 }} />
+              <span style={{ fontSize: 12, color: "var(--rs-text-muted)" }}>seg</span>
+            </div>
+          </SettingRow>
+          <SettingRow label="Coins por segundo" desc="Cuántas monedas suman 1 segundo al timer" frozen>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <input type="number" className="module-input" value={coinsPerSec}
+                onChange={(e) => setCoinsPerSec(Number(e.target.value))}
+                disabled={sessionActive} style={{ width: 80 }} />
+              <span style={{ fontSize: 12, color: "var(--rs-text-muted)" }}>coins</span>
+            </div>
+          </SettingRow>
+          <SettingRow
+            label="Reactivar tras llegar a cero"
+            desc="Si llega un regalo después de TIMER_ZERO, el timer vuelve a correr automáticamente"
+            frozen
+          >
+            <span
+              role="switch"
+              aria-checked={reactivate}
+              className={`module-toggle ${reactivate ? "on" : ""}`}
+              style={{ cursor: sessionActive ? "not-allowed" : "pointer" }}
+              onClick={() => !sessionActive && setReactivate(!reactivate)}
+            >
+              <span />
+            </span>
+          </SettingRow>
 
-      <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10 }}>
-        <button className="btn-ghost">Restaurar defaults</button>
-        <button className="btn-green">Guardar cambios</button>
+          <SectionTitle icon="🏆">Rankings</SectionTitle>
+          <SettingRow label="Top Donors — cantidad" desc="Editable durante el LIVE sin perder datos acumulados">
+            <select className="module-input" value={donorTopN}
+              onChange={(e) => setDonorTopN(Number(e.target.value))} style={{ width: 90 }}>
+              {[2, 3, 5, 10, 20].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </SettingRow>
+          <SettingRow label="Top Tap Tap — cantidad" desc="Editable durante el LIVE sin perder datos acumulados">
+            <select className="module-input" value={tapTopN}
+              onChange={(e) => setTapTopN(Number(e.target.value))} style={{ width: 90 }}>
+              {[2, 3, 5, 10, 20].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </SettingRow>
+
+          <SectionTitle icon="🎮">Cuenta TikTok</SectionTitle>
+          <SettingRow label="Iniciar sesión" desc="Autentícate con tu cuenta de TikTok para conectarte sin servicio de firma">
+            <TikTokLoginSection />
+          </SettingRow>
+          <SettingRow label="Username por defecto" desc="Se pre-rellena en el campo de conexión al abrir la app">
+            <input type="text" className="module-input" value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="sin @" style={{ width: 160 }} />
+          </SettingRow>
+
+          <div className="settings-footer-actions">
+            <button className="module-ghost-button"><UIIcon name="x" size={14} /> Restaurar defaults</button>
+            <button className="module-green-button"><UIIcon name="check" size={14} /> Guardar cambios</button>
+          </div>
+
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

@@ -22,7 +22,11 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' ws://127.0.0.1:*; img-src 'self' data: https://*.tiktokcdn.com https://*.tiktokcdn-us.com https://*.musical.ly https://p16-sign.tiktokcdn-us.com https://p16-sign-va.tiktokapi.com"
+      "csp": "default-src 'self'; connect-src 'self' ws://127.0.0.1:*; img-src 'self' data: asset: https://*.tiktokcdn.com https://*.tiktokcdn-us.com https://*.musical.ly https://p16-sign.tiktokcdn-us.com https://p16-sign-va.tiktokapi.com; media-src 'self' asset: blob:",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      }
     }
   },
   "bundle": {

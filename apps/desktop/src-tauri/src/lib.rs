@@ -239,11 +239,19 @@ async fn connect_tiktok(
         return Err("El username no puede estar vacío".to_string());
     }
 
-    // Matar bridge anterior si hay uno corriendo
+    // Matar bridge anterior si hay uno corriendo (árbol completo en Windows)
     {
         let mut guard = state.bridge_process.lock().unwrap();
         if let Some(mut child) = guard.take() {
+            #[cfg(target_os = "windows")]
+            {
+                let pid = child.id();
+                let _ = std::process::Command::new("taskkill")
+                    .args(["/F", "/T", "/PID", &pid.to_string()])
+                    .output();
+            }
             let _ = child.kill();
+            let _ = child.wait();
         }
     }
 
@@ -338,11 +346,21 @@ async fn connect_tiktok(
 
 #[tauri::command]
 async fn disconnect_tiktok(state: State<'_, CoreState>) -> Result<(), String> {
-    // Matar el proceso bridge
+    // Matar el proceso bridge y todo su árbol de procesos
     {
         let mut guard = state.bridge_process.lock().unwrap();
         if let Some(mut child) = guard.take() {
+            // En Windows, child.kill() solo mata cmd.exe pero deja vivos los
+            // procesos node/npx hijos. taskkill /F /T mata el árbol completo.
+            #[cfg(target_os = "windows")]
+            {
+                let pid = child.id();
+                let _ = std::process::Command::new("taskkill")
+                    .args(["/F", "/T", "/PID", &pid.to_string()])
+                    .output();
+            }
             let _ = child.kill();
+            let _ = child.wait();
         }
     }
 
@@ -412,6 +430,10 @@ async fn get_session_stats(state: State<'_, CoreState>) -> Result<Option<Session
     let Some(snap) = state.session_mgr.snapshot() else {
         return Ok(None);
     };
+    // El live terminó — informar al frontend para que actualice el estado
+    if snap.ended_at.is_some() {
+        return Ok(None);
+    }
     let current_viewers = *state.ws_server.current_viewers.lock().unwrap();
 
     // Duración real: si el live sigue activo usamos live_started_ms; si terminó usamos ended_at
@@ -790,6 +812,378 @@ async fn tiktok_logout(state: State<'_, CoreState>) -> Result<(), String> {
 }
 
 // ============================================================
+// Detección de herramientas del sistema
+// ============================================================
+
+#[tauri::command]
+async fn check_autoit_installed() -> bool {
+    let paths = [
+        r"C:\Program Files (x86)\AutoIt3\AutoIt3.exe",
+        r"C:\Program Files\AutoIt3\AutoIt3.exe",
+        r"C:\AutoIt3\AutoIt3.exe",
+    ];
+    paths.iter().any(|p| std::path::Path::new(p).exists())
+}
+
+// ============================================================
+// Ejecución de KeyStrokes via AutoIt
+// ============================================================
+
+fn simple_key_to_autoit(key: &str) -> String {
+    match key.trim().to_uppercase().as_str() {
+        "SPACE" | "SPACEBAR"          => "{SPACE}".to_string(),
+        "ENTER" | "RETURN"            => "{ENTER}".to_string(),
+        "TAB"                         => "{TAB}".to_string(),
+        "ESC" | "ESCAPE"              => "{ESC}".to_string(),
+        "BACKSPACE" | "BS"            => "{BACKSPACE}".to_string(),
+        "DELETE" | "DEL"              => "{DELETE}".to_string(),
+        "UP"                          => "{UP}".to_string(),
+        "DOWN"                        => "{DOWN}".to_string(),
+        "LEFT"                        => "{LEFT}".to_string(),
+        "RIGHT"                       => "{RIGHT}".to_string(),
+        "HOME"                        => "{HOME}".to_string(),
+        "END"                         => "{END}".to_string(),
+        "PGUP" | "PAGEUP"             => "{PGUP}".to_string(),
+        "PGDN" | "PAGEDOWN"           => "{PGDN}".to_string(),
+        "INSERT" | "INS"              => "{INSERT}".to_string(),
+        k if k.starts_with('F')
+            && k.len() >= 2
+            && k.len() <= 3
+            && k[1..].parse::<u8>().is_ok() => format!("{{{k}}}"),
+        k if k.len() == 1             => k.to_lowercase(),
+        other                         => format!("{{{other}}}"),
+    }
+}
+
+fn key_to_autoit(key: &str) -> String {
+    let trimmed = key.trim();
+    if trimmed.contains('+') {
+        let parts: Vec<&str> = trimmed.split('+').collect();
+        if parts.len() < 2 {
+            return simple_key_to_autoit(trimmed);
+        }
+        let mut prefix = String::new();
+        for modifier in &parts[..parts.len() - 1] {
+            match modifier.trim().to_uppercase().as_str() {
+                "CTRL" | "CONTROL" => prefix.push('^'),
+                "ALT"              => prefix.push('!'),
+                "SHIFT"            => prefix.push('+'),
+                _                  => {}
+            }
+        }
+        let base = simple_key_to_autoit(parts.last().unwrap().trim());
+        return format!("{prefix}{base}");
+    }
+    simple_key_to_autoit(trimmed)
+}
+
+#[tauri::command]
+async fn execute_keystroke(
+    keys: Vec<String>,
+    repeat_count: u32,
+    delay_ms: u64,
+) -> Result<(), String> {
+    // Bloquear combinaciones peligrosas
+    let blocked = ["alt+f4", "win", "lwin", "rwin", "ctrl+alt+del"];
+    for key in &keys {
+        let lower = key.to_lowercase();
+        if blocked.iter().any(|b| lower.contains(b)) {
+            return Err(format!("Tecla bloqueada por seguridad: {key}"));
+        }
+    }
+
+    let autoit_exe = [
+        r"C:\Program Files (x86)\AutoIt3\AutoIt3.exe",
+        r"C:\Program Files\AutoIt3\AutoIt3.exe",
+        r"C:\AutoIt3\AutoIt3.exe",
+    ]
+    .iter()
+    .find(|p| std::path::Path::new(p).exists())
+    .ok_or_else(|| "AutoIt no detectado — instala AutoIt para ejecutar keystrokes reales".to_string())?;
+
+    let mut lines = vec!["#NoTrayIcon".to_string()];
+    for _ in 0..repeat_count.max(1) {
+        for key in &keys {
+            let au = key_to_autoit(key);
+            lines.push(format!("Send(\"{au}\")"));
+            if delay_ms > 0 {
+                lines.push(format!("Sleep({delay_ms})"));
+            }
+        }
+    }
+    let script = lines.join("\r\n");
+
+    let temp_path = std::env::temp_dir().join("rs_keystroke.au3");
+    std::fs::write(&temp_path, script.as_bytes())
+        .map_err(|e| format!("Error escribiendo script AutoIt: {e}"))?;
+
+    std::process::Command::new(autoit_exe)
+        .arg(&temp_path)
+        .spawn()
+        .map_err(|e| format!("Error ejecutando AutoIt: {e}"))?;
+
+    Ok(())
+}
+
+// ============================================================
+// Selector de archivo de audio
+// ============================================================
+
+#[tauri::command]
+async fn pick_audio_file() -> Result<Option<String>, String> {
+    tokio::task::spawn_blocking(|| {
+        rfd::FileDialog::new()
+            .add_filter("Audio", &["mp3", "wav", "ogg"])
+            .set_title("Seleccionar archivo de audio")
+            .pick_file()
+            .map(|p| p.to_string_lossy().into_owned())
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+// ============================================================
+// Abrir URL en el navegador por defecto
+// ============================================================
+
+#[tauri::command]
+async fn open_in_browser(url: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("cmd")
+            .args(["/c", "start", "", &url])
+            .spawn()
+            .map_err(|e| format!("Error abriendo URL: {e}"))?;
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&url)
+            .spawn()
+            .map_err(|e| format!("Error abriendo URL: {e}"))?;
+    }
+    Ok(())
+}
+
+// ============================================================
+// Señalizar overlay para que muestre un efecto
+// ============================================================
+
+#[tauri::command]
+async fn trigger_media_overlay(
+    overlay_id: String,
+    payload: serde_json::Value,
+    state: State<'_, CoreState>,
+) -> Result<(), String> {
+    let msg = serde_json::to_string(&payload).map_err(|e| e.to_string())?;
+    state.ws_server.broadcast_overlay(&overlay_id, msg);
+    Ok(())
+}
+
+// ============================================================
+// HTTP Server para Overlays (puerto 47820)
+// TikTok Studio y OBS cargan esta URL como Browser Source.
+// Cada página HTML se conecta internamente al WS en 47821.
+// ============================================================
+
+const OVERLAY_HTTP_PORT: u16 = 47820;
+
+const OVERLAY_TIMER_HTML: &str = r#"<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:transparent!important;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif}
+.c{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+#t{font-size:clamp(64px,14vw,160px);font-weight:900;color:#4ade80;line-height:1;text-shadow:0 0 40px rgba(74,222,128,.5),0 2px 0 #000,2px 2px 0 #000;font-variant-numeric:tabular-nums;letter-spacing:-2px;transition:color .3s}
+#t.z{color:#f87171;text-shadow:0 0 40px rgba(248,113,113,.5),0 2px 0 #000,2px 2px 0 #000;animation:blink .5s infinite alternate}
+.lb{font-size:clamp(11px,1.8vw,18px);color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:6px;text-shadow:0 1px 4px #000}
+@keyframes blink{to{opacity:.35}}
+</style></head><body>
+<div class="c"><div id="t">--:--</div><div class="lb">TIMER</div></div>
+<script>
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function go(){var w=new WebSocket('ws://127.0.0.1:47821');
+w.onopen=function(){w.send(JSON.stringify({clientType:'overlay',overlayId:'timer'}))};
+w.onmessage=function(e){try{var m=JSON.parse(e.data);if(m.messageType==='timer_updated'){var el=document.getElementById('t');var r=m.payload.remainingSeconds;el.textContent=fmt(r);el.className=r===0?'z':''}}catch(x){}};
+w.onclose=function(){setTimeout(go,3000)}}
+go();
+</script></body></html>"#;
+
+const OVERLAY_DONORS_HTML: &str = r#"<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:transparent!important;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;padding:16px}
+h2{color:#fde047;font-size:clamp(13px,2.2vw,20px);text-transform:uppercase;letter-spacing:4px;margin-bottom:10px;text-shadow:0 2px 8px #000}
+.row{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border-radius:8px;padding:7px 12px;margin-bottom:5px;border-left:3px solid #fde047}
+.rk{font-size:clamp(15px,2vw,20px);font-weight:900;color:#fde047;width:26px;flex-shrink:0;text-align:center}
+.nm{flex:1;color:#fff;font-size:clamp(12px,1.8vw,16px);font-weight:600;text-shadow:0 1px 3px #000;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cn{color:#fde047;font-size:clamp(11px,1.5vw,14px);font-weight:700;white-space:nowrap}
+.empty{color:rgba(255,255,255,.5);font-size:13px;padding:14px 0;text-shadow:0 1px 4px #000}
+</style></head><body>
+<h2>🏆 Top Donors</h2>
+<div id="list"><div class="empty">Esperando datos del LIVE...</div></div>
+<script>
+var M=['🥇','🥈','🥉'];
+function go(){var w=new WebSocket('ws://127.0.0.1:47821');
+w.onopen=function(){w.send(JSON.stringify({clientType:'overlay',overlayId:'donors'}))};
+w.onmessage=function(e){try{var m=JSON.parse(e.data);if(m.messageType==='ranking_updated'&&m.overlayId==='donors'){var d=m.payload.donors||[];document.getElementById('list').innerHTML=d.length?d.map(function(x,i){return'<div class="row"><span class="rk">'+(M[i]||'#'+(i+1))+'</span><span class="nm">'+x.displayName+'</span><span class="cn">🪙'+x.coins.toLocaleString()+'</span></div>'}).join(''):'<div class="empty">Sin datos todavía</div>'}}catch(x){}};
+w.onclose=function(){setTimeout(go,3000)}}
+go();
+</script></body></html>"#;
+
+const OVERLAY_TAPPERS_HTML: &str = r#"<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:transparent!important;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;padding:16px}
+h2{color:#f9a8d4;font-size:clamp(13px,2.2vw,20px);text-transform:uppercase;letter-spacing:4px;margin-bottom:10px;text-shadow:0 2px 8px #000}
+.row{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border-radius:8px;padding:7px 12px;margin-bottom:5px;border-left:3px solid #f9a8d4}
+.rk{font-size:clamp(15px,2vw,20px);font-weight:900;color:#f9a8d4;width:26px;flex-shrink:0;text-align:center}
+.nm{flex:1;color:#fff;font-size:clamp(12px,1.8vw,16px);font-weight:600;text-shadow:0 1px 3px #000;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lk{color:#f9a8d4;font-size:clamp(11px,1.5vw,14px);font-weight:700;white-space:nowrap}
+.empty{color:rgba(255,255,255,.5);font-size:13px;padding:14px 0;text-shadow:0 1px 4px #000}
+</style></head><body>
+<h2>❤️ Top Tap Tap</h2>
+<div id="list"><div class="empty">Esperando datos del LIVE...</div></div>
+<script>
+var M=['🥇','🥈','🥉'];
+function go(){var w=new WebSocket('ws://127.0.0.1:47821');
+w.onopen=function(){w.send(JSON.stringify({clientType:'overlay',overlayId:'tappers'}))};
+w.onmessage=function(e){try{var m=JSON.parse(e.data);if(m.messageType==='ranking_updated'&&m.overlayId==='tappers'){var d=m.payload.tappers||[];document.getElementById('list').innerHTML=d.length?d.map(function(x,i){return'<div class="row"><span class="rk">'+(M[i]||'#'+(i+1))+'</span><span class="nm">'+x.displayName+'</span><span class="lk">❤️ '+x.likes.toLocaleString()+'</span></div>'}).join(''):'<div class="empty">Sin datos todavía</div>'}}catch(x){}};
+w.onclose=function(){setTimeout(go,3000)}}
+go();
+</script></body></html>"#;
+
+const OVERLAY_BEST_GIFT_HTML: &str = r#"<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:transparent!important;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh}
+.card{background:rgba(0,0,0,.65);backdrop-filter:blur(10px);border-radius:16px;padding:20px 28px;text-align:center;border:2px solid rgba(253,224,71,.45);box-shadow:0 0 40px rgba(253,224,71,.25);display:none;flex-direction:column;align-items:center;gap:6px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+.card.on{display:flex}
+@keyframes pop{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}
+.ic{font-size:40px}
+.gn{font-size:clamp(22px,4vw,40px);font-weight:900;color:#fde047;text-shadow:0 0 20px rgba(253,224,71,.6)}
+.co{font-size:clamp(14px,2.2vw,22px);color:#fff;text-shadow:0 1px 4px #000}
+.sn{font-size:clamp(11px,1.6vw,15px);color:rgba(255,255,255,.7);text-shadow:0 1px 3px #000}
+.lb{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:3px;margin-top:2px}
+.ph{color:rgba(255,255,255,.45);font-size:14px;text-shadow:0 1px 4px #000;text-align:center}
+</style></head><body>
+<div id="wrap"><div class="ph">👑 Mejor regalo aparecerá aquí</div></div>
+<script>
+function go(){var w=new WebSocket('ws://127.0.0.1:47821');
+w.onopen=function(){w.send(JSON.stringify({clientType:'overlay',overlayId:'best-gift'}))};
+w.onmessage=function(e){try{var m=JSON.parse(e.data);if(m.messageType==='best_gift_updated'){var p=m.payload;document.getElementById('wrap').innerHTML='<div class="card on"><div class="ic">👑</div><div class="gn">'+p.giftName+'</div><div class="co">🪙 '+Number(p.coins).toLocaleString()+' coins</div><div class="sn">de @'+p.senderName+'</div><div class="lb">Mejor Regalo del LIVE</div></div>'}}catch(x){}};
+w.onclose=function(){setTimeout(go,3000)}}
+go();
+</script></body></html>"#;
+
+const OVERLAY_LIKES_HTML: &str = r#"<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:transparent!important;overflow:hidden;width:100%;height:100vh;font-family:'Segoe UI',Arial,sans-serif}
+.heart{position:fixed;bottom:-60px;font-size:clamp(28px,5vw,52px);animation:up var(--d,3s) ease-in forwards;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5)) drop-shadow(0 0 8px rgba(255,100,150,.6))}
+@keyframes up{0%{bottom:-60px;opacity:1;transform:translateX(0) scale(1) rotate(0deg)}40%{opacity:1}100%{bottom:105vh;opacity:0;transform:translateX(var(--sx,20px)) scale(.7) rotate(var(--r,10deg))}}
+</style></head><body>
+<script>
+var E=['❤️','🩷','💕','💖','💗','🌹','💝'];
+function spawn(n){for(var i=0;i<Math.min(n,6);i++){(function(idx){setTimeout(function(){var h=document.createElement('span');h.className='heart';h.textContent=E[Math.floor(Math.random()*E.length)];var l=8+Math.random()*84;h.style.cssText='left:'+l+'%;--d:'+(2.2+Math.random()*1.8)+'s;--sx:'+(Math.random()*60-30)+'px;--r:'+(Math.random()*20-10)+'deg';document.body.appendChild(h);h.addEventListener('animationend',function(){h.remove()})},idx*180)})(i)}}
+function go(){var w=new WebSocket('ws://127.0.0.1:47821');
+w.onopen=function(){w.send(JSON.stringify({clientType:'overlay',overlayId:'likes'}))};
+w.onmessage=function(e){try{var m=JSON.parse(e.data);if(m.messageType==='likes_received'){spawn(m.payload.count||1)}}catch(x){}};
+w.onclose=function(){setTimeout(go,3000)}}
+go();
+</script></body></html>"#;
+
+const OVERLAY_JAR_HTML: &str = r#"<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:transparent!important;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;padding:16px}
+h2{color:#c084fc;font-size:clamp(13px,2.2vw,20px);text-transform:uppercase;letter-spacing:4px;margin-bottom:10px;text-shadow:0 2px 8px #000}
+.gift{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border-radius:8px;padding:7px 12px;margin-bottom:5px;border-left:3px solid #c084fc;animation:slide .35s ease}
+@keyframes slide{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+.gn{flex:1;color:#fff;font-size:clamp(12px,1.8vw,15px);font-weight:600;text-shadow:0 1px 3px #000;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.gc{color:#c084fc;font-size:clamp(10px,1.4vw,13px);font-weight:700;white-space:nowrap}
+.gs{color:rgba(255,255,255,.6);font-size:clamp(10px,1.3vw,12px);white-space:nowrap}
+.empty{color:rgba(255,255,255,.5);font-size:13px;padding:14px 0;text-shadow:0 1px 4px #000}
+</style></head><body>
+<h2>🫙 Gift Jar</h2>
+<div id="jar"><div class="empty">Los regalos aparecerán aquí...</div></div>
+<script>
+var gifts=[];var MAX=8;
+function render(){var el=document.getElementById('jar');if(!gifts.length){el.innerHTML='<div class="empty">Los regalos aparecerán aquí...</div>';return}var sl=gifts.slice(-MAX).reverse();el.innerHTML=sl.map(function(g){return'<div class="gift"><span class="gn">🎁 '+g.name+'</span><span class="gc">🪙'+Number(g.coins).toLocaleString()+'</span><span class="gs">@'+g.sender+'</span></div>'}).join('')}
+function go(){var w=new WebSocket('ws://127.0.0.1:47821');
+w.onopen=function(){w.send(JSON.stringify({clientType:'overlay',overlayId:'jar'}))};
+w.onmessage=function(e){try{var m=JSON.parse(e.data);if(m.messageType==='gift_received'&&m.overlayId==='jar'){var p=m.payload;gifts.push({name:p.giftName,coins:p.coins,sender:p.senderName});render()}}catch(x){}};
+w.onclose=function(){setTimeout(go,3000)}}
+go();
+</script></body></html>"#;
+
+async fn run_overlay_http_server() {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    let bind_addr = format!("127.0.0.1:{OVERLAY_HTTP_PORT}");
+    let listener = match tokio::net::TcpListener::bind(&bind_addr).await {
+        Ok(l) => {
+            println!("[overlay-http] Servidor HTTP de overlays en http://{bind_addr}/overlay/<id>");
+            l
+        }
+        Err(e) => {
+            eprintln!("[overlay-http] No se pudo iniciar en {bind_addr}: {e}");
+            return;
+        }
+    };
+
+    loop {
+        let Ok((mut stream, _addr)) = listener.accept().await else { continue };
+
+        tokio::spawn(async move {
+            let mut buf = vec![0u8; 2048];
+            let n = match stream.read(&mut buf).await {
+                Ok(n) if n > 0 => n,
+                _ => return,
+            };
+
+            let raw = String::from_utf8_lossy(&buf[..n]);
+            let path = raw
+                .lines()
+                .next()
+                .and_then(|l| l.split_whitespace().nth(1))
+                .unwrap_or("/")
+                .split('?')
+                .next()
+                .unwrap_or("/")
+                .to_owned();
+
+            let html: Option<&'static str> = match path.as_str() {
+                "/overlay/timer.html"     | "/overlay/timer"     => Some(OVERLAY_TIMER_HTML),
+                "/overlay/donors.html"    | "/overlay/donors"    => Some(OVERLAY_DONORS_HTML),
+                "/overlay/tappers.html"   | "/overlay/tappers"   => Some(OVERLAY_TAPPERS_HTML),
+                "/overlay/best-gift.html" | "/overlay/best-gift" => Some(OVERLAY_BEST_GIFT_HTML),
+                "/overlay/likes.html"     | "/overlay/likes"     => Some(OVERLAY_LIKES_HTML),
+                "/overlay/jar.html"       | "/overlay/jar"       => Some(OVERLAY_JAR_HTML),
+                _                        => None,
+            };
+
+            let response = match html {
+                Some(body) => format!(
+                    "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n{}",
+                    body.len(),
+                    body
+                ),
+                None => {
+                    let msg = "404 Not Found — rutas: /overlay/timer, /overlay/donors, /overlay/tappers, /overlay/best-gift, /overlay/likes, /overlay/jar";
+                    format!(
+                        "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                        msg.len(),
+                        msg
+                    )
+                }
+            };
+
+            stream.write_all(response.as_bytes()).await.ok();
+        });
+    }
+}
+
+// ============================================================
 // Bootstrap
 // ============================================================
 
@@ -816,6 +1210,11 @@ pub fn run() {
             tiktok_login,
             get_tiktok_session,
             tiktok_logout,
+            check_autoit_installed,
+            execute_keystroke,
+            pick_audio_file,
+            open_in_browser,
+            trigger_media_overlay,
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
@@ -827,6 +1226,83 @@ pub fn run() {
             tauri::async_runtime::spawn(async move {
                 ws.run().await;
             });
+
+            // Arrancar el HTTP server de overlays (puerto 47820) en background
+            tauri::async_runtime::spawn(run_overlay_http_server());
+
+            // EventBus → Tauri events (bridge para el frontend)
+            {
+                use reactstream_core::contracts::{AppEvent, EventType};
+                let eb = state.event_bus.clone();
+                let ah = app.handle().clone();
+
+                let h = ah.clone();
+                eb.subscribe(EventType::Gift, Arc::new(move |ev| {
+                    if let AppEvent::Gift(e) = ev {
+                        let _ = h.emit("rs-tiktok-event", serde_json::json!({
+                            "type": "gift",
+                            "giftId": e.gift.id,
+                            "giftName": e.gift.name,
+                            "coins": e.gift.coins,
+                            "quantity": e.quantity,
+                            "totalCoins": e.total_coins,
+                            "username": e.user.display_name,
+                        }));
+                    }
+                }));
+
+                let h = ah.clone();
+                eb.subscribe(EventType::Like, Arc::new(move |ev| {
+                    if let AppEvent::Like(e) = ev {
+                        let _ = h.emit("rs-tiktok-event", serde_json::json!({
+                            "type": "like",
+                            "count": e.count,
+                            "username": e.user.display_name,
+                        }));
+                    }
+                }));
+
+                let h = ah.clone();
+                eb.subscribe(EventType::Follow, Arc::new(move |ev| {
+                    if let AppEvent::Follow(e) = ev {
+                        let _ = h.emit("rs-tiktok-event", serde_json::json!({
+                            "type": "follow",
+                            "username": e.user.display_name,
+                        }));
+                    }
+                }));
+
+                let h = ah.clone();
+                eb.subscribe(EventType::Comment, Arc::new(move |ev| {
+                    if let AppEvent::Comment(e) = ev {
+                        let _ = h.emit("rs-tiktok-event", serde_json::json!({
+                            "type": "comment",
+                            "text": e.text,
+                            "username": e.user.display_name,
+                        }));
+                    }
+                }));
+
+                let h = ah.clone();
+                eb.subscribe(EventType::Share, Arc::new(move |ev| {
+                    if let AppEvent::Share(e) = ev {
+                        let _ = h.emit("rs-tiktok-event", serde_json::json!({
+                            "type": "share",
+                            "username": e.user.display_name,
+                        }));
+                    }
+                }));
+
+                let h = ah.clone();
+                eb.subscribe(EventType::Member, Arc::new(move |ev| {
+                    if let AppEvent::Member(e) = ev {
+                        let _ = h.emit("rs-tiktok-event", serde_json::json!({
+                            "type": "member",
+                            "username": e.user.display_name,
+                        }));
+                    }
+                }));
+            }
 
             Ok(())
         })

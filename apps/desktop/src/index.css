@@ -1,3 +1,12 @@
+
+/* ReactStream visual system — typography */
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+:root {
+  --rs-font-display: "Oxanium", "Segoe UI", system-ui, sans-serif;
+  --rs-font-ui: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --rs-font-tech: "Rajdhani", "Segoe UI", system-ui, sans-serif;
+}
+html, body, button, input, textarea, select { font-family: var(--rs-font-ui); }
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -144,278 +153,7 @@ input::placeholder { color: #59615b; }
   mask-image: linear-gradient(to bottom, rgba(0,0,0,.35), transparent 72%);
 }
 
-.rs-main-row { position: relative; z-index: 1; display: flex; flex: 1; min-height: 0; overflow: hidden; padding: 0 20px 0 20px; gap: 12px; }
 .rs-main-content { min-width: 0; flex: 1; min-height: 0; overflow: hidden; border-radius: 20px; }
-
-@media (max-width: 1050px) {
-  :root { --rs-sidebar-width: 178px; --rs-topbar-height: 112px; }
-  .rs-main-row { padding-left: 12px; padding-right: 12px; }
-  .topbar-logo-panel { flex-basis: 250px; width: 250px; }
-  .topbar-brand-mark { width:82px; height:58px; }
-  .topbar-brand-name { font-size:21px; }
-  .topbar-brand-tagline { font-size:6px; letter-spacing:2.7px; }
-  .topbar-connection { flex-basis: 470px; }
-  .topbar-account { flex-basis: 54px; width: 54px; }
-}
-
-/* Topbar */
-.rs-topbar {
-  position: relative;
-  z-index: 2;
-  flex: 0 0 var(--rs-topbar-height);
-  display: flex;
-  align-items: stretch;
-  gap: 12px;
-  padding: 8px 20px 7px;
-  background: rgba(5,7,6,.94);
-  border-bottom: 1px solid rgba(255,255,255,.07);
-}
-.rs-topbar::after {
-  content:"";
-  position:absolute;
-  left:20px;
-  right:20px;
-  bottom:0;
-  height:1px;
-  background:linear-gradient(90deg, transparent, rgba(57,255,20,.2), transparent);
-}
-
-.topbar-logo-panel {
-  width: 250px;
-  flex: 0 0 250px;
-  border: 1px solid var(--rs-border);
-  border-radius: 16px;
-  background:
-    radial-gradient(circle at 50% 48%, rgba(57,255,20,.06), transparent 58%),
-    #07100b;
-  overflow: hidden;
-  position: relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.topbar-brand {
-  width:100%;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:0;
-  overflow:hidden;
-}
-.topbar-brand-mark {
-  width:112px;
-  height:82px;
-  object-fit:contain;
-  display:block;
-  filter:drop-shadow(0 0 10px rgba(57,255,20,.18));
-  margin-top:-2px;
-}
-.topbar-brand-name {
-  margin-top:-3px;
-  color:#f1f3f2;
-  font-size:25px;
-  line-height:1;
-  font-weight:800;
-  letter-spacing:-1.1px;
-  font-style:italic;
-  text-shadow:0 2px 8px rgba(0,0,0,.35);
-}
-.topbar-brand-name strong {
-  color:#39ff14;
-  font-weight:800;
-}
-.topbar-brand-tagline {
-  margin-top:7px;
-  color:#c6ccc8;
-  font-size:7px;
-  line-height:1;
-  letter-spacing:3.3px;
-  white-space:nowrap;
-  font-weight:500;
-}
-
-.topbar-connection {
-  position:relative;
-  flex:0 0 470px;
-  padding:10px 18px 6px;
-}
-.card-heading {
-  color:#e2e6e3;
-  font-size:14px;
-  font-weight:800;
-  letter-spacing:.035em;
-}
-.connection-row {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-top:7px;
-}
-.username-input-wrap {
-  position:relative;
-  flex:1;
-}
-.username-input-wrap input {
-  width:100%;
-  height:34px;
-  padding-left:38px;
-  font-size:12px;
-}
-.topbar-icon {
-  position:absolute;
-  left:12px;
-  top:50%;
-  transform:translateY(-50%);
-  color:#c3c8c4;
-  font-size:19px;
-  z-index:1;
-}
-.connection-row .btn-green {
-  height:34px;
-  min-width:132px;
-  font-size:12px;
-}
-.connection-status {
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-top:6px;
-  color:#a9b0aa;
-  font-size:12px;
-}
-
-.topbar-stats {
-  flex:1;
-  min-width:0;
-  padding:10px 18px 5px;
-}
-.stats-title-row {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.stats-grid {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:11px;
-  margin-top:6px;
-  height:46px;
-}
-.stat-divider {
-  width:1px;
-  height:52px;
-  flex:0 0 1px;
-  align-self:center;
-  background:rgba(255,255,255,.17);
-  opacity:.95;
-}
-.stat-item {
-  min-width:0;
-  display:flex;
-  align-items:center;
-  gap:9px;
-}
-.stat-icon {
-  width:28px;
-  height:28px;
-  border:2px solid #e8ece9;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  color:#f0f3f0;
-  flex:0 0 28px;
-}
-.stat-icon svg {
-  width:17px;
-  height:17px;
-  display:block;
-}
-.stat-icon.coin {
-  color:#ffbd09;
-  border-color:#ffbd09;
-  font-weight:900;
-}
-.stat-copy { min-width:0; }
-.stat-label {
-  color:#a5aca7;
-  font-size:8px;
-  letter-spacing:.03em;
-  white-space:nowrap;
-}
-.stat-value {
-  color:#f4f6f4;
-  font-size:15px;
-  font-weight:800;
-  line-height:1.25;
-  white-space:nowrap;
-}
-.stat-value.accent { color:#ffbe0b; }
-.stat-sub {
-  color:#969e98;
-  font-size:8px;
-  white-space:nowrap;
-}
-
-.topbar-account {
-  width:62px;
-  flex:0 0 62px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 0 5px;
-}
-.settings-button {
-  width:42px;
-  height:42px;
-  border:1px solid var(--rs-border);
-  border-radius:13px;
-  background:linear-gradient(145deg,#151a17,#0a0d0b);
-  color:#d7ddd8;
-  font-size:23px;
-  cursor:pointer;
-  display:grid;
-  place-items:center;
-}
-.settings-button:hover {
-  color:var(--rs-green);
-  border-color:var(--rs-border-green);
-  box-shadow:0 0 17px var(--rs-green-glow);
-}
-.profile-wrap {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:2px;
-  color:var(--rs-green);
-  font-size:8px;
-}
-.profile-avatar {
-  position:relative;
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  border:1px solid rgba(255,255,255,.15);
-  background:#101412;
-  display:grid;
-  place-items:center;
-  color:#b9c0bb;
-  font-size:22px;
-}
-.profile-avatar span {
-  position:absolute;
-  width:10px;
-  height:10px;
-  right:-1px;
-  bottom:1px;
-  border-radius:50%;
-  background:var(--rs-green);
-  border:2px solid #071009;
-  box-shadow:0 0 7px var(--rs-green);
-}
 
 /* Sidebar */
 .rs-sidebar { position:relative; width:var(--rs-sidebar-width); flex:0 0 var(--rs-sidebar-width); min-height:0; margin-bottom:0; padding:15px 10px 12px; border:1px solid rgba(57,255,20,.22); border-radius:19px; background:linear-gradient(180deg,rgba(9,13,10,.94),rgba(6,9,7,.96)); box-shadow:inset 0 0 30px rgba(57,255,20,.025), 0 0 22px rgba(57,255,20,.035); overflow:hidden; }
@@ -449,1537 +187,11 @@ input::placeholder { color: #59615b; }
   box-shadow: inset 0 0 70px rgba(57,255,20,.025), 0 0 24px rgba(0,0,0,.35);
 }
 
-.hero-stage {
-  isolation: isolate;
-}
-
-.hero-grid {
-  position: absolute;
-  inset: -18%;
-  z-index: 0;
-  opacity: .9;
-  background:
-    linear-gradient(132deg, transparent 0 25%, rgba(18,25,21,.82) 25.2% 25.7%, transparent 25.9% 45%, rgba(16,22,19,.72) 45.2% 45.7%, transparent 45.9% 66%, rgba(15,21,18,.68) 66.2% 66.7%, transparent 66.9%),
-    linear-gradient(48deg, transparent 0 37%, rgba(13,19,16,.75) 37.2% 37.8%, transparent 38% 59%, rgba(15,21,18,.66) 59.2% 59.8%, transparent 60%);
-  transform: rotate(-2deg);
-}
-
-.hero-stage::before,
-.hero-stage::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.hero-stage::before {
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 7% 78%, rgba(57,255,20,.26), transparent 21%),
-    radial-gradient(ellipse at 96% 18%, rgba(57,255,20,.20), transparent 22%),
-    linear-gradient(118deg, transparent 0 40%, rgba(255,255,255,.035) 40.2% 40.45%, transparent 40.7% 58%, rgba(255,255,255,.025) 58.2% 58.4%, transparent 58.7%);
-}
-
-.hero-stage::after {
-  width: 55%;
-  height: 38%;
-  left: 22%;
-  top: 28%;
-  background: radial-gradient(ellipse, rgba(57,255,20,.065), transparent 67%);
-  filter: blur(24px);
-}
-
-.hero-sweep {
-  position: absolute;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(57,255,20,.72), rgba(112,255,50,.95), transparent);
-  filter: blur(8px);
-  opacity: .8;
-}
-
-.hero-sweep-top {
-  width: 58%;
-  height: 18%;
-  right: -11%;
-  top: -4%;
-  transform: rotate(24deg);
-}
-
-.hero-sweep-bottom {
-  width: 66%;
-  height: 14%;
-  left: -10%;
-  bottom: -1%;
-  transform: rotate(28deg);
-}
-
-.hero-sweep-left {
-  width: 35%;
-  height: 10%;
-  left: -8%;
-  bottom: 25%;
-  transform: rotate(32deg);
-  opacity: .45;
-}
-
-.hero-corner {
-  position: absolute;
-  z-index: 4;
-  width: 34px;
-  height: 34px;
-  pointer-events: none;
-}
-
-.hero-corner::before,
-.hero-corner::after {
-  content: "";
-  position: absolute;
-  background: rgba(57,255,20,.8);
-  box-shadow: 0 0 8px rgba(57,255,20,.12);
-}
-
-.hero-corner::before { width: 2px; height: 34px; }
-.hero-corner::after { width: 34px; height: 2px; }
-
-.hero-corner-tl { left: 3%; top: 6%; }
-.hero-corner-tr { right: 3%; top: 6%; transform: scaleX(-1); }
-.hero-corner-bl { left: 3%; bottom: 14%; transform: scaleY(-1); }
-.hero-corner-br { right: 3%; bottom: 14%; transform: scale(-1); }
-
-.hero-copy {
-  position: absolute;
-  z-index: 5;
-  left: 6%;
-  top: 12%;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  color: rgba(218,225,220,.76);
-  font-size: clamp(9px, .72vw, 12px);
-  line-height: 1.15;
-  letter-spacing: .34em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.hero-brand {
-  position: absolute;
-  z-index: 5;
-  left: 50%;
-  top: 48%;
-  width: min(48%, 590px);
-  transform: translate(-50%, -50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.hero-brand img {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 54vh;
-  object-fit: contain;
-  filter: drop-shadow(0 0 14px rgba(57,255,20,.18));
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-.hero-values {
-  position: absolute;
-  z-index: 5;
-  right: 5.8%;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: rgba(218,225,220,.72);
-  font-size: clamp(9px, .72vw, 12px);
-  letter-spacing: .35em;
-  line-height: 1.2;
-}
-
-.hero-values-line {
-  display: block;
-  width: 34px;
-  height: 2px;
-  margin-bottom: 3px;
-  background: #39ff14;
-  box-shadow: 0 0 8px rgba(57,255,20,.6);
-}
-
-.hero-bottom {
-  position: absolute;
-  z-index: 7;
-  left: 2.1%;
-  right: 2.1%;
-  bottom: 2.7%;
-  min-height: 52px;
-  border: 1px solid rgba(57,255,20,.42);
-  border-radius: 15px;
-  background: linear-gradient(90deg, rgba(4,12,7,.72), rgba(5,11,8,.54), rgba(4,12,7,.72));
-  box-shadow: inset 0 0 28px rgba(57,255,20,.025);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 22px;
-}
-
-.hero-bottom-status {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: rgba(235,240,236,.9);
-  font-size: 13px;
-}
-
-.hero-status-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #39ff14;
-  box-shadow: 0 0 10px rgba(57,255,20,.8);
-  flex: 0 0 auto;
-}
-
-.hero-bottom-version {
-  color: rgba(220,228,223,.8);
-  font-size: 9px;
-  letter-spacing: .23em;
-  white-space: nowrap;
-}
-
-@media (max-width: 1100px) {
-  .hero-brand { width: min(50%, 520px); }
-  .hero-copy { left: 5.5%; }
-  .hero-values { right: 5%; }
-  .hero-bottom { min-height: 46px; }
-}
-
-@media (max-width: 850px) {
-  .hero-copy { font-size: 8px; letter-spacing: .24em; gap: 4px; }
-  .hero-values { font-size: 8px; gap: 6px; }
-  .hero-brand { width: min(54%, 430px); top: 47%; }
-  .hero-bottom { padding: 0 14px; }
-  .hero-bottom-status { font-size: 11px; }
-  .hero-bottom-version { font-size: 7px; letter-spacing: .15em; }
-}
-
-@media (max-width: 650px) {
-  .hero-copy { left: 5%; top: 9%; font-size: 7px; }
-  .hero-values { right: 4%; font-size: 7px; }
-  .hero-brand { width: 58%; top: 45%; }
-  .hero-corner { width: 24px; height: 24px; }
-  .hero-corner::before { height: 24px; }
-  .hero-corner::after { width: 24px; }
-  .hero-bottom { left: 2%; right: 2%; bottom: 2%; min-height: 42px; border-radius: 12px; }
-  .hero-bottom-version { display: none; }
-}
 
 .sidebar-icon-svg { width: 30px; height: 30px; flex: 0 0 30px; display:block; color:#eef2ef; filter:drop-shadow(0 0 4px rgba(255,255,255,.05)); }
 .sidebar-item.active .sidebar-icon-svg { color:var(--rs-green); filter:drop-shadow(0 0 8px rgba(57,255,20,.58)); }
 .sidebar-icon-svg.sidebar-pro { color:#d9d1a7; }
 .sidebar-item.active .sidebar-icon-svg.sidebar-pro { color:var(--rs-green); }
-.topbar-icon { display:grid; place-items:center; }
-.topbar-icon svg { width:19px; height:19px; display:block; }
-.stat-icon { width:31px; height:31px; border:2px solid #e8ece9; border-radius:50%; display:grid; place-items:center; color:#f0f3f0; flex:0 0 31px; }
-.stat-icon svg { width:20px; height:20px; display:block; }
-.stat-icon.coin { color:#ffbd09; border-color:#ffbd09; }
-.settings-button { display:grid; place-items:center; }
-.settings-button svg { width:24px; height:24px; }
-.profile-avatar svg { width:23px; height:23px; }
-.topbar-connection .card-heading, .topbar-connection .connection-row, .topbar-connection .connection-status { margin-left:70px; }
-.topbar-connection .connection-row { margin-right:0; }
-
-@media (max-width: 900px) {
-  .tiktok-mark { left:10px; top:10px; width:32px; height:32px; border-radius:8px; }
-    .tiktok-mark { left:12px; top:12px; width:56px; height:56px; border-radius:12px; }
-    .topbar-connection .card-heading, .topbar-connection .connection-row { margin-left:70px; }
-.topbar-connection .connection-status { margin-left:0; }
-  .topbar-connection { padding:16px 18px 11px; }
-  .sidebar-icon-svg { width:22px; height:22px; flex-basis:22px; }
-}
-
-/* BANANA v16 — TikTok supplied artwork: crop internal JPG padding without changing the asset */
-.tiktok-mark img { width:52px; height:52px; transform:scale(1.48); }
-
-/* TikTok mark — balanced to match the reference compact header */
-.tiktok-mark {
-  position:absolute;
-  left:14px;
-  top:14px;
-  width:56px;
-  height:56px;
-  border-radius:10px;
-  display:grid;
-  place-items:center;
-  background:#070a09;
-  border:1px solid rgba(255,255,255,.05);
-  overflow:hidden;
-}
-.tiktok-mark img {
-  width:42px;
-  height:42px;
-  object-fit:cover;
-  display:block;
-  mix-blend-mode:screen;
-  transform:scale(1.12);
-  transform-origin:center;
-}
-.topbar-connection { position:relative; }
-.topbar-connection .card-heading,
-.topbar-connection .connection-row,
-.topbar-connection .connection-status { margin-left:70px; }
-.topbar-connection .connection-row { margin-right:0; }
-@media (max-width: 1050px) {
-  .tiktok-mark { left:12px; top:12px; width:52px; height:52px; border-radius:10px; }
-  .tiktok-mark img { width:38px; height:38px; transform:scale(1.1); }
-  .topbar-connection .card-heading,
-  .topbar-connection .connection-row,
-  .topbar-connection .connection-status { margin-left:64px; }
-}
-
-/* BANANA v18 — TikTok connection reference tuning */
-.topbar-connection .card-heading,
-.topbar-connection .connection-row { margin-left:70px; }
-.topbar-connection .connection-status {
-  margin-left:0;
-  margin-top:9px;
-  gap:9px;
-  color:#b9c0bb;
-  font-size:13px;
-  line-height:1;
-  font-family:"Arial Narrow", "Segoe UI", Arial, sans-serif;
-  letter-spacing:.005em;
-}
-.topbar-connection .connection-status .status-dot { width:9px; height:9px; }
-.topbar-connection .card-heading {
-  font-family:"Arial Narrow", "Segoe UI", Arial, sans-serif;
-  font-size:13px;
-  font-weight:800;
-  letter-spacing:.025em;
-}
-.topbar-connection .btn-green {
-  background:linear-gradient(135deg, #f3fff0 0%, #72ff4f 15%, #39f51f 48%, #25d313 100%);
-  border-color:rgba(133,255,110,.78);
-  box-shadow:0 0 18px rgba(57,255,20,.2), inset 0 1px rgba(255,255,255,.55), inset 12px 0 18px rgba(255,255,255,.08);
-}
-@media (max-width:1050px) {
-  .topbar-connection .card-heading,
-  .topbar-connection .connection-row { margin-left:64px; }
-  .topbar-connection .connection-status { margin-left:0; }
-}
-
-/* BANANA v19 — refine TikTok connection status against the reference */
-.topbar-connection .connection-status {
-  margin-left: 70px;
-  margin-top: 14px;
-  gap: 9px;
-  font-size: 14px;
-  line-height: 1.1;
-  font-weight: 500;
-  letter-spacing: .01em;
-}
-.topbar-connection .connection-status .status-dot {
-  width: 9px;
-  height: 9px;
-}
-@media (max-width: 1050px) {
-  .topbar-connection .connection-status {
-    margin-left: 64px;
-    margin-top: 13px;
-    font-size: 13px;
-  }
-}
-
-/* BANANA v20 — TikTok connection typography/alignment refinement */
-.topbar-connection .card-heading {
-  margin-left: 70px;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: .025em;
-  line-height: 1.1;
-}
-.topbar-connection .connection-status {
-  margin-left: 14px;
-  margin-top: 19px;
-  gap: 9px;
-  font-size: 15px;
-  line-height: 1.1;
-  font-weight: 500;
-  letter-spacing: .005em;
-}
-.topbar-connection .connection-status .status-dot {
-  width: 9px;
-  height: 9px;
-}
-@media (max-width: 1050px) {
-  .topbar-connection .card-heading { margin-left: 64px; font-size: 14px; }
-  .topbar-connection .connection-status { margin-left: 12px; margin-top: 18px; font-size: 14px; }
-}
-
-/* BANANA v23 — compact topbar: remove child min-content pressure so the header can actually shrink */
-:root {
-  --rs-topbar-height: 104px;
-}
-
-.rs-topbar {
-  flex: 0 0 var(--rs-topbar-height);
-  height: var(--rs-topbar-height);
-  min-height: 0;
-  padding-top: 6px;
-  padding-bottom: 5px;
-}
-
-.topbar-logo-panel,
-.topbar-brand,
-.topbar-connection,
-.topbar-stats,
-.topbar-account {
-  min-height: 0;
-}
-
-.topbar-brand-mark {
-  width: 78px;
-  height: 54px;
-  margin-top: 0;
-  flex: 0 0 54px;
-}
-
-.topbar-brand-name {
-  margin-top: -1px;
-  font-size: 20px;
-  line-height: 1;
-}
-
-.topbar-brand-tagline {
-  margin-top: 4px;
-  font-size: 6px;
-  letter-spacing: 2.8px;
-}
-
-.topbar-connection {
-  padding-top: 7px;
-  padding-bottom: 4px;
-}
-
-.topbar-stats {
-  padding-top: 7px;
-  padding-bottom: 3px;
-}
-
-@media (max-width: 1050px) {
-  :root { --rs-topbar-height: 104px; }
-  .rs-topbar { height: var(--rs-topbar-height); }
-  .topbar-brand-mark { width: 72px; height: 50px; flex-basis: 50px; }
-  .topbar-brand-name { font-size: 19px; }
-  .topbar-brand-tagline { font-size: 5.5px; letter-spacing: 2.5px; }
-}
-
-/* BANANA v24 — TikTok connection panel enlarged to match the user's reference sketch */
-:root {
-  --rs-topbar-height: 144px;
-}
-
-.rs-topbar {
-  flex: 0 0 var(--rs-topbar-height);
-  height: var(--rs-topbar-height);
-  min-height: var(--rs-topbar-height);
-  max-height: var(--rs-topbar-height);
-  align-items: stretch;
-  padding: 8px 18px;
-}
-
-/* Connection card: larger, with the status on its own lower row */
-.topbar-connection {
-  flex: 0 0 470px;
-  height: 100%;
-  padding: 13px 18px 11px;
-  position: relative;
-  overflow: hidden;
-}
-
-.topbar-connection .card-heading {
-  margin-left: 78px;
-  font-size: 18px;
-  line-height: 1.1;
-  letter-spacing: .02em;
-  margin-bottom: 11px;
-}
-
-.topbar-connection .connection-row {
-  margin-left: 78px;
-  gap: 10px;
-  align-items: center;
-}
-
-.topbar-connection .connection-row .username-input-wrap {
-  min-width: 0;
-  flex: 1;
-}
-
-.topbar-connection .connection-row input {
-  height: 44px;
-  min-height: 44px;
-  padding-left: 38px;
-  font-size: 14px;
-  border-radius: 8px;
-}
-
-.topbar-connection .connection-row .topbar-icon {
-  left: 10px;
-}
-
-.topbar-connection .btn-green {
-  height: 44px;
-  min-height: 44px;
-  padding: 0 27px;
-  border-radius: 8px;
-  font-size: 14px;
-  letter-spacing: .04em;
-  white-space: nowrap;
-}
-
-.topbar-connection .connection-status {
-  margin-left: 12px;
-  margin-top: 15px;
-  gap: 11px;
-  font-size: 17px;
-  line-height: 1.15;
-  font-weight: 500;
-}
-
-.topbar-connection .connection-status .status-dot {
-  width: 12px;
-  height: 12px;
-  box-shadow: 0 0 8px var(--rs-green), 0 0 16px rgba(57,255,20,.45);
-}
-
-.tiktok-mark {
-  left: 14px;
-  top: 14px;
-  width: 64px;
-  height: 64px;
-  border-radius: 11px;
-}
-
-.tiktok-mark img {
-  width: 47px;
-  height: 47px;
-  transform: scale(1.12);
-}
-
-/* Keep the other topbar blocks vertically balanced with the enlarged header. */
-.topbar-logo-panel,
-.topbar-stats,
-.topbar-account {
-  height: 100%;
-  min-height: 0;
-}
-
-.topbar-stats {
-  padding-top: 12px;
-  padding-bottom: 10px;
-}
-
-@media (max-width: 1050px) {
-  :root { --rs-topbar-height: 144px; }
-  .rs-topbar { height: var(--rs-topbar-height); }
-  .topbar-connection { flex-basis: 420px; }
-  .topbar-connection .card-heading,
-  .topbar-connection .connection-row { margin-left: 70px; }
-  .topbar-connection .connection-status { margin-left: 12px; }
-}
-
-/* BANANA v25 — topbar height fix
-   Keep the enlarged TikTok connection design, but return the header to a compact height. */
-:root {
-  --rs-topbar-height: 126px;
-}
-
-.rs-topbar {
-  flex: 0 0 var(--rs-topbar-height);
-  height: var(--rs-topbar-height);
-  min-height: 0;
-  max-height: var(--rs-topbar-height);
-  padding: 6px 18px 5px;
-  overflow: hidden;
-}
-
-/* Logo block: fit inside the compact header without forcing its height. */
-.topbar-logo-panel {
-  height: 100%;
-  min-height: 0;
-}
-
-.topbar-brand {
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.topbar-brand-mark {
-  width: 76px;
-  height: 50px;
-  flex: 0 0 50px;
-}
-
-.topbar-brand-name {
-  margin-top: -1px;
-  font-size: 19px;
-  line-height: 1;
-}
-
-.topbar-brand-tagline {
-  margin-top: 3px;
-  font-size: 5.5px;
-  letter-spacing: 2.5px;
-}
-
-/* TikTok connection: preserve the larger typography while fitting the card. */
-.topbar-connection {
-  height: 100%;
-  min-height: 0;
-  padding: 7px 18px 5px;
-  overflow: hidden;
-}
-
-.topbar-connection .card-heading {
-  margin-left: 70px;
-  margin-bottom: 4px;
-  font-size: 14px;
-  line-height: 1.05;
-}
-
-.topbar-connection .connection-row {
-  margin-left: 70px;
-  margin-top: 0;
-  height: 40px;
-  gap: 10px;
-}
-
-.topbar-connection .connection-row input {
-  height: 40px;
-  min-height: 40px;
-  font-size: 13px;
-}
-
-.topbar-connection .btn-green {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 24px;
-  font-size: 13px;
-}
-
-.topbar-connection .connection-status {
-  margin-left: 12px;
-  margin-top: 8px;
-  gap: 9px;
-  font-size: 15px;
-  line-height: 1;
-}
-
-.topbar-connection .connection-status .status-dot {
-  width: 10px;
-  height: 10px;
-}
-
-.tiktok-mark {
-  left: 14px;
-  top: 12px;
-  width: 56px;
-  height: 56px;
-  border-radius: 10px;
-}
-
-.tiktok-mark img {
-  width: 42px;
-  height: 42px;
-  transform: scale(1.1);
-}
-
-/* Stats: vertically center the existing data instead of letting it define header height. */
-.topbar-stats {
-  height: 100%;
-  min-height: 0;
-  padding: 8px 18px 4px;
-}
-
-.stats-grid {
-  height: 42px;
-  margin-top: 4px;
-}
-
-/* Account controls stay inside the compact header. */
-.topbar-account {
-  height: 100%;
-  min-height: 0;
-  padding-bottom: 3px;
-}
-
-@media (max-width: 1050px) {
-  :root { --rs-topbar-height: 126px; }
-  .rs-topbar { height: var(--rs-topbar-height); }
-  .topbar-connection { flex-basis: 420px; }
-  .topbar-connection .card-heading,
-  .topbar-connection .connection-row { margin-left: 64px; }
-  .topbar-connection .connection-status { margin-left: 10px; }
-}
-
-/* BANANA v27 — TikTok connection micro-balance */
-.topbar-connection .tiktok-mark,
-.tiktok-mark {
-  left: 14px;
-  top: 12px;
-  width: 48px;
-  height: 48px;
-  border-radius: 9px;
-}
-
-.topbar-connection .tiktok-mark img,
-.tiktok-mark img {
-  width: 36px;
-  height: 36px;
-  transform: scale(1.08);
-}
-
-.topbar-connection .card-heading,
-.topbar-connection .connection-row {
-  margin-left: 66px;
-}
-
-.topbar-connection .connection-row {
-  gap: 8px;
-  height: 34px;
-}
-
-.topbar-connection .connection-row input {
-  height: 34px;
-  min-height: 34px;
-  padding-left: 34px;
-  font-size: 12px;
-  border-radius: 7px;
-}
-
-.topbar-connection .connection-row .topbar-icon {
-  left: 9px;
-}
-
-.topbar-connection .btn-green {
-  height: 34px;
-  min-height: 34px;
-  min-width: 96px;
-  padding: 0 18px;
-  border-radius: 7px;
-  font-size: 12px;
-}
-
-/* Status aligned with the left edge of the TikTok tile. */
-.topbar-connection .connection-status {
-  margin-left: 14px;
-  margin-top: 9px;
-  gap: 9px;
-  font-size: 15px;
-  line-height: 1;
-}
-
-.topbar-connection .connection-status .status-dot {
-  width: 10px;
-  height: 10px;
-}
-
-@media (max-width: 1050px) {
-  .topbar-connection .card-heading,
-  .topbar-connection .connection-row {
-    margin-left: 62px;
-  }
-
-  .topbar-connection .connection-status {
-    margin-left: 12px;
-  }
-
-  .topbar-connection .tiktok-mark,
-  .tiktok-mark {
-    left: 12px;
-    top: 12px;
-    width: 46px;
-    height: 46px;
-  }
-
-  .topbar-connection .tiktok-mark img,
-  .tiktok-mark img {
-    width: 34px;
-    height: 34px;
-  }
-}
-
-/* BANANA v28 — TikTok connection reference match
-   Match the supplied reference: TikTok mark on the left, title/input/button to
-   the right, and the status aligned to the TikTok mark's left edge below it. */
-.topbar-connection {
-  padding: 9px 18px 7px;
-}
-
-.topbar-connection .card-heading {
-  margin-left: 78px;
-  margin-bottom: 7px;
-  font-size: 16px;
-  line-height: 1.05;
-}
-
-.topbar-connection .connection-row {
-  margin-left: 78px;
-  margin-top: 0;
-  height: 42px;
-  gap: 12px;
-}
-
-.topbar-connection .connection-row input {
-  height: 42px;
-  min-height: 42px;
-  padding-left: 39px;
-  font-size: 14px;
-  border-radius: 9px;
-}
-
-.topbar-connection .connection-row .topbar-icon {
-  left: 11px;
-}
-
-.topbar-connection .btn-green {
-  height: 42px;
-  min-height: 42px;
-  min-width: 118px;
-  padding: 0 23px;
-  border-radius: 9px;
-  font-size: 13px;
-}
-
-/* Status starts exactly where the TikTok tile starts. */
-.topbar-connection .connection-status {
-  margin-left: 14px;
-  margin-top: 10px;
-  gap: 10px;
-  font-size: 15px;
-  line-height: 1;
-}
-
-.topbar-connection .connection-status .status-dot {
-  width: 11px;
-  height: 11px;
-}
-
-/* Reference-sized TikTok tile. */
-.topbar-connection .tiktok-mark {
-  left: 14px;
-  top: 12px;
-  width: 58px;
-  height: 58px;
-  border-radius: 10px;
-}
-
-.topbar-connection .tiktok-mark img {
-  width: 44px;
-  height: 44px;
-  transform: scale(1.1);
-}
-
-@media (max-width: 1050px) {
-  .topbar-connection .card-heading,
-  .topbar-connection .connection-row {
-    margin-left: 70px;
-  }
-
-  .topbar-connection .connection-status {
-    margin-left: 12px;
-  }
-
-  .topbar-connection .tiktok-mark {
-    left: 12px;
-    top: 11px;
-    width: 54px;
-    height: 54px;
-  }
-}
-
-/* BANANA v30 — status exact alignment with TikTok tile */
-.topbar-connection .connection-status {
-  margin-left: -4px !important;
-}
-
-
-
-/* BANANA v31 — LIVE stats reference: typography matched to TikTok connection,
-   icon circles removed, and badge reflects the real live/session state. */
-.topbar-stats .card-heading {
-  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
-  font-size: 16px;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: .025em;
-}
-
-.topbar-stats .stats-title-row {
-  align-items: center;
-}
-
-.topbar-stats .badge-live {
-  min-width: 58px;
-  text-align: center;
-  padding: 5px 9px;
-}
-
-.topbar-stats .badge-live.is-offline {
-  background: rgba(109,117,111,.12);
-  color: #aeb5b0;
-  border-color: rgba(174,181,176,.16);
-  box-shadow: none;
-  animation: none;
-}
-
-.topbar-stats .badge-live.is-live {
-  background: rgba(239,51,82,.18);
-  color: #ff536d;
-  border-color: rgba(239,51,82,.2);
-}
-
-.topbar-stats .stats-grid {
-  align-items: center;
-  margin-top: 8px;
-}
-
-.topbar-stats .stat-icon {
-  width: 31px;
-  height: 31px;
-  flex: 0 0 31px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: #e8ece9;
-  box-shadow: none;
-  display: grid;
-  place-items: center;
-}
-
-.topbar-stats .stat-icon svg {
-  width: 28px;
-  height: 28px;
-  display: block;
-}
-
-.topbar-stats .stat-icon.coin {
-  color: #ffbe0b;
-  border: 0;
-}
-
-.topbar-stats .stat-item {
-  gap: 9px;
-}
-
-.topbar-stats .stat-label {
-  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
-  font-size: 8px;
-  letter-spacing: .025em;
-}
-
-.topbar-stats .stat-value {
-  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
-  font-size: 15px;
-  line-height: 1.2;
-}
-
-.topbar-stats .stat-sub {
-  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
-}
-
-/* BANANA v32 — live stats typography enlarged to match reference */
-.topbar-stats .card-heading {
-  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
-  font-size: 19px !important;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: .015em;
-}
-
-.topbar-stats .stats-grid {
-  margin-top: 9px;
-  height: 52px;
-  gap: 16px;
-}
-
-.topbar-stats .stat-item {
-  gap: 11px;
-}
-
-.topbar-stats .stat-icon {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-}
-
-.topbar-stats .stat-icon svg {
-  width: 34px;
-  height: 34px;
-}
-
-.topbar-stats .stat-label {
-  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
-  font-size: 11px !important;
-  font-weight: 500;
-  letter-spacing: .02em;
-  line-height: 1.15;
-}
-
-.topbar-stats .stat-value {
-  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
-  font-size: 19px !important;
-  font-weight: 800;
-  line-height: 1.15;
-}
-
-.topbar-stats .stat-sub {
-  font-family: "Arial Narrow", "Segoe UI", Arial, sans-serif;
-  font-size: 10px !important;
-  line-height: 1.15;
-}
-
-.topbar-stats .stat-divider {
-  height: 40px;
-}
-
-.topbar-stats .badge-live {
-  font-size: 12px;
-  font-weight: 800;
-  padding: 6px 11px;
-  min-width: 68px;
-}
-
-/* BANANA v33 — compactar y alinear cada icono con su bloque de texto */
-.topbar-stats .stats-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  column-gap: 16px;
-}
-
-.topbar-stats .stat-item {
-  width: 100%;
-  justify-self: start;
-  justify-content: flex-start;
-  gap: 7px;
-}
-
-.topbar-stats .stat-icon {
-  margin-left: 0;
-}
-
-.topbar-stats .stat-copy {
-  text-align: left;
-}
-
-/* Live profile panel — replaces the old settings/profile buttons. */
-.topbar-stats {
-  display: flex;
-  align-items: stretch;
-  overflow: hidden;
-}
-
-.stats-main {
-  min-width: 0;
-  flex: 1 1 auto;
-  padding: 10px 18px 5px;
-}
-
-.topbar-live-profile {
-  flex: 0 0 190px;
-  min-width: 190px;
-  margin: 8px 8px 8px 0;
-  padding: 0 16px;
-  border-left: 1px solid rgba(255,255,255,.13);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  transition: .2s ease;
-}
-
-.live-profile-avatar {
-  position: relative;
-  width: 58px;
-  height: 58px;
-  flex: 0 0 58px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: #aeb6b0;
-  background: radial-gradient(circle at 35% 30%, #1a211d, #080b09 72%);
-  border: 2px solid rgba(255,255,255,.13);
-  box-shadow: inset 0 0 15px rgba(0,0,0,.35);
-  overflow: visible;
-}
-
-.live-profile-avatar svg {
-  width: 30px;
-  height: 30px;
-}
-
-/* Botón de cerrar sesión — aparece en hover sobre el avatar */
-.live-profile-logout-btn {
-  position: absolute;
-  bottom: -4px;
-  right: -4px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #0f1410;
-  border: 1.5px solid rgba(255,255,255,0.18);
-  color: rgba(255,255,255,0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transform: scale(0.85);
-  transition: opacity 0.15s, transform 0.15s, color 0.15s, border-color 0.15s;
-  padding: 0;
-  z-index: 2;
-}
-.live-profile-logout-btn:hover {
-  color: #fca5a5;
-  border-color: rgba(239,68,68,0.5);
-  background: rgba(239,68,68,0.1);
-}
-.live-profile-avatar:hover .live-profile-logout-btn {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.topbar-live-profile.is-live .live-profile-avatar {
-  border-color: var(--rs-green);
-  box-shadow: 0 0 14px rgba(57,255,20,.26), inset 0 0 15px rgba(57,255,20,.08);
-}
-
-.live-profile-dot {
-  position: absolute;
-  right: -1px;
-  bottom: 2px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #4c5550;
-  border: 2px solid #080b09;
-}
-
-.topbar-live-profile.is-live .live-profile-dot {
-  background: var(--rs-green);
-  box-shadow: 0 0 8px var(--rs-green);
-}
-
-.live-profile-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.live-profile-name {
-  max-width: 110px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #f3f6f3;
-  font-size: 15px;
-  line-height: 1.1;
-  font-weight: 800;
-}
-
-.topbar-live-profile.is-offline .live-profile-name {
-  color: #8c948e;
-}
-
-.live-profile-status {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #89918b;
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.topbar-live-profile.is-live .live-profile-status {
-  color: var(--rs-green);
-  font-weight: 700;
-}
-
-.live-profile-status .status-dot {
-  width: 8px;
-  height: 8px;
-}
-
-@media (max-width: 1050px) {
-  .topbar-live-profile {
-    flex-basis: 165px;
-    min-width: 165px;
-    padding: 0 10px;
-    gap: 9px;
-  }
-  .live-profile-avatar { width: 50px; height: 50px; flex-basis: 50px; }
-  .live-profile-name { font-size: 13px; max-width: 88px; }
-}
-
-/* BANANA v34 — stats shortened to make room for the TikTok live profile. */
-.topbar-stats {
-  display: flex;
-  align-items: stretch;
-  min-width: 0;
-  overflow: hidden;
-  padding: 0;
-}
-
-.topbar-stats .stats-main {
-  min-width: 0;
-  flex: 1 1 auto;
-  padding: 10px 18px 5px;
-}
-
-.topbar-stats .stats-title-row {
-  justify-content: flex-start;
-}
-
-/* The old LIVE/OFFLINE badge is intentionally removed from the stats header.
-   Live state is now represented by the profile block on the right. */
-.topbar-stats .badge-live {
-  display: none;
-}
-
-.topbar-live-profile {
-  flex: 0 0 220px;
-  min-width: 220px;
-  margin: 8px 8px 8px 0;
-  padding: 0 18px;
-  border-left: 1px solid rgba(255,255,255,.13);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  transition: .2s ease;
-}
-
-.live-profile-avatar {
-  position: relative;
-  width: 62px;
-  height: 62px;
-  flex: 0 0 62px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: #aeb6b0;
-  background: radial-gradient(circle at 35% 30%, #1a211d, #080b09 72%);
-  border: 2px solid rgba(255,255,255,.13);
-  box-shadow: inset 0 0 15px rgba(0,0,0,.35);
-  overflow: hidden;
-}
-
-.live-profile-avatar svg {
-  width: 31px;
-  height: 31px;
-}
-
-.live-profile-avatar img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-
-.topbar-live-profile.is-live .live-profile-avatar {
-  border-color: var(--rs-green);
-  box-shadow: 0 0 14px rgba(57,255,20,.26), inset 0 0 15px rgba(57,255,20,.08);
-}
-
-.live-profile-dot {
-  position: absolute;
-  right: 1px;
-  bottom: 2px;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #4c5550;
-  border: 2px solid #080b09;
-}
-
-.topbar-live-profile.is-live .live-profile-dot {
-  background: var(--rs-green);
-  box-shadow: 0 0 8px var(--rs-green);
-}
-
-.live-profile-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.live-profile-name {
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #f3f6f3;
-  font-size: 16px;
-  line-height: 1.1;
-  font-weight: 800;
-}
-
-.topbar-live-profile.is-offline .live-profile-name {
-  color: #8c948e;
-}
-
-.live-profile-status {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #89918b;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.topbar-live-profile.is-live .live-profile-status {
-  color: var(--rs-green);
-  font-weight: 700;
-}
-
-.live-profile-status .status-dot {
-  width: 8px;
-  height: 8px;
-}
-
-@media (max-width: 1050px) {
-  .topbar-live-profile {
-    flex-basis: 180px;
-    min-width: 180px;
-    padding: 0 10px;
-    gap: 9px;
-  }
-  .live-profile-avatar { width: 50px; height: 50px; flex-basis: 50px; }
-  .live-profile-name { font-size: 13px; max-width: 88px; }
-}
-
-/* BANANA v35 — logo superior ligeramente más grande, sin modificar el panel */
-.topbar-brand-mark {
-  width: 125px;
-  height: 90px;
-}
-
-.topbar-brand-name {
-  font-size: 28px;
-}
-
-.topbar-brand-tagline {
-  font-size: 8px;
-  letter-spacing: 3.4px;
-}
-
-/* BANANA v36 — logo superior: ajuste intermedio, más pequeño que v35 */
-.topbar-brand-mark {
-  width: 92px;
-  height: 62px;
-  flex: 0 0 62px;
-  margin-top: 0;
-}
-
-.topbar-brand-name {
-  font-size: 21px;
-  margin-top: -2px;
-}
-
-.topbar-brand-tagline {
-  font-size: 6px;
-  letter-spacing: 2.7px;
-  margin-top: 4px;
-}
-
-/* BANANA v37 — divisores de estadísticas fieles a la referencia
-   Líneas verticales limpias entre cada bloque, centradas en el área de métricas. */
-.topbar-stats .stats-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: stretch;
-  column-gap: 16px;
-}
-
-.topbar-stats .stat-divider {
-  width: 1px;
-  min-width: 1px;
-  height: 40px;
-  align-self: center;
-  justify-self: center;
-  margin: 0;
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.topbar-stats .stat-item {
-  align-self: center;
-}
-
-/* ReactStream v35 — cuenta TikTok integrada en el panel de estadísticas. */
-.topbar-stats {
-  display: flex;
-  align-items: stretch;
-  min-width: 0;
-  overflow: hidden;
-  padding: 0;
-}
-
-.topbar-stats .stats-main {
-  min-width: 0;
-  flex: 1 1 auto;
-  padding: 10px 18px 5px;
-}
-
-.topbar-stats .stats-title-row {
-  justify-content: flex-start;
-}
-
-.topbar-live-profile {
-  flex: 0 0 190px;
-  min-width: 190px;
-  margin: 8px 8px 8px 0;
-  padding: 8px 10px;
-  border-left: 1px solid rgba(255,255,255,.13);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  transition: .2s ease;
-}
-
-.live-profile-avatar {
-  position: relative;
-  width: 58px;
-  height: 58px;
-  flex: 0 0 58px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: #aeb6b0;
-  background: radial-gradient(circle at 35% 30%, #1a211d, #080b09 72%);
-  border: 2px solid rgba(255,255,255,.13);
-  box-shadow: inset 0 0 15px rgba(0,0,0,.35);
-  overflow: hidden;
-}
-
-.live-profile-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.live-profile-avatar svg {
-  width: 30px;
-  height: 30px;
-}
-
-.topbar-live-profile.is-live .live-profile-avatar {
-  border-color: var(--rs-green);
-  box-shadow: 0 0 14px rgba(57,255,20,.26), inset 0 0 15px rgba(57,255,20,.08);
-}
-
-.live-profile-dot {
-  position: absolute;
-  right: 0;
-  bottom: 1px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--rs-green);
-  border: 2px solid #080b09;
-  box-shadow: 0 0 8px var(--rs-green);
-}
-
-.live-profile-copy {
-  min-width: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  text-align: center;
-}
-
-.live-profile-username {
-  max-width: 170px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #f3f6f3;
-  font-size: 12px;
-  line-height: 1.2;
-  font-weight: 800;
-}
-
-.live-profile-name {
-  max-width: 170px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #9ca59f;
-  font-size: 10px;
-  line-height: 1.2;
-  font-weight: 500;
-}
-
-.live-profile-status {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 2px;
-  color: var(--rs-green);
-  font-size: 9px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.live-profile-status .status-dot {
-  width: 6px;
-  height: 6px;
-}
-
-.topbar-tiktok-login {
-  width: 166px;
-  min-height: 32px;
-  padding: 7px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.topbar-tiktok-login svg { flex: 0 0 auto; }
-
-@media (max-width: 1250px) {
-  .topbar-live-profile {
-    flex-basis: 175px;
-    min-width: 175px;
-  }
-  .topbar-tiktok-login { width: 150px; font-size: 9px; }
-}
-
-@media (max-width: 1050px) {
-  .topbar-live-profile {
-    flex-basis: 155px;
-    min-width: 155px;
-  }
-  .live-profile-avatar { width: 50px; height: 50px; flex-basis: 50px; }
-  .topbar-tiktok-login { width: 135px; font-size: 9px; }
-}
-
 /* ============================================================
    REACTSTREAM — GLASS SHELL v1
    Home artwork is the single visual source of truth. The UI
@@ -2192,29 +404,32 @@ input::placeholder { color: #59615b; }
 
 .glass-sidebar-item.active .sidebar-label { color: #f5fff2; }
 
-/* Floating David R card */
+/* Floating profile card */
 .rs-profile-card {
   position: absolute;
   z-index: 30;
   top: 12px;
   right: 14px;
-  min-width: 190px;
-  height: 68px;
-  padding: 8px 14px 8px 9px;
+  width: 278px;
+  height: 84px;
+  padding: 10px 14px 10px 10px;
   display: flex;
   align-items: center;
   gap: 11px;
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 22px;
   background:
-    linear-gradient(120deg, rgba(255,255,255,.10), rgba(255,255,255,.025)),
-    rgba(5,14,9,.34);
+    linear-gradient(135deg, rgba(255,255,255,.115) 0%, rgba(255,255,255,.035) 28%, rgba(57,255,20,.035) 64%, rgba(0,0,0,.16) 100%),
+    rgba(5,13,8,.48);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.10),
-    inset 0 0 22px rgba(57,255,20,.045),
-    0 16px 42px rgba(0,0,0,.38);
-  backdrop-filter: blur(28px) saturate(145%);
-  -webkit-backdrop-filter: blur(28px) saturate(145%);
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -1px 0 rgba(0,0,0,.18),
+    inset 10px 10px 24px rgba(255,255,255,.018),
+    inset -14px -12px 28px rgba(57,255,20,.022),
+    0 18px 42px rgba(0,0,0,.42),
+    0 0 0 1px rgba(57,255,20,.045);
+  backdrop-filter: blur(30px) saturate(155%) brightness(1.04);
+  -webkit-backdrop-filter: blur(30px) saturate(155%) brightness(1.04);
 }
 
 .rs-profile-card::after {
@@ -2223,7 +438,10 @@ input::placeholder { color: #59615b; }
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(120deg, rgba(255,255,255,.08), transparent 35%, rgba(57,255,20,.06));
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.10), transparent 32%, transparent 68%, rgba(57,255,20,.055)),
+    radial-gradient(circle at 84% 10%, rgba(57,255,20,.10), transparent 34%);
+  opacity: .9;
 }
 
 .rs-profile-avatar {
@@ -2244,6 +462,81 @@ input::placeholder { color: #59615b; }
 .rs-profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rs-profile-avatar svg { width: 25px; height: 25px; }
 .rs-profile-avatar span:not(.rs-profile-status-dot) { font-weight: 800; color: var(--rs-green); }
+
+.rs-profile-avatar--empty { opacity: .45; }
+
+.rs-profile-login-area {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.rs-profile-connect-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(145,255,117,.98), rgba(36,214,18,.95));
+  border: 1px solid rgba(154,255,133,.72);
+  color: #041006;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+  box-shadow:
+    0 2px 16px rgba(57,255,20,.20),
+    inset 0 1px rgba(255,255,255,.62),
+    inset 0 -8px 14px rgba(0,100,15,.10);
+  width: 100%;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.rs-profile-connect-btn::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 19px;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,.22), transparent 42%);
+}
+
+.rs-profile-connect-btn svg {
+  position: relative;
+  z-index: 1;
+  transition: transform .18s ease, filter .18s ease;
+}
+
+.rs-profile-connect-btn:hover:not(:disabled) {
+  filter: brightness(1.12);
+  box-shadow:
+    0 0 9px rgba(57,255,20,.80),
+    0 0 22px rgba(57,255,20,.48),
+    0 0 34px rgba(57,255,20,.20),
+    inset 0 1px rgba(255,255,255,.72);
+  transform: translateY(-1px);
+}
+
+.rs-profile-connect-btn:hover:not(:disabled) svg {
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.85));
+}
+
+.rs-profile-connect-btn:active:not(:disabled) { transform: scale(.97); }
+.rs-profile-connect-btn:disabled { opacity: .55; cursor: default; }
+
+.rs-profile-login-hint {
+  font-size: 10px;
+  color: rgba(220,227,222,.52);
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1;
+}
 
 .rs-profile-status-dot {
   position: absolute;
@@ -2499,25 +792,25 @@ input::placeholder { color: #59615b; }
 
 /* 2. David R — larger reference-sized glass card */
 .rs-profile-card {
-  top: 14px;
-  right: 16px;
-  width: 248px;
-  min-width: 248px;
+  top: 12px;
+  right: 14px;
+  width: 278px;
+  min-width: 278px;
   height: 84px;
-  padding: 10px 17px 10px 11px;
-  gap: 13px;
-  border-radius: 24px;
+  padding: 10px 14px 10px 10px;
+  gap: 11px;
+  border-radius: 22px;
   background:
-    linear-gradient(120deg, rgba(255,255,255,.105), rgba(255,255,255,.028)),
-    rgba(5,14,9,.30);
-  border-color: rgba(255,255,255,.18);
+    linear-gradient(160deg, rgba(255,255,255,.085) 0%, rgba(255,255,255,.012) 45%, rgba(57,255,20,.03) 100%),
+    rgba(4,10,6,.52);
+  border-color: rgba(255,255,255,.19);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.12),
-    inset 0 0 24px rgba(57,255,20,.055),
-    0 16px 44px rgba(0,0,0,.38),
-    0 0 22px rgba(57,255,20,.035);
-  backdrop-filter: blur(34px) saturate(150%);
-  -webkit-backdrop-filter: blur(34px) saturate(150%);
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -1px 0 rgba(0,0,0,.12),
+    0 22px 52px rgba(0,0,0,.50),
+    0 0 0 1px rgba(255,255,255,.04);
+  backdrop-filter: blur(32px) saturate(165%) brightness(1.03);
+  -webkit-backdrop-filter: blur(32px) saturate(165%) brightness(1.03);
 }
 
 .rs-profile-avatar {
@@ -2674,7 +967,7 @@ input::placeholder { color: #59615b; }
 .actions-module-shell {
   position: absolute;
   inset: 0;
-  padding: 52px 66px 14px 232px;
+  padding: 52px 18px 14px 232px;
   box-sizing: border-box;
   overflow: hidden;
   color: #f4f8f5;
@@ -2860,7 +1153,7 @@ input::placeholder { color: #59615b; }
    and keep the whole workspace comfortably clear of the floating sidebar. */
 .actions-module-shell {
   padding-left: 246px;
-  padding-right: 66px;
+  padding-right: 50px;
 }
 
 .actions-module-content {
@@ -2953,3 +1246,1581 @@ input::placeholder { color: #59615b; }
   .actions-module-content { padding: 0; }
   .keystroke-editor { padding: 14px 16px; }
 }
+
+/* ReactStream Event Icon Pack */
+.rs-event-icon { width: var(--event-icon-size, 22px); height: var(--event-icon-size, 22px); flex: 0 0 var(--event-icon-size, 22px); object-fit: contain; display: inline-block; vertical-align: middle; transition: transform .16s ease, filter .16s ease, opacity .16s ease; filter: drop-shadow(0 0 4px rgba(57,255,20,.10)); }
+.rs-event-icon:hover { transform: translateY(-1px) scale(1.03); }
+.rs-event-icon-active { filter: drop-shadow(0 0 7px rgba(57,255,20,.30)); }
+.rs-event-icon-selected { filter: drop-shadow(0 0 9px rgba(57,255,20,.42)); }
+.rs-gift-image { display: inline-block; vertical-align: middle; flex: 0 0 auto; }
+.rs-timer-glyph { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(249,115,22,.65); border-radius: 6px; color: #fb923c; font: 700 8px/1 var(--rs-font-ui); letter-spacing: -.04em; }
+.rs-automation-trigger-icon { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; }
+.trigger-chip .rs-event-icon, .keystroke-item-icon .rs-event-icon { margin-right: 1px; }
+.trigger-chip { gap: 7px; }
+.gift-action-button { display:inline-flex; align-items:center; justify-content:center; gap:7px; }
+.keystroke-item-icon { display:flex; align-items:center; justify-content:center; }
+
+/* V17 — ReactStream iconography + interaction polish */
+.rs-ui-icon { display: inline-block; flex: 0 0 auto; vertical-align: middle; }
+.actions-module-tab-icon { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: currentColor; }
+.actions-module-tab.active .actions-module-tab-icon { filter: drop-shadow(0 0 6px rgba(57,255,20,.45)); }
+
+.trigger-chip { position: relative; overflow: hidden; }
+.trigger-chip::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 100%, rgba(57,255,20,.16), transparent 65%); transition: opacity .18s ease; }
+.trigger-chip:hover::after, .trigger-chip.active::after { opacity: 1; }
+.trigger-chip .rs-event-icon { position: relative; z-index: 1; }
+.trigger-chip.active .rs-event-icon { transform: scale(1.05); }
+
+.autoit-icon { color: #fbbf24; }
+.autoit-button { display: inline-flex; align-items: center; gap: 6px; }
+
+.keystroke-item-icon { width: 35px; flex: 0 0 35px; height: 35px; }
+.keystroke-list-item.active .keystroke-item-icon { filter: drop-shadow(0 0 7px rgba(57,255,20,.22)); }
+.keystroke-menu { width: 24px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; transition: background .16s ease, color .16s ease; }
+.keystroke-list-item:hover .keystroke-menu { background: rgba(255,255,255,.045); color: #fff; }
+
+.keystroke-empty { color: var(--rs-text-muted); }
+.keystroke-empty-icon, .media-empty-icon, .sound-empty-icon, .automation-empty-icon {
+  width: 64px; height: 64px; display: grid; place-items: center; border: 1px solid rgba(57,255,20,.20); border-radius: 18px;
+  background: rgba(57,255,20,.035); color: rgba(57,255,20,.75); box-shadow: inset 0 0 24px rgba(57,255,20,.035), 0 0 20px rgba(57,255,20,.035);
+}
+
+.key-chips { gap: 8px; }
+.key-chip {
+  height: 32px; min-width: 44px; padding: 0 7px 0 10px; border-radius: 8px;
+  background: linear-gradient(180deg, rgba(57,255,20,.13), rgba(57,255,20,.055));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 2px 8px rgba(0,0,0,.16);
+  font-family: var(--rs-font-ui); font-size: 11px; letter-spacing: .02em;
+}
+.keycap-label { display: inline-flex; align-items: center; justify-content: center; min-width: 25px; }
+.key-chip button { width: 17px; height: 17px; display: inline-grid; place-items: center; border-radius: 5px; color: rgba(255,255,255,.45); transition: .15s ease; }
+.key-chip button:hover { color: #fff; background: rgba(255,255,255,.08); }
+
+.module-green-button, .module-ghost-button, .module-danger-button, .icon-danger-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.module-green-button .rs-ui-icon, .module-ghost-button .rs-ui-icon, .module-danger-button .rs-ui-icon { filter: drop-shadow(0 0 4px rgba(255,255,255,.10)); }
+
+.gift-filter { gap: 9px; }
+.gift-filter .rs-gift-image, .gift-filter .rs-event-icon { width: 24px; height: 24px; }
+.gift-filter.filled { border-color: rgba(57,255,20,.30); background: linear-gradient(90deg, rgba(57,255,20,.055), rgba(2,8,5,.46)); }
+.gift-action-button { min-width: 88px; }
+
+.media-list-icon { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: var(--rs-green); }
+.media-empty-icon, .sound-empty-icon, .automation-empty-icon { color: var(--rs-green); }
+
+.btn-green, .btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rs-event-icon, .trigger-chip, .keystroke-list-item, .key-chip button, .keystroke-menu { transition: none !important; }
+}
+.automation-log-success { color: var(--rs-green); }
+.automation-log-muted { color: rgba(255,255,255,.38); }
+
+/* Gift trigger: selector + simulation side-by-side. Everything else keeps the existing module styling. */
+.gift-simulation-row { display: grid; grid-template-columns: minmax(250px, .82fr) minmax(420px, 1.45fr); gap: 10px; align-items: stretch; }
+.gift-selected-card { min-width: 0; min-height: 142px; box-sizing: border-box; padding: 11px 13px; border: 1px solid rgba(57,255,20,.56); border-radius: 12px; background: rgba(2,8,5,.38); box-shadow: inset 0 0 25px rgba(57,255,20,.025); }
+.gift-selected-title, .simulation-title-row { text-transform: uppercase; letter-spacing: .13em; font-size: 10px; font-weight: 800; color: rgba(205,216,209,.70); }
+.gift-selected-content { display: flex; align-items: center; gap: 12px; margin-top: 8px; min-width: 0; }
+.gift-selected-image { width: 82px; height: 86px; flex: 0 0 82px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.13); border-radius: 9px; background: rgba(7,17,11,.48); overflow: hidden; }
+.gift-selected-image .rs-gift-image, .gift-selected-image .rs-event-icon { width: 64px; height: 64px; object-fit: contain; }
+.gift-selected-info { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.gift-selected-info strong { font-size: 13px; font-weight: 800; color: #f4f8f5; }
+.gift-selected-coins { font-size: 11px; font-weight: 800; color: rgba(239,245,241,.88); }
+.gift-selected-coins span { color: #f5bd20; font-size: 12px; }
+.gift-selected-info small { font-size: 9px; color: rgba(205,216,209,.45); }
+.gift-change-button { height: 28px; margin-top: 5px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(57,255,20,.30); border-radius: 8px; background: rgba(57,255,20,.045); color: rgba(239,245,241,.84); font-size: 10px; font-weight: 800; cursor: pointer; }
+.gift-change-button:hover { border-color: rgba(57,255,20,.58); color: #fff; background: rgba(57,255,20,.08); }
+.simulation-card-inline { min-width: 0; min-height: 142px; box-sizing: border-box; padding: 11px 13px; }
+.simulation-title-row { display: flex; align-items: center; gap: 6px; color: var(--rs-green); }
+.simulation-help { width: 14px; height: 14px; display: inline-grid; place-items: center; border: 1px solid rgba(57,255,20,.65); border-radius: 50%; font-size: 9px; letter-spacing: 0; }
+.simulation-description { margin: 7px 0 10px; color: rgba(218,227,221,.58); font-size: 10px; }
+.simulation-card-inline .simulation-buttons { height: 36px; }
+.simulation-card-inline .simulation-log { min-height: 0; padding-top: 7px; max-height: 28px; overflow: hidden; }
+@media (max-width: 1050px) {
+  .gift-simulation-row { grid-template-columns: 1fr; }
+}
+
+
+/* ============================================================
+   ReactStream Typography — Oxanium / Space Grotesk / Rajdhani
+   Typography only: no layout, spacing, color or component changes.
+   ============================================================ */
+html, body, #root {
+  font-family: var(--rs-font-ui);
+}
+
+/* Oxanium — brand hierarchy and primary headings */
+h1, h2, h3,
+.actions-module-header h1 {
+  font-family: var(--rs-font-display);
+  font-weight: 700;
+}
+
+/* Space Grotesk — readable application/UI copy */
+p, span, input, textarea, select,
+.keystroke-item-copy strong,
+.keystroke-item-copy small,
+.autoit-banner span,
+.module-help,
+.simulation-description,
+.simulation-log {
+  font-family: var(--rs-font-ui);
+}
+
+/* Rajdhani — compact technical controls and labels */
+button,
+.module-section-title,
+.keystroke-list-head > span,
+.two-column-fields label > span,
+.trigger-chip,
+.autoit-banner strong,
+.autoit-button,
+.module-green-button,
+.module-ghost-button,
+.module-danger-button,
+.gift-action-button,
+.simulation-title-row,
+.simulation-help,
+.key-chip {
+  font-family: var(--rs-font-tech);
+}
+
+/* Keep keyboard values distinctly technical. */
+.key-chip {
+  font-family: var(--rs-font-tech);
+  font-weight: 700;
+}
+
+/* Typography readability pass — sizes only, preserving the current layout. */
+.actions-module-header p { font-size: 16px; }
+.actions-module-tab { font-size: 16px; }
+.keystroke-list-head > span { font-size: 16px; }
+.keystroke-item-copy strong { font-size: 16px; }
+.keystroke-item-copy small { font-size: 16px; }
+.autoit-banner strong { font-size: 18px; }
+.autoit-banner span { font-size: 14px; }
+.autoit-button { font-size: 16px; }
+.module-section-title { font-size: 15px; }
+.module-input { font-size: 14px; }
+.trigger-chip { font-size: 16px; }
+.module-help { font-size: 14px; }
+.two-column-fields label > span { font-size: 15px; }
+.module-green-button, .module-ghost-button, .module-danger-button { font-size: 15px; }
+
+.gift-selected-title, .simulation-title-row { font-size: 14px; }
+.gift-selected-info strong { font-size: 16px; }
+.gift-selected-coins { font-size: 14px; }
+.gift-selected-coins span { font-size: 18px; }
+.gift-selected-info small { font-size: 10px; }
+.gift-change-button { font-size: 13px; }
+.simulation-description { font-size: 15px; }
+.simulation-help { font-size: 15px; }
+.key-chip { font-size: 15px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE SHELL — scrollable and centered variants
+   ═══════════════════════════════════════════════════════════════ */
+
+.page-content-scroll {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(57,255,20,.25) transparent;
+}
+
+.page-content-centered {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FROZEN BADGE
+   ═══════════════════════════════════════════════════════════════ */
+
+.frozen-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(245,158,11,0.15);
+  color: #f59e0b;
+  font-weight: 600;
+  font-family: var(--rs-font-tech);
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SOUNDS PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+.sound-play-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(57,255,20,0.10);
+  color: var(--rs-green);
+  transition: background .15s, color .15s;
+  font-size: 11px;
+}
+.sound-play-btn.playing {
+  background: var(--rs-green);
+  color: #000;
+}
+.sound-play-btn:hover:not(.playing) {
+  background: rgba(57,255,20,0.20);
+}
+
+.sound-play-btn-lg {
+  width: 44px;
+  height: 44px;
+}
+
+.sound-volume-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--rs-text-muted);
+}
+.sound-slider {
+  flex: 1;
+  accent-color: var(--rs-green);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.sound-slider:focus { box-shadow: none; border-color: transparent; }
+.sound-volume-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rs-green);
+  width: 42px;
+  text-align: right;
+  font-family: var(--rs-font-tech);
+}
+
+.sound-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(5,7,6,.9);
+  border: 1px solid var(--rs-border);
+  border-radius: 12px;
+}
+
+.sound-filename {
+  flex: 1;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--rs-text-secondary);
+  cursor: default;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OVERLAYS PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+.overlay-emoji-icon {
+  font-size: 18px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.overlay-right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.overlay-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rs-border);
+  flex-shrink: 0;
+}
+
+.overlay-emoji-title {
+  font-size: 20px;
+}
+
+.overlay-content-split {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.overlay-preview-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--rs-border);
+}
+
+.overlay-preview-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--rs-border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--rs-text-muted);
+  letter-spacing: .08em;
+  flex-shrink: 0;
+  font-family: var(--rs-font-tech);
+}
+
+.overlay-preview-canvas {
+  flex: 1;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.overlay-settings-panel {
+  width: 280px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(57,255,20,.25) transparent;
+}
+
+.overlay-settings-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.overlay-setting-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.overlay-url-box {
+  background: rgba(5,7,6,.9);
+  border: 1px solid var(--rs-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--rs-text-muted);
+  word-break: break-all;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRO PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+.pro-card {
+  text-align: center;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.pro-crown-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(245,158,11,0.10);
+  border: 2px solid rgba(245,158,11,0.40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.pro-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-family: var(--rs-font-display);
+}
+
+.pro-subtitle {
+  font-size: 14px;
+  color: var(--rs-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.pro-features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.pro-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--rs-text-secondary);
+  padding: 9px 12px;
+  background: rgba(13,17,15,.82);
+  border: 1px solid var(--rs-border);
+  border-radius: 10px;
+  transition: border-color .15s;
+}
+.pro-feature-item:hover { border-color: var(--rs-border-green); }
+
+.pro-feature-icon {
+  color: var(--rs-green);
+  flex-shrink: 0;
+}
+
+.pro-license-box {
+  width: 100%;
+  background: rgba(13,17,15,.82);
+  border: 1px solid var(--rs-border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.pro-license-input {
+  flex: 1;
+  font-family: monospace;
+  letter-spacing: .1em;
+}
+
+.pro-footer-note {
+  font-size: 12px;
+  color: var(--rs-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SETTINGS PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+.settings-page-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-family: var(--rs-font-display);
+}
+
+.settings-page-subtitle {
+  font-size: 12px;
+  color: var(--rs-text-secondary);
+  margin-bottom: 8px;
+}
+
+.settings-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--rs-green);
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  margin-top: 22px;
+  margin-bottom: 2px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--rs-border-green);
+  font-family: var(--rs-font-tech);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--rs-border);
+}
+
+.setting-row-label {
+  flex: 1;
+}
+
+.setting-row-control {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.settings-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rs-border);
+}
+
+.tiktok-login-status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.status-dot.online { background: var(--rs-green); box-shadow: 0 0 6px var(--rs-green); }
+
+.session-debug {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--rs-text-muted);
+}
+.session-debug.error   { color: #f87171; }
+.session-debug.success { color: var(--rs-green); }
+
+/* ═══════════════════════════════════════════════════════════════
+   MODULE CONTENT VARIANTS — Settings scrollable, Pro centrado
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Settings: scroll dentro del card */
+.settings-content {
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(57,255,20,.25) transparent;
+}
+
+/* Pro: centrar el contenido dentro del card */
+.pro-content {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.pro-inner {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Crown icon uses amber instead of green */
+.pro-title-icon {
+  color: #f59e0b !important;
+  filter: drop-shadow(0 0 11px rgba(245,158,11,.45)) !important;
+}
+
+/* ============================================================
+   PERSISTENT TIKTOK LIVE CONNECTION CARD
+   Independent card placed immediately to the left of ProfileCard.
+   ============================================================ */
+.rs-tiktok-connect-card {
+  position: absolute;
+  z-index: 29;
+  top: 12px;
+  right: 320px;
+  width: 320px;
+  height: 84px;
+  min-height: 84px;
+  box-sizing: border-box;
+  padding: 10px 10px 9px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.115) 0%, rgba(255,255,255,.035) 28%, rgba(57,255,20,.035) 64%, rgba(0,0,0,.16) 100%),
+    rgba(5,13,8,.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -1px 0 rgba(0,0,0,.18),
+    inset 10px 10px 24px rgba(255,255,255,.018),
+    inset -14px -12px 28px rgba(57,255,20,.022),
+    0 18px 42px rgba(0,0,0,.42),
+    0 0 0 1px rgba(57,255,20,.045);
+  backdrop-filter: blur(30px) saturate(155%) brightness(1.04);
+  -webkit-backdrop-filter: blur(30px) saturate(155%) brightness(1.04);
+  overflow: hidden;
+}
+
+.rs-tiktok-connect-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg, rgba(255,255,255,.10), transparent 26%, transparent 68%, rgba(57,255,20,.055)),
+    radial-gradient(circle at 82% 12%, rgba(57,255,20,.11), transparent 34%);
+  opacity: .9;
+}
+
+.rs-tiktok-connect-card::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 1px;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), rgba(57,255,20,.16), transparent);
+}
+
+.rs-tiktok-connect-main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.rs-tiktok-connect-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.08), rgba(0,0,0,.16)),
+    rgba(2,7,4,.74);
+  border: 1px solid rgba(255,255,255,.15);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.12),
+    inset 0 -8px 16px rgba(0,0,0,.12),
+    0 4px 12px rgba(0,0,0,.28);
+}
+
+.rs-tiktok-connect-icon img {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  transform: scale(1.08);
+  mix-blend-mode: screen;
+}
+
+.rs-tiktok-connect-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rs-tiktok-connect-field input {
+  display: block;
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.30)),
+    rgba(3,10,5,.38);
+  border: 1px solid rgba(255,255,255,.105);
+  box-shadow: inset 0 1px rgba(255,255,255,.045);
+  font-size: 12px;
+  color: #eef3ef;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.rs-tiktok-connect-field input:hover {
+  border-color: rgba(255,255,255,.15);
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.17), rgba(0,0,0,.27)),
+    rgba(3,10,5,.42);
+}
+
+.rs-tiktok-connect-field input:focus {
+  border-color: rgba(57,255,20,.38);
+  box-shadow:
+    0 0 0 2px rgba(57,255,20,.07),
+    0 0 18px rgba(57,255,20,.08),
+    inset 0 1px rgba(255,255,255,.07);
+}
+
+.rs-tiktok-connect-field input:disabled { opacity: .78; }
+
+.rs-tiktok-connect-button {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(110,255,82,.70);
+  border-radius: 12px;
+  background:
+    linear-gradient(145deg, rgba(145,255,117,.95), rgba(36,214,18,.94));
+  color: #041006;
+  cursor: pointer;
+  box-shadow:
+    0 0 14px rgba(57,255,20,.16),
+    inset 0 1px rgba(255,255,255,.62),
+    inset 0 -8px 14px rgba(0,100,15,.12);
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+
+.rs-tiktok-connect-button::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 11px;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,.20), transparent 42%);
+}
+
+.rs-tiktok-connect-button svg {
+  position: relative;
+  z-index: 1;
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: filter .18s ease, transform .18s ease;
+}
+
+.rs-tiktok-connect-button:hover:not(:disabled) {
+  filter: brightness(1.12);
+  box-shadow:
+    0 0 9px rgba(57,255,20,.86),
+    0 0 21px rgba(57,255,20,.62),
+    0 0 34px rgba(57,255,20,.30),
+    inset 0 1px rgba(255,255,255,.76),
+    inset 0 -8px 14px rgba(0,100,15,.08);
+  transform: translateY(-1px);
+}
+
+.rs-tiktok-connect-button:hover:not(:disabled) svg {
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.9));
+  transform: translateX(1px);
+}
+
+.rs-tiktok-connect-button:active:not(:disabled) { transform: scale(.95); }
+.rs-tiktok-connect-button:disabled { opacity: .52; cursor: default; }
+
+.rs-tiktok-connect-status {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  margin: 7px 2px 0 0;
+  padding-left: 0;
+  color: rgba(229,235,231,.86);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rs-tiktok-connect-status.error { color: #ffb0bb; }
+.rs-tiktok-connect-status.connected { color: rgba(226,255,221,.92); }
+.rs-tiktok-connect-status.connecting { color: rgba(255,235,174,.94); }
+.rs-tiktok-connect-status.ready { color: rgba(229,235,231,.86); }
+
+.rs-tiktok-status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: var(--rs-yellow);
+  box-shadow: 0 0 7px rgba(255,190,11,.62), 0 0 13px rgba(255,190,11,.22);
+}
+
+.rs-tiktok-connect-status.connected .rs-tiktok-status-dot {
+  background: var(--rs-green);
+  box-shadow: 0 0 7px var(--rs-green), 0 0 14px rgba(57,255,20,.55);
+}
+
+.rs-tiktok-connect-status.connecting .rs-tiktok-status-dot {
+  background: var(--rs-yellow);
+  box-shadow: 0 0 7px var(--rs-yellow), 0 0 14px rgba(255,190,11,.48);
+  animation: rs-tiktok-status-pulse 1.25s ease-in-out infinite;
+}
+
+.rs-tiktok-connect-status.error .rs-tiktok-status-dot {
+  background: var(--rs-red);
+  box-shadow: 0 0 7px rgba(239,51,82,.72), 0 0 14px rgba(239,51,82,.30);
+}
+
+.rs-tiktok-connect-status.ready .rs-tiktok-status-dot {
+  background: var(--rs-yellow);
+  box-shadow: 0 0 7px rgba(255,190,11,.62), 0 0 13px rgba(255,190,11,.22);
+}
+
+@keyframes rs-tiktok-status-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(.72); opacity: .72; }
+}
+
+@media (max-width: 900px) {
+  .rs-tiktok-connect-card {
+    top: 9px;
+    right: 240px;
+    width: 320px;
+    height: 74px;
+    min-height: 74px;
+    border-radius: 18px;
+    padding: 8px 10px;
+  }
+
+  .rs-tiktok-connect-icon { width: 38px; height: 38px; flex-basis: 38px; border-radius: 10px; }
+  .rs-tiktok-connect-icon img { width: 30px; height: 30px; }
+  .rs-tiktok-connect-field input { height: 36px; font-size: 11px; }
+  .rs-tiktok-connect-button { width: 36px; height: 36px; flex-basis: 36px; }
+  .rs-tiktok-connect-button svg { width: 17px; height: 17px; }
+  .rs-tiktok-connect-status { font-size: 10px; margin-top: 5px; }
+}
+
+
+/* ============================================================
+   CARDS — FINAL iOS / visionOS LIQUID GLASS REFINEMENT
+   Scope: ONLY TikTokConnectCard + ProfileCard.
+   No layout, logic, navigation or global components changed.
+   ============================================================ */
+
+.rs-tiktok-connect-card,
+.rs-profile-card {
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(135deg,
+      rgba(255,255,255,.12) 0%,
+      rgba(255,255,255,.035) 30%,
+      rgba(57,255,20,.025) 58%,
+      rgba(0,0,0,.10) 100%),
+    rgba(5, 12, 8, .24);
+  border: 1px solid rgba(255,255,255,.20);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -1px 0 rgba(0,0,0,.10),
+    inset 0 0 28px rgba(255,255,255,.018),
+    0 18px 44px rgba(0,0,0,.34),
+    0 0 0 1px rgba(57,255,20,.035);
+  backdrop-filter: blur(34px) saturate(145%) brightness(1.06);
+  -webkit-backdrop-filter: blur(34px) saturate(145%) brightness(1.06);
+}
+
+.rs-tiktok-connect-card::before,
+.rs-profile-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(120deg,
+      rgba(255,255,255,.13) 0%,
+      rgba(255,255,255,.035) 20%,
+      transparent 42%,
+      transparent 70%,
+      rgba(57,255,20,.045) 100%);
+  opacity: .9;
+}
+
+.rs-tiktok-connect-card::after,
+.rs-profile-card::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 12% 0%,
+      rgba(255,255,255,.10),
+      transparent 28%),
+    radial-gradient(circle at 88% 8%,
+      rgba(57,255,20,.07),
+      transparent 34%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+/* Keep every actual card child above the glass layers. */
+.rs-tiktok-connect-card > *,
+.rs-profile-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* TikTok logo tile: translucent glass instead of opaque black. */
+.rs-tiktok-connect-icon {
+  background:
+    linear-gradient(145deg,
+      rgba(255,255,255,.10),
+      rgba(255,255,255,.025)),
+    rgba(0,0,0,.42);
+  border-color: rgba(255,255,255,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -8px 18px rgba(0,0,0,.10),
+    0 5px 16px rgba(0,0,0,.22);
+}
+
+/* Input: darker transparent glass, allowing the background to breathe through. */
+.rs-tiktok-connect-field input {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.08)),
+    rgba(0,0,0,.25);
+  border-color: rgba(255,255,255,.13);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    inset 0 -1px 0 rgba(0,0,0,.10);
+}
+
+.rs-tiktok-connect-field input:hover {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.06)),
+    rgba(0,0,0,.22);
+  border-color: rgba(255,255,255,.18);
+}
+
+/* Arrow button: glass/neon surface with a cleaner highlight. */
+.rs-tiktok-connect-button {
+  background:
+    linear-gradient(145deg,
+      rgba(110,255,82,.92),
+      rgba(36,214,18,.82));
+  border-color: rgba(145,255,126,.68);
+  box-shadow:
+    0 0 14px rgba(57,255,20,.18),
+    inset 0 1px 0 rgba(255,255,255,.68),
+    inset 0 -8px 16px rgba(0,100,15,.08);
+}
+
+/* Profile login button: white TikTok icon + white typography, as in reference. */
+.rs-profile-connect-btn {
+  color: #fff !important;
+  background:
+    linear-gradient(135deg,
+      rgba(104,255,78,.98) 0%,
+      rgba(47,225,25,.94) 55%,
+      rgba(35,204,17,.90) 100%);
+  border-color: rgba(169,255,151,.72);
+  box-shadow:
+    0 0 18px rgba(57,255,20,.22),
+    inset 0 1px 0 rgba(255,255,255,.72),
+    inset 0 -8px 16px rgba(0,90,15,.08);
+  text-shadow: 0 1px 5px rgba(0,0,0,.24);
+}
+
+.rs-profile-connect-btn svg {
+  color: #fff !important;
+}
+
+.rs-profile-connect-btn::after {
+  background:
+    linear-gradient(115deg,
+      rgba(255,255,255,.34),
+      rgba(255,255,255,.06) 34%,
+      transparent 58%);
+}
+
+.rs-profile-connect-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 10px rgba(57,255,20,.75),
+    0 0 24px rgba(57,255,20,.38),
+    0 0 38px rgba(57,255,20,.16),
+    inset 0 1px 0 rgba(255,255,255,.82);
+}
+
+/* Login hint remains subtle, like the reference. */
+.rs-profile-login-hint {
+  color: rgba(235,241,237,.58);
+}
+
+/* Status colors are intentionally functional and class-driven:
+   ready = yellow, connecting = yellow/pulse, connected = green, error = red. */
+.rs-tiktok-connect-status.ready .rs-tiktok-status-dot {
+  background: var(--rs-yellow);
+  box-shadow:
+    0 0 7px rgba(255,190,11,.70),
+    0 0 14px rgba(255,190,11,.24);
+}
+
+.rs-tiktok-connect-status.connecting .rs-tiktok-status-dot {
+  background: var(--rs-yellow);
+  box-shadow:
+    0 0 8px rgba(255,190,11,.82),
+    0 0 16px rgba(255,190,11,.34);
+}
+
+.rs-tiktok-connect-status.connected .rs-tiktok-status-dot {
+  background: var(--rs-green);
+  box-shadow:
+    0 0 8px rgba(57,255,20,.95),
+    0 0 16px rgba(57,255,20,.52);
+}
+
+.rs-tiktok-connect-status.error .rs-tiktok-status-dot {
+  background: var(--rs-red);
+  box-shadow:
+    0 0 8px rgba(239,51,82,.82),
+    0 0 16px rgba(239,51,82,.34);
+}
+
+
+/* ============================================================
+   ReactStream — TRUE TRANSPARENT LIQUID GLASS
+   Final visual pass: make the actual card surface transparent.
+   Layout, dimensions, content and behavior remain unchanged.
+   ============================================================ */
+
+.rs-tiktok-connect-card,
+.rs-profile-card {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.055) 0%,
+      rgba(255, 255, 255, 0.018) 24%,
+      rgba(255, 255, 255, 0.008) 58%,
+      rgba(0, 0, 0, 0.035) 100%
+    ) !important;
+  background-color: rgba(255, 255, 255, 0.018) !important;
+
+  -webkit-backdrop-filter: blur(7px) saturate(118%) !important;
+  backdrop-filter: blur(7px) saturate(118%) !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.20),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.10),
+    0 10px 26px rgba(0, 0, 0, 0.18),
+    0 0 16px rgba(57, 255, 20, 0.035) !important;
+}
+
+/* Remove the previous green-tinted glass overlays and replace them
+   with a very subtle white optical reflection. */
+.rs-tiktok-connect-card::before,
+.rs-profile-card::before {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.085) 0%,
+      rgba(255, 255, 255, 0.025) 12%,
+      transparent 30%
+    ) !important;
+  opacity: 1 !important;
+}
+
+.rs-tiktok-connect-card::after,
+.rs-profile-card::after {
+  background:
+    linear-gradient(
+      180deg,
+      transparent 55%,
+      rgba(57, 255, 20, 0.012) 100%
+    ) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* The inner TikTok tile should also read as translucent glass. */
+.rs-tiktok-connect-icon {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.085),
+      rgba(255, 255, 255, 0.018)
+    ) !important;
+  background-color: rgba(0, 0, 0, 0.20) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Input becomes a transparent dark-glass inset instead of an opaque panel. */
+.rs-tiktok-connect-field input {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(0, 0, 0, 0.10)
+    ) !important;
+  background-color: rgba(0, 0, 0, 0.10) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.10) !important;
+}
+
+/* Profile avatar: transparent glass disc, keeping the existing avatar/icon. */
+.rs-profile-avatar {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.075),
+      rgba(255, 255, 255, 0.015)
+    ) !important;
+  background-color: rgba(0, 0, 0, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 5px 14px rgba(0, 0, 0, 0.16) !important;
+}
+
+
+/* ============================================================
+   ReactStream — Balanced iPhone-style Liquid Glass
+   Calibration pass: transparent, but with enough dark density
+   to preserve separation and legibility.
+   No geometry or layout changes.
+   ============================================================ */
+
+.rs-tiktok-connect-card,
+.rs-profile-card {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.075) 0%,
+      rgba(255, 255, 255, 0.028) 24%,
+      rgba(5, 14, 8, 0.14) 72%,
+      rgba(0, 7, 3, 0.18) 100%
+    ) !important;
+  background-color: rgba(4, 12, 7, 0.12) !important;
+
+  -webkit-backdrop-filter: blur(11px) saturate(125%) contrast(103%) !important;
+  backdrop-filter: blur(11px) saturate(125%) contrast(103%) !important;
+
+  border: 1px solid rgba(235, 255, 240, 0.19) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.19),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.16),
+    inset 1px 0 0 rgba(255, 255, 255, 0.045),
+    0 9px 25px rgba(0, 0, 0, 0.21),
+    0 0 18px rgba(57, 255, 20, 0.045) !important;
+}
+
+/* Soft optical highlight: visible enough to read as glass, never a green fill. */
+.rs-tiktok-connect-card::before,
+.rs-profile-card::before {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.10) 0%,
+      rgba(255, 255, 255, 0.035) 14%,
+      transparent 34%
+    ) !important;
+  opacity: 1 !important;
+}
+
+/* Very subtle lower refraction. */
+.rs-tiktok-connect-card::after,
+.rs-profile-card::after {
+  background:
+    linear-gradient(
+      180deg,
+      transparent 48%,
+      rgba(0, 0, 0, 0.035) 100%
+    ) !important;
+}
+
+/* Keep the inner controls visually separated from the glass surface. */
+.rs-tiktok-connect-field input {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(0, 0, 0, 0.14)
+    ) !important;
+  background-color: rgba(0, 0, 0, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.11) !important;
+}
+
+/* Glass treatment for the profile avatar. */
+.rs-profile-avatar {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.018)
+    ) !important;
+  background-color: rgba(0, 0, 0, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.17) !important;
+}
+
+
+/* ============================================================
+   ReactStream — Persistent cards +10% scale
+   Geometry only: preserve layout, content and functionality.
+   ============================================================ */
+
+.rs-tiktok-connect-card {
+  width: 352px !important;       /* 320 × 1.10 */
+  height: 92px !important;       /* 84 × 1.10 */
+  min-height: 92px !important;
+  right: 350px !important;       /* 14 (profile right) + 306 (profile width) + 30 (gap) */
+  border-radius: 24px !important;
+}
+
+.rs-profile-card {
+  width: 306px !important;       /* 278 × 1.10 */
+  height: 92px !important;       /* 84 × 1.10 */
+  border-radius: 24px !important;
+}
+
+
+/* ============================================================
+   STATUS BULB — TikTokConnectCard indicator
+   Replaces the plain dot with a light-bulb SVG that glows
+   green (live), yellow (ready/waiting/connecting), red (error).
+   ============================================================ */
+
+.rs-status-bulb {
+  flex: 0 0 13px;
+  width: 13px;
+  height: 13px;
+  transition: filter 0.3s ease, color 0.3s ease;
+}
+
+.rs-status-bulb--ready {
+  color: var(--rs-yellow);
+  filter: drop-shadow(0 0 3px rgba(255,190,11,.55));
+}
+
+.rs-status-bulb--connecting {
+  color: var(--rs-yellow);
+  filter: drop-shadow(0 0 6px rgba(255,190,11,.90));
+  animation: rs-bulb-pulse 1.1s ease-in-out infinite;
+}
+
+.rs-status-bulb--waiting {
+  color: var(--rs-yellow);
+  filter: drop-shadow(0 0 4px rgba(255,190,11,.65));
+}
+
+.rs-status-bulb--live {
+  color: var(--rs-green);
+  filter: drop-shadow(0 0 5px rgba(57,255,20,.85));
+}
+
+.rs-status-bulb--error {
+  color: var(--rs-red);
+  filter: drop-shadow(0 0 5px rgba(239,51,82,.75));
+}
+
+@keyframes rs-bulb-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.42; }
+}
+
+/* New tone classes for the status text row */
+.rs-tiktok-connect-status.waiting {
+  color: rgba(255,235,174,.78);
+}
+
+.rs-tiktok-connect-status.live {
+  color: rgba(200,255,190,.92);
+}
+
+/* Disconnect button: slightly red tint on hover to signal destructive */
+.rs-tiktok-connect-button--disconnect:hover:not(:disabled) {
+  background: rgba(239,51,82,.20);
+  border-color: rgba(239,51,82,.55);
+  color: #ffb0bb;
+}
+
+
+/* ============================================================
+   PROFILE CARD — live status line
+   Three-line layout: name / @handle / status indicator
+   ============================================================ */
+
+/* Reduce gap slightly to fit 3 lines comfortably */
+.rs-profile-copy {
+  gap: 2px !important;
+}
+
+/* Live status line */
+.rs-profile-copy .rs-profile-live-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  line-height: 1;
+}
+
+.rs-profile-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex: 0 0 5px;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+/* Live (green) */
+.rs-profile-copy .rs-profile-live-line--live {
+  color: var(--rs-green);
+}
+.rs-profile-live-line--live .rs-profile-live-dot {
+  background: var(--rs-green);
+  box-shadow: 0 0 5px rgba(57,255,20,.85), 0 0 10px rgba(57,255,20,.35);
+}
+
+/* Waiting (muted, no glow) */
+.rs-profile-copy .rs-profile-live-line--waiting {
+  color: rgba(180,195,185,.48);
+}
+.rs-profile-live-line--waiting .rs-profile-live-dot {
+  background: rgba(180,195,185,.40);
+}
+
+/* Connecting (yellow pulse) */
+.rs-profile-copy .rs-profile-live-line--connecting {
+  color: rgba(255,235,174,.80);
+}
+.rs-profile-live-line--connecting .rs-profile-live-dot {
+  background: var(--rs-yellow);
+  box-shadow: 0 0 4px rgba(255,190,11,.70);
+  animation: rs-bulb-pulse 1.1s ease-in-out infinite;
+}
+
+/* Error (red) */
+.rs-profile-copy .rs-profile-live-line--error {
+  color: #ffb0bb;
+}
+.rs-profile-live-line--error .rs-profile-live-dot {
+  background: var(--rs-red);
+  box-shadow: 0 0 4px rgba(239,51,82,.65);
+}
+
+/* Live card border glow */
+.rs-profile-card.rs-profile-card--live {
+  border-color: rgba(57,255,20,.38) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 0 -1px 0 rgba(0,0,0,.12),
+    0 22px 52px rgba(0,0,0,.50),
+    0 0 0 1px rgba(57,255,20,.12),
+    0 0 18px rgba(57,255,20,.08) !important;
+}
+
+
+/* ============================================================
+   ReactStream — Global Liquid Glass Pass (careful)
+   Purpose: extend the approved top-card glass language to the
+   rest of the interface without changing layout or behavior.
+   TOPBAR CARDS ARE EXCLUDED ON PURPOSE.
+   ============================================================ */
+
+:root {
+  --rs-glass-surface:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.060) 0%,
+      rgba(255,255,255,.022) 26%,
+      rgba(5,14,9,.16) 72%,
+      rgba(0,7,3,.20) 100%
+    );
+  --rs-glass-fill: rgba(4,12,7,.12);
+  --rs-glass-border: rgba(235,255,240,.16);
+  --rs-glass-highlight: rgba(255,255,255,.15);
+  --rs-glass-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.12),
+    0 10px 30px rgba(0,0,0,.18);
+  --rs-glass-blur: 14px;
+}
+
+/* Major module surfaces */
+.actions-module-card,
+.snd-panel,
+.overlay-settings-panel,
+.pro-feature-item,
+.pro-license-box {
+  background: var(--rs-glass-surface) !important;
+  background-color: var(--rs-glass-fill) !important;
+  border-color: var(--rs-glass-border) !important;
+  box-shadow: var(--rs-glass-shadow) !important;
+  -webkit-backdrop-filter: blur(var(--rs-glass-blur)) saturate(125%) !important;
+  backdrop-filter: blur(var(--rs-glass-blur)) saturate(125%) !important;
+}
+
+/* Keep green accents as accents; the surfaces themselves stay neutral glass. */
+.actions-module-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 0 42px rgba(57,255,20,.018),
+    0 16px 44px rgba(0,0,0,.22) !important;
+}
+
+.keystroke-list-panel,
+.keystroke-list-item,
+.simulation-card,
+.autoit-banner,
+.snd-item,
+.snd-preview-card,
+.snd-section,
+.overlay-preview-area {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.048) 0%,
+      rgba(255,255,255,.016) 24%,
+      rgba(3,10,6,.13) 100%
+    ) !important;
+  background-color: rgba(3,10,6,.10) !important;
+  border-color: rgba(235,255,240,.12) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.105),
+    inset 0 -1px 0 rgba(0,0,0,.10),
+    0 6px 20px rgba(0,0,0,.10) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+  backdrop-filter: blur(10px) saturate(120%) !important;
+}
+
+/* Selected / active states remain neon, but gain a glass layer underneath. */
+.keystroke-list-item.active,
+.snd-item.active,
+.trigger-chip.active {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(57,255,20,.13),
+      rgba(57,255,20,.035)
+    ) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(128%) !important;
+  backdrop-filter: blur(10px) saturate(128%) !important;
+}
+
+/* Inputs: dark translucent glass inset, consistent across modules. */
+input:not(.topbar-connection input),
+select,
+textarea,
+.module-input,
+.snd-name-input,
+.snd-volume-input,
+.overlay-url-box {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.028),
+      rgba(0,0,0,.12)
+    ) !important;
+  background-color: rgba(0,0,0,.10) !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    inset 0 -1px 0 rgba(0,0,0,.10) !important;
+}
+
+/* Secondary buttons use the same glass language without stealing attention
+   from the existing neon primary buttons. */
+.btn-ghost,
+.module-ghost-button,
+.snd-test-btn,
+.snd-cambiar-btn,
+.snd-dup-btn {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.050),
+      rgba(255,255,255,.014)
+    ) !important;
+  border-color: rgba(235,255,240,.13) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 5px 14px rgba(0,0,0,.10) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(118%) !important;
+  backdrop-filter: blur(9px) saturate(118%) !important;
+}
+
+/* Sidebar keeps its established proportions; only refine its glass quality. */
+.rs-sidebar.glass-sidebar {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.065),
+      rgba(255,255,255,.016) 34%,
+      rgba(3,10,6,.16) 100%
+    ) !important;
+  background-color: rgba(4,12,8,.16) !important;
+  border-color: rgba(235,255,240,.17) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 0 32px rgba(57,255,20,.03),
+    0 18px 48px rgba(0,0,0,.25) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(125%) !important;
+  backdrop-filter: blur(18px) saturate(125%) !important;
+}
+
+/* Sidebar items: subtle glass, preserving the existing active neon treatment. */
+.glass-sidebar-item {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.036),
+      rgba(255,255,255,.010)
+    ) !important;
+  border-color: rgba(255,255,255,.09) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 5px 16px rgba(0,0,0,.08) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(115%) !important;
+  backdrop-filter: blur(9px) saturate(115%) !important;
+}
+
+/* Keep Profile / TikTok top cards completely untouched by this global pass. */
+.rs-topbar .rs-card,
+.rs-topbar .rs-profile-card,
+.rs-topbar .rs-tiktok-connect-card,
+.rs-topbar .topbar-connection,
+.rs-topbar .topbar-stats {
+  /* Intentionally no visual overrides here. */
+}
+
+/* Respect reduced-motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  .actions-module-card,
+  .snd-panel,
+  .keystroke-list-item,
+  .snd-item,
+  .glass-sidebar-item,
+  .btn-ghost,
+  .module-ghost-button,
+  .snd-test-btn,
+  .snd-cambiar-btn,
+  .snd-dup-btn {
+    transition: none !important;
+  }
+}
+

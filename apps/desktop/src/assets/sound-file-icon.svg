@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="g" x1="8" y1="5" x2="25" y2="27" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A8FF95"/>
+      <stop offset=".42" stop-color="#39FF14"/>
+      <stop offset="1" stop-color="#12C808"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation=".7" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Two-note silhouette optimized for small UI sizes. -->
+  <g filter="url(#glow)" fill="url(#g)">
+    <!-- shared beam -->
+    <path d="M9 7L24 4V8L9 11V7Z"/>
+    <!-- left stem + note -->
+    <path d="M9 8.5V21.2C7.7 20.7 5.9 20.7 4.5 21.4C2.6 22.3 2.1 24.3 3.7 25.4C5.3 26.5 8.1 26 9.4 24.8C10.2 24.1 10.5 23.1 10.5 22V10L9 8.5Z"/>
+    <!-- right stem + note -->
+    <path d="M20 6.5V18.6C18.8 18.2 17.3 18.3 16.1 18.9C14.5 19.8 14.1 21.6 15.5 22.6C16.9 23.6 19.3 23.3 20.4 22.2C21.1 21.5 21.5 20.6 21.5 19.7V6.2L20 6.5Z"/>
+  </g>
+
+  <!-- Tiny highlight kept thick enough to survive at 16px. -->
+  <path
+    d="M6 22.6C6.8 22.2 7.7 22.2 8.3 22.6"
+    stroke="#E8FFE3"
+    stroke-opacity=".55"
+    stroke-width=".9"
+    stroke-linecap="round"
+  />
+</svg>

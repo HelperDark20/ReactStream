@@ -4,13 +4,13 @@ import { listen } from "@tauri-apps/api/event";
 import { useAppStore } from "./stores/app.store";
 import Sidebar from "./components/Sidebar";
 import ProfileCard from "./components/ProfileCard";
+import TikTokConnectCard from "./components/TikTokConnectCard";
 import HomePage from "./pages/HomePage";
 
 const ActionsPage = lazy(() => import("./pages/ActionsPage"));
 const OverlaysPage = lazy(() => import("./pages/OverlaysPage"));
 const SoundsPage = lazy(() => import("./pages/SoundsPage"));
 const ProPage = lazy(() => import("./pages/ProPage"));
-const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 
 function PageContent() {
   const { activePage } = useAppStore();
@@ -21,7 +21,6 @@ function PageContent() {
       {activePage === "overlays" && <OverlaysPage />}
       {activePage === "sounds" && <SoundsPage />}
       {activePage === "pro" && <ProPage />}
-      {activePage === "settings" && <SettingsPage />}
     </Suspense>
   );
 }
@@ -47,10 +46,12 @@ export default function App() {
     setTikTokDisplayName,
     setTikTokAvatarUrl,
     tiktokStatus,
+    tiktokAvatarUrl,
     updateSessionStats,
     setSessionActive,
   } = useAppStore();
   const statsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const profilePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     invoke<{
@@ -107,6 +108,44 @@ export default function App() {
     };
   }, [tiktokStatus, updateSessionStats, setSessionActive]);
 
+  // Poll get_tiktok_profile when connected until we have avatar + display name
+  useEffect(() => {
+    if (profilePollRef.current) {
+      clearInterval(profilePollRef.current);
+      profilePollRef.current = null;
+    }
+    if (tiktokStatus !== "CONNECTED") return;
+    if (tiktokAvatarUrl) return; // already populated
+
+    const poll = async () => {
+      try {
+        const profile = await invoke<{ avatarUrl?: string; displayName?: string } | null>("get_tiktok_profile");
+        if (profile?.avatarUrl) {
+          setTikTokAvatarUrl(profile.avatarUrl);
+          if (profile.displayName) setTikTokDisplayName(profile.displayName);
+          invoke("save_tiktok_profile", {
+            avatarUrl: profile.avatarUrl,
+            displayName: profile.displayName ?? "",
+          }).catch(() => {});
+          if (profilePollRef.current) {
+            clearInterval(profilePollRef.current);
+            profilePollRef.current = null;
+          }
+        }
+      } catch {}
+    };
+
+    poll(); // intento inmediato
+    profilePollRef.current = setInterval(poll, 2500);
+
+    return () => {
+      if (profilePollRef.current) {
+        clearInterval(profilePollRef.current);
+        profilePollRef.current = null;
+      }
+    };
+  }, [tiktokStatus, tiktokAvatarUrl, setTikTokAvatarUrl, setTikTokDisplayName]);
+
   useEffect(() => {
     let unlisten: (() => void) | undefined;
     listen<{ success: boolean; username?: string; error?: string }>(
@@ -128,6 +167,7 @@ export default function App() {
         <PageContent />
       </main>
       <Sidebar />
+      <TikTokConnectCard />
       <ProfileCard />
     </div>
   );

@@ -2,15 +2,15 @@ import { useState } from "react";
 import KeystrokePage from "./actions/KeystrokePage";
 import MediasPage from "./actions/MediasPage";
 import AutomationsPage from "./actions/AutomationsPage";
-import { ZapIcon } from "../components/icons";
+import { UIIcon, ZapIcon } from "../components/icons";
 import background from "../assets/reactstream-background.svg";
 
 type Tab = "keystroke" | "medias" | "automations";
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: "keystroke", label: "Keystroke", icon: "⌨" },
-  { id: "medias", label: "Medios y Overlays", icon: "▱" },
-  { id: "automations", label: "Automatizaciones", icon: "⚡" },
+const TABS: { id: Tab; label: string; icon: "keyboard" | "layers" | "zap" }[] = [
+  { id: "keystroke", label: "Keystroke", icon: "keyboard" },
+  { id: "medias", label: "Medios y Overlays", icon: "layers" },
+  { id: "automations", label: "Automatizaciones", icon: "zap" },
 ];
 
 export default function ActionsPage() {
@@ -44,7 +44,7 @@ export default function ActionsPage() {
                 className={`actions-module-tab ${isActive ? "active" : ""}`}
                 onClick={() => setActiveTab(tab.id)}
               >
-                <span className="actions-module-tab-icon">{tab.icon}</span>
+                <span className="actions-module-tab-icon"><UIIcon name={tab.icon} size={14} /></span>
                 <span>{tab.label}</span>
               </button>
             );

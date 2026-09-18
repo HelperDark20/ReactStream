@@ -11,7 +11,7 @@ export type AppStatus =
 
 export type TikTokConnectionStatus = "DISCONNECTED" | "CONNECTING" | "CONNECTED" | "ERROR";
 
-export type ActivePage = "home" | "actions" | "overlays" | "sounds" | "pro" | "settings";
+export type ActivePage = "home" | "actions" | "overlays" | "sounds" | "pro";
 
 interface AppState {
   // Estado de la app

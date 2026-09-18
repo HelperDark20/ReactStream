@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="amberFill" x1="64" y1="15" x2="64" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF47A"/>
+      <stop offset="0.28" stop-color="#FFD83D"/>
+      <stop offset="0.68" stop-color="#FFB300"/>
+      <stop offset="1" stop-color="#D97800"/>
+    </linearGradient>
+
+    <linearGradient id="hotEdge" x1="26" y1="99" x2="100" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB300"/>
+      <stop offset="0.5" stop-color="#FFFFE8"/>
+      <stop offset="1" stop-color="#FFE55C"/>
+    </linearGradient>
+
+    <radialGradient id="innerGlow" cx="50%" cy="38%" r="70%">
+      <stop offset="0" stop-color="#FFF7A8" stop-opacity="0.28"/>
+      <stop offset="0.5" stop-color="#FFC800" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#7A3A00" stop-opacity="0.05"/>
+    </radialGradient>
+
+    <filter id="glowSoft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4.5" result="b1"/>
+      <feColorMatrix in="b1" type="matrix"
+        values="1 0 0 0 1
+                0 1 0 0 0.58
+                0 0 1 0 0
+                0 0 0 0.95 0" result="c1"/>
+      <feMerge>
+        <feMergeNode in="c1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="glowStrong" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2.2" result="b2"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="b3"/>
+      <feMerge>
+        <feMergeNode in="b2"/>
+        <feMergeNode in="b3"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Soft amber bloom -->
+  <path
+    d="M64 12 L113 105 Q115 110 109 110 H19 Q13 110 16 105 L61 12 Q64 7 67 12 Z"
+    fill="#FFB300"
+    opacity="0.22"
+    filter="url(#glowSoft)"
+  />
+
+  <!-- Body -->
+  <path
+    d="M64 16 L111 103 Q113 107 108 107 H20 Q15 107 17.5 102.5 L61.5 16 Q64 11 66.5 16 Z"
+    fill="url(#amberFill)"
+    fill-opacity="0.26"
+  />
+
+  <!-- Inner vignette -->
+  <path
+    d="M64 23 L103 98 H25 Z"
+    fill="url(#innerGlow)"
+    opacity="0.95"
+  />
+
+  <!-- Neon outer tube -->
+  <path
+    d="M64 14 L112.2 103.8 Q114.6 108.2 109.6 108.2 H18.4 Q13.4 108.2 15.8 103.8 L62 14 Q64 10.2 66 14 Z"
+    stroke="#FFB300"
+    stroke-width="6"
+    stroke-linejoin="round"
+    opacity="0.72"
+    filter="url(#glowSoft)"
+  />
+
+  <!-- Bright core tube -->
+  <path
+    d="M64 14 L112.2 103.8 Q114.6 108.2 109.6 108.2 H18.4 Q13.4 108.2 15.8 103.8 L62 14 Q64 10.2 66 14 Z"
+    stroke="url(#hotEdge)"
+    stroke-width="3"
+    stroke-linejoin="round"
+    filter="url(#glowStrong)"
+  />
+
+  <!-- Inner highlight -->
+  <path
+    d="M64 21 L104.5 96 H23.5 Z"
+    stroke="#FFE77A"
+    stroke-width="1.15"
+    stroke-linejoin="round"
+    opacity="0.65"
+  />
+
+  <!-- Exclamation mark glow -->
+  <rect x="59.2" y="38" width="9.6" height="35.5" rx="4.8"
+        fill="#FFD43B" opacity="0.9" filter="url(#glowStrong)"/>
+  <circle cx="64" cy="86.5" r="5.1"
+          fill="#FFD43B" opacity="0.95" filter="url(#glowStrong)"/>
+
+  <!-- Exclamation core -->
+  <rect x="60.8" y="39.7" width="6.4" height="32.2" rx="3.2"
+        fill="#FFFBE4"/>
+  <rect x="61.6" y="40.6" width="4.8" height="30.4" rx="2.4"
+        fill="#FFE85A"/>
+  <circle cx="64" cy="86.5" r="3.6" fill="#FFFBE4"/>
+  <circle cx="64" cy="86.5" r="2.6" fill="#FFE85A"/>
+
+  <!-- Tiny specular highlights -->
+  <path d="M64 18.5 L68 26" stroke="#FFFDEB" stroke-width="1.2" stroke-linecap="round" opacity="0.9"/>
+  <path d="M20.5 103.5 H35" stroke="#FFFDEB" stroke-width="1.2" stroke-linecap="round" opacity="0.72"/>
+</svg>
