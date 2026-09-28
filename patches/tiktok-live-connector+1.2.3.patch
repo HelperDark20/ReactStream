@@ -1,0 +1,264 @@
+diff --git a/node_modules/tiktok-live-connector/dist/index.js b/node_modules/tiktok-live-connector/dist/index.js
+index 30a69f2..8ba8912 100644
+--- a/node_modules/tiktok-live-connector/dist/index.js
++++ b/node_modules/tiktok-live-connector/dist/index.js
+@@ -1,5 +1,17 @@
+ "use strict";
+ 
++// Cargar EULER_API_KEY desde .env.local del bridge si no está en el entorno
++try {
++  const _fs = require('fs'), _path = require('path');
++  const _envFile = _path.join(process.cwd(), '.env.local');
++  if (_fs.existsSync(_envFile)) {
++    _fs.readFileSync(_envFile, 'utf-8').split('\n').forEach(line => {
++      const eq = line.indexOf('=');
++      if (eq > 0) { const k = line.substring(0, eq).trim(); const v = line.substring(eq + 1).trim(); if (k && v && !process.env[k]) process.env[k] = v; }
++    });
++  }
++} catch {}
++
+ function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+ 
+ function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+@@ -603,13 +615,60 @@ async function _startFetchRoomPolling2() {
+   }
+ }
+ 
++async function _fetchFromEuler2(eulerApiKey) {
++  const { deserializeMessage } = require('./lib/webcastProtobuf.js');
++  const roomId = _classPrivateFieldGet(this, _clientParams).room_id;
++  const sessionId = _classPrivateFieldGet(this, _options).sessionId;
++  const cookieEnv = process.env.REACTSTREAM_TIKTOK_COOKIES || '';
++  const ttTargetIdcMatch = cookieEnv.match(/tt-target-idc=([^;]+)/);
++  const ttTargetIdc = ttTargetIdcMatch ? ttTargetIdcMatch[1].trim() : '';
++
++  const params = new URLSearchParams({ room_id: roomId, client_enter: 'true', apiKey: eulerApiKey });
++  if (sessionId) params.set('session_id', sessionId);
++  if (ttTargetIdc) params.set('tt_target_idc', ttTargetIdc);
++
++  const url = `https://tiktok.eulerstream.com/webcast/fetch?${params}`;
++  console.log(`[euler] solicitando cursor para room=${roomId}...`);
++
++  const response = await _classPrivateFieldGet(this, _httpClient).axiosInstance.get(url, { responseType: 'arraybuffer' });
++
++  const setCookie = response.headers['x-set-tt-cookie'];
++  if (setCookie) {
++    setCookie.split('; ').forEach(c => {
++      if (c.trim()) _classPrivateFieldGet(this, _httpClient).cookieJar.processSetCookieHeader(c.trim());
++    });
++  }
++
++  const result = await deserializeMessage('WebcastResponse', Buffer.from(response.data));
++  const cursorPreview = result.cursor ? result.cursor.substring(0, 30) + '…' : '(vacío)';
++  console.log(`[euler] cursor=${cursorPreview} | wsUrl=${result.wsUrl ? 'SÍ' : 'NO'}`);
++  return result;
++}
++
+ async function _fetchRoomData2(isInitial) {
+-  let webcastResponse = await _classPrivateFieldGet(this, _httpClient).getDeserializedObjectFromWebcastApi('im/fetch/', _classPrivateFieldGet(this, _clientParams), 'WebcastResponse', isInitial);
++  let webcastResponse;
++  const eulerApiKey = process.env.EULER_API_KEY;
++  if (isInitial && eulerApiKey) {
++    webcastResponse = await _fetchFromEuler2.call(this, eulerApiKey);
++  } else {
++    webcastResponse = await _classPrivateFieldGet(this, _httpClient).getDeserializedObjectFromWebcastApi('im/fetch/', _classPrivateFieldGet(this, _clientParams), 'WebcastResponse', isInitial);
++  }
+   let upgradeToWsOffered = !!webcastResponse.wsUrl;
+ 
+-  if (!webcastResponse.cursor) {
++  if (!webcastResponse.cursor && !upgradeToWsOffered) {
+     if (isInitial) {
+-      throw new InvalidResponseError('Missing cursor in initial fetch response.');
++      // Empty response: try direct WebSocket using clientParams (room_id is already set)
++      if (_classPrivateFieldGet(this, _options).sessionId) {
++        try {
++          await _classPrivateMethodGet(this, _tryUpgradeToWebsocket, _tryUpgradeToWebsocket2).call(this, {
++            wsUrl: 'wss://webcast.tiktok.com/webcast/im/push/',
++            wsParams: []
++          });
++        } catch (wsErr) {
++          // WebSocket attempt failed, fall through to polling
++        }
++      }
++      return;
+     } else {
+       _classPrivateMethodGet(this, _handleError, _handleError2).call(this, null, 'Missing cursor in fetch response.');
+     }
+@@ -643,9 +702,10 @@ async function _tryUpgradeToWebsocket2(webcastResponse) {
+ 
+     for (let wsParam of webcastResponse.wsParams) {
+       wsParams[wsParam.name] = wsParam.value;
+-    } // Wait until ws connected, then stop request polling
+-
+-
++    }
++    console.log('[ws-upgrade] wsUrl:', webcastResponse.wsUrl);
++    console.log('[ws-upgrade] wsParams:', JSON.stringify(wsParams));
++    // Wait until ws connected, then stop request polling
+     await _classPrivateMethodGet(this, _setupWebsocket, _setupWebsocket2).call(this, webcastResponse.wsUrl, wsParams);
+ 
+     _classPrivateFieldSet(this, _isWsUpgradeDone, true);
+diff --git a/node_modules/tiktok-live-connector/dist/lib/tiktokHttpClient.js b/node_modules/tiktok-live-connector/dist/lib/tiktokHttpClient.js
+index 3ab6952..832b42c 100644
+--- a/node_modules/tiktok-live-connector/dist/lib/tiktokHttpClient.js
++++ b/node_modules/tiktok-live-connector/dist/lib/tiktokHttpClient.js
+@@ -114,7 +114,7 @@ function _post2(url, params, data, responseType) {
+ async function _buildUrl2(host, path, params, sign) {
+   let fullUrl = `${host}${path}?${new URLSearchParams(params || {})}`;
+ 
+-  if (sign) {
++  if (sign || path === 'im/fetch/') {
+     fullUrl = await signWebcastRequest(fullUrl, this.axiosInstance.defaults.headers, this.cookieJar, this.signProviderOptions);
+   }
+ 
+diff --git a/node_modules/tiktok-live-connector/dist/lib/webcastConfig.js b/node_modules/tiktok-live-connector/dist/lib/webcastConfig.js
+index 8b3aaa7..c897a1b 100644
+--- a/node_modules/tiktok-live-connector/dist/lib/webcastConfig.js
++++ b/node_modules/tiktok-live-connector/dist/lib/webcastConfig.js
+@@ -23,7 +23,6 @@ module.exports = {
+     is_fullscreen: false,
+     is_page_visible: true,
+     did_rule: 3,
+-    fetch_rule: 1,
+     last_rtt: 0,
+     live_id: 12,
+     resp_content_type: 'protobuf',
+diff --git a/node_modules/tiktok-live-connector/dist/lib/webcastWebsocket.js b/node_modules/tiktok-live-connector/dist/lib/webcastWebsocket.js
+index 07b3e6e..5c92698 100644
+--- a/node_modules/tiktok-live-connector/dist/lib/webcastWebsocket.js
++++ b/node_modules/tiktok-live-connector/dist/lib/webcastWebsocket.js
+@@ -15,6 +15,57 @@ const {
+   serializeMessage
+ } = require('./webcastProtobuf.js');
+ 
++// --- Encoder manual de protobuf (sin dependencias externas) ---
++// Necesario para WebcastPushFrame + WebcastImEnterRoomMessage + HeartbeatMessage
++// que no existen en el schema de v1.2.3 pero sí en el nuevo endpoint ws_reuse_supplement.
++
++function _pbVarint(n) {
++  const out = [];
++  let v = typeof n === 'bigint' ? n : BigInt(n);
++  while (v > 127n) { out.push(Number(v & 0x7Fn | 0x80n)); v >>= 7n; }
++  out.push(Number(v));
++  return Buffer.from(out);
++}
++
++function _pbInt64(fieldNum, value) {
++  return Buffer.concat([_pbVarint(fieldNum << 3), _pbVarint(value)]);
++}
++
++function _pbLd(fieldNum, data) {
++  return Buffer.concat([_pbVarint((fieldNum << 3) | 2), _pbVarint(data.length), data]);
++}
++
++function _pbStr(fieldNum, str) {
++  return _pbLd(fieldNum, Buffer.from(str, 'utf8'));
++}
++
++// WebcastImEnterRoomMessage: fields roomId(1), liveId(4), identity(5), filterWelcomeMsg(9)
++function _buildImEnterRoom(roomId) {
++  return Buffer.concat([
++    _pbInt64(1, BigInt(roomId)),
++    _pbInt64(4, 12n),
++    _pbStr(5, 'audience'),
++    _pbStr(9, '0'),
++  ]);
++}
++
++// HeartbeatMessage: fields roomId(1), sendPacketSeqId(2)
++function _buildHeartbeat(roomId, seqId) {
++  return Buffer.concat([
++    _pbInt64(1, BigInt(roomId)),
++    _pbInt64(2, BigInt(seqId)),
++  ]);
++}
++
++// WebcastPushFrame: payloadEncoding(6), payloadType(7), payload(8)
++function _buildPushFrame(payloadType, payload) {
++  return Buffer.concat([
++    _pbStr(6, 'pb'),
++    _pbStr(7, payloadType),
++    _pbLd(8, payload),
++  ]);
++}
++
+ var _handleEvents = /*#__PURE__*/new WeakSet();
+ 
+ var _handleMessage = /*#__PURE__*/new WeakSet();
+@@ -37,10 +88,20 @@ class WebcastWebsocket extends websocket.client {
+ 
+     this.pingInterval = null;
+     this.connection = null;
+-    this.wsParams = { ...clientParams,
+-      ...wsParams
++    this.hbSeqId = 1;
++
++    // Params requeridos por TikTok WS en versiones modernas (v2-style)
++    const modernWsParams = {
++      ws_direct: '0',
++      sup_ws_ds_opt: '1',
++      update_version_code: '2.0.0',
++      history_comment_count: '6',
++      client_enter: '1',
++      identity: 'audience',
++      webcast_language: 'en',
+     };
+-    this.wsUrlWithParams = `${wsUrl}?${new URLSearchParams(this.wsParams)}&version_code=${Config.WEBCAST_VERSION_CODE}`;
++    this.wsParams = { ...clientParams, ...wsParams, ...modernWsParams };
++    this.wsUrlWithParams = `${wsUrl}?${new URLSearchParams(this.wsParams)}&version_code=270000`;
+     this.wsHeaders = {
+       Cookie: cookieJar.getCookieString(),
+       ...(customHeaders || {})
+@@ -48,6 +109,8 @@ class WebcastWebsocket extends websocket.client {
+ 
+     _classPrivateMethodGet(this, _handleEvents, _handleEvents2).call(this);
+ 
++    console.log('[ws] URL completa:', this.wsUrlWithParams);
++    Object.keys(this.wsHeaders).forEach(k => { if (this.wsHeaders[k] === undefined) delete this.wsHeaders[k]; });
+     this.connect(this.wsUrlWithParams, '', Config.TIKTOK_URL_WEB, this.wsHeaders, websocketOptions);
+   }
+ 
+@@ -56,7 +119,23 @@ class WebcastWebsocket extends websocket.client {
+ function _handleEvents2() {
+   this.on('connect', wsConnection => {
+     this.connection = wsConnection;
++
++    // Enviar im_enter_room antes de iniciar heartbeat (requerido por ws_reuse_supplement)
++    const roomId = this.wsParams.room_id;
++    if (roomId) {
++      try {
++        const imEnterPayload = _buildImEnterRoom(roomId);
++        const frame = _buildPushFrame('im_enter_room', imEnterPayload);
++        wsConnection.sendBytes(frame);
++        console.log('[ws] im_enter_room → room_id=' + roomId);
++      } catch (e) {
++        console.error('[ws] error al enviar im_enter_room:', e.message);
++      }
++    }
++
++    // Iniciar heartbeat DESPUÉS de im_enter_room
+     this.pingInterval = setInterval(() => _classPrivateMethodGet(this, _sendPing, _sendPing2).call(this), 10000);
++
+     wsConnection.on('message', message => {
+       if (message.type === 'binary') {
+         _classPrivateMethodGet(this, _handleMessage, _handleMessage2).call(this, message);
+@@ -86,8 +165,17 @@ async function _handleMessage2(message) {
+ }
+ 
+ function _sendPing2() {
+-  // Send static connection alive ping
+-  this.connection.sendBytes(Buffer.from('3A026862', 'hex'));
++  const roomId = this.wsParams.room_id;
++  if (roomId && this.connection) {
++    try {
++      const hbPayload = _buildHeartbeat(roomId, this.hbSeqId++);
++      const frame = _buildPushFrame('hb', hbPayload);
++      this.connection.sendBytes(frame);
++    } catch (e) {
++      // Fallback al ping estático si falla el encoder
++      this.connection.sendBytes(Buffer.from('3A026862', 'hex'));
++    }
++  }
+ }
+ 
+ function _sendAck2(id) {
